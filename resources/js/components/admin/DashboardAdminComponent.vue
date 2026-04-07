@@ -10,11 +10,11 @@
             <h1>Dashboard</h1>
             <div class="menu"></div>
             <button type="button" class="btn_exportarDatos">
-                Exportar datos
+                <img src="" alt="">Exportar datos
             </button>
             <button type="button">
                 <a href="">
-                    <img src="" alt="">
+                    <img src="/public/notificaciones-logo.png" alt="Notificaciones logo">
                 </a>
             </button>
           </div>
