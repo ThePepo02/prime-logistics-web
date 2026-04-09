@@ -61,10 +61,10 @@
 import { ref } from 'vue';
 
 
-const exportIcon = ref('/public/iconoExportarDatos.png');
-const notificacionesIcon = ref('/public/notificaciones-logo.png');
-const perfilIcon = ref('/public/perfilUsuarioAdmin.png');
-const primeLogisticsWebIcon = ref('/public/prime-logistics-logo.png');
+const exportIcon = ref('/iconoExportarDatos.png');
+const notificacionesIcon = ref('/notificaciones-logo.png');
+const perfilIcon = ref('/perfilUsuarioAdmin.png');
+const primeLogisticsWebIcon = ref('/prime-logistics-logo.png');
 </script>
 
 <style lang="scss" scoped>
