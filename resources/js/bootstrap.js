@@ -4,4 +4,4 @@ window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 const url = import.meta.env.VITE_APP_URL;
-window.axios.defaults.baseURL=`${url}/api/`;
+window.axios.defaults.baseURL=`${url}`;
