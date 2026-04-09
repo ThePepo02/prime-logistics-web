@@ -2,7 +2,9 @@
     <div>
         <!-- encabezado -->
         <header>
-            <div class="logo"></div>
+            <div class="logo">
+                <img :src="primeLogisticsWebIcon" alt="prime logistics web logo">
+            </div>
             <!-- Cambié <title> por <h1> porque <title> no va dentro de <header> -->
             <h1>Dashboard Admin</h1>
         </header>
@@ -56,9 +58,13 @@
 </template>
 
 <script setup>
-const exportIcon = new URL('@/../public/iconoExportarDatos.png', import.meta.url).href;
-const notificacionesIcon = new URL('@/../public/notificaciones-logo.png', import.meta.url).href;
-const perfilIcon = new URL('@/../public/perfilUsuarioAdmin.png', import.meta.url).href;
+import { ref } from 'vue';
+
+
+const exportIcon = ref('/public/iconoExportarDatos.png');
+const notificacionesIcon = ref('/public/notificaciones-logo.png');
+const perfilIcon = ref('/public/perfilUsuarioAdmin.png');
+const primeLogisticsWebIcon = ref('/public/prime-logistics-logo.png');
 </script>
 
 <style lang="scss" scoped>
