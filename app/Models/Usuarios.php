@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Rol;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
-class Usuarios extends Model
+class Usuarios extends Authenticatable
 {
+
+    use HasApiTokens;
     //
     protected $table = 'usuaris';
 
@@ -19,6 +23,15 @@ class Usuarios extends Model
         'empresa',
         'rol_id',
     ];
+
+    protected $hidden = [
+        'contrasenya',
+    ];
+
+    public function getAuthPassword()
+    {
+        return $this->contrasenya;
+    }
 
     public function rol()
     {
