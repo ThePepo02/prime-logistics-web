@@ -16,6 +16,7 @@ RUN npm run build
 # ============================================
 FROM php:8.2-fpm-alpine
 
+# Instalar dependencias del sistema
 RUN apk add --no-cache \
     nginx \
     supervisor \
@@ -25,27 +26,31 @@ RUN apk add --no-cache \
     oniguruma-dev \
     autoconf \
     g++ \
-    make \
-    unixodbc-dev
+    make
 
+# Instalar extensiones PHP básicas
 RUN docker-php-ext-install pdo mbstring bcmath pcntl
 
-RUN pecl install sqlsrv pdo_sqlsrv \
-    && docker-php-ext-enable sqlsrv pdo_sqlsrv
-
+# Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+# Copiar código del proyecto
 COPY . .
+
+# Copiar el build del frontend
 COPY --from=frontend-build /app/public/build ./public/build
 
-RUN composer install --no-dev --optimize-autoloader
+# Instalar dependencias PHP
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
+# Permisos Laravel
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
+# Copiar configuraciones
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/supervisord.conf /etc/supervisord.conf
 COPY docker/start.sh /start.sh
