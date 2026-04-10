@@ -25,13 +25,9 @@ RUN apk add --no-cache \
     oniguruma-dev \
     autoconf \
     g++ \
-    make \
-    unixodbc-dev
+    make
 
 RUN docker-php-ext-install pdo mbstring bcmath pcntl
-
-RUN pecl install sqlsrv pdo_sqlsrv \
-    && docker-php-ext-enable sqlsrv pdo_sqlsrv
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -40,7 +36,7 @@ WORKDIR /var/www/html
 COPY . .
 COPY --from=frontend-build /app/public/build ./public/build
 
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
