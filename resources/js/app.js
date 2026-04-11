@@ -1,6 +1,6 @@
 import './bootstrap';
 import { createApp } from 'vue/dist/vue.esm-bundler.js';
-import DashboardAdminComponent from './components/admin/DashboardAdminComponent.vue';
+import DashboardAdminComponent from './components/DashboardAdminComponent.vue';
 
 const app = createApp({});
 
