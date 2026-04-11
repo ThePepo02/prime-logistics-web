@@ -1,0 +1,36 @@
+name: Notificación por Email
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  notify:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Enviar notificación por email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.GMAIL_USER }}
+          password: ${{ secrets.GMAIL_PASSWORD }}
+          subject: "✅ PR fusionado en Prime Logistics: ${{ github.event.pull_request.title }}"
+          to: aperezj2122@politecnics.barcelona
+          from: Prime Logistics CI/CD <${{ secrets.GMAIL_USER }}>
+          body: |
+            Hola equipo,
+
+            Se ha fusionado un Pull Request en la rama main del proyecto Prime Logistics.
+
+            📌 PR: ${{ github.event.pull_request.title }}
+            👤 Autor: ${{ github.event.pull_request.user.login }}
+            📅 Fecha: ${{ github.event.pull_request.merged_at }}
+            🔗 Enlace: ${{ github.event.pull_request.html_url }}
+
+            Saludos,
+            GitHub Actions - Prime Logistics
