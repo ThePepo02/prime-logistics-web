@@ -7,22 +7,20 @@
                     <i class="bi bi-box-seam"></i>
                 </div>
                 <span class="logo-text">Prime Logistics</span>
-                <div class="content-header">
-                    <h1 class="page-title">Dashboard
-                        <span class="title-sub">Vista global del sistema — Prime Logistics</span>
-                    </h1>
-                    <!-- Botones de acción -->
-                    <div class="actions-bar">
-                        <button type="button" class="btn_exportarDatos" @click="exportData">
-                            <i class="bi bi-download"></i>
-                            Exportar datos
-                        </button>
-                        <a href="#" class="btn_notificaciones" @click.prevent="clickNotification">
-                            <i class="bi bi-bell"></i>
-                        </a>
-                        <div class="perfil-icon" @click="clickProfile">
-                            <i class="bi bi-person-circle"></i>
-                        </div>
+                <h1 class="page-title">Dashboard
+                    <span class="title-sub">Vista global del sistema — Prime Logistics</span>
+                </h1>
+                <!-- Botones de acción -->
+                <div class="actions-bar">
+                    <button type="button" class="btn_exportarDatos" @click="exportData">
+                        <i class="bi bi-download"></i>
+                        Exportar datos
+                    </button>
+                    <a href="#" class="btn_notificaciones" @click.prevent="clickNotification">
+                        <i class="bi bi-bell"></i>
+                    </a>
+                    <div class="perfil-icon" @click="clickProfile">
+                        <i class="bi bi-person-circle"></i>
                     </div>
                 </div>
             </div>
@@ -79,7 +77,6 @@
                         </div>
                         <div class="kpi-value">{{ formatNumber(kpiData.aceptadas) }}</div>
                         <div class="kpi-trend-info">
-                            <span class="percentage-badge">{{ kpiData.porcentajeAceptacion }}% en favor</span>
                             <span :class="kpiData.aceptadasTrend >= 0 ? 'trend-up' : 'trend-down'">
                                 {{ Math.abs(kpiData.aceptadasTrend) }}% tasa global
                             </span>
@@ -353,9 +350,9 @@ $text-dark: #2c3e50;
 $text-muted: #6c757d;
 
 .dashboard-container {
-  font-family: 'Inter', sans-serif;
-  background-color: #f4f7fc;
-  min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f7fc;
+    min-height: 100vh;
 }
 
 .dashboard-header {
@@ -365,33 +362,33 @@ $text-muted: #6c757d;
     display: grid;
     justify-content: space-between;
     align-items: center;
+}
 
-    .logo {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
 
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: $primary-color;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
+.logo-icon {
+    width: 36px;
+    height: 36px;
+    background: $primary-color;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
 
-            i {
-                font-size: 1.3rem;
-            }
-        }
+i {
+    font-size: 1.3rem;
+}
 
-        .logo-text {
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: $primary-dark;
-        }
-    }
+.logo-text {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: $primary-dark;
 }
 
 .dashboard-layout {
@@ -476,20 +473,17 @@ $text-muted: #6c757d;
     }
 }
 
-.content-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .page-title {
     margin-top: 34px;
     font-size: 1.75rem;
     font-weight: 600;
     color: $text-dark;
-    
+
     .title-sub {
-        display: block;
+        display: flex;
+        flex-direction: row;
+        align-items: baseline;
+        gap: 0.5rem;
         font-size: 0.85rem;
         font-weight: 500;
         color: $primary-color;
