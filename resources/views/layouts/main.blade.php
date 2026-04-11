@@ -13,8 +13,8 @@
 
 <body>
     <div id="app">
-        @section('content')
-        </div>
-    </body>
+        @yield('content')
+    </div>
+</body>
 
-    </html>
+</html>
