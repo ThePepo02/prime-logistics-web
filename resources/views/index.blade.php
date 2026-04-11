@@ -1,5 +1,5 @@
 @extends('layouts.main')
 
 @section('content')
-    <dashboardAdmin-component></dashboardAdmin-component>
+    <dashboard-admin-component></dashboard-admin-component>
 @endsection
