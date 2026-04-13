@@ -13,14 +13,14 @@
                 <!-- Botones de acción -->
                 <div class="actions-bar">
                     <button type="button" class="btn_exportarDatos" @click="exportData">
-                        <i class="bi bi-download"></i>
+                        <img :src="iconoExportarDatos" alt="Icono exportarDatos">
                         Exportar datos
                     </button>
                     <a href="#" class="btn_notificaciones" @click.prevent="clickNotification">
-                        <i class="bi bi-bell"></i>
+                        <img :src="iconoNotificaciones" alt="Icono notificaciones">
                     </a>
                     <div class="perfil-icon" @click="clickProfile">
-                        <i class="bi bi-person-circle"></i>
+                        <img :src="iconoPerfilUsuarioAdmin" alt="Imagen Perfil Usuario admin">
                     </div>
                 </div>
             </div>
@@ -218,6 +218,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 
 const logoPrimeLogistics = ref('/public/img/prime-logistics-logo.png')
+const iconoExportarDatos = ref('/public/img/iconoExportarDatos.png')
+const iconoNotificaciones = ref('/public/img/notificaciones-logo.png')
+const iconoPerfilUsuarioAdmin = ref('/public/img/perfilUsuarioAdmin.png')
 
 // Datos reactivos
 const sidebarOpen = ref(false)
