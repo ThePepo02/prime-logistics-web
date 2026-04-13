@@ -4,7 +4,7 @@
         <header class="dashboard-header">
             <div class="logo">
                 <div class="logo-icon">
-                    <i class="bi bi-box-seam"></i>
+                    <img src="" alt="logo Prime Logistics">
                 </div>
                 <span class="logo-text">Prime Logistics</span>
                 <h1 class="page-title">Dashboard
