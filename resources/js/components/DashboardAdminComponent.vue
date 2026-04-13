@@ -4,7 +4,7 @@
         <header class="dashboard-header">
             <div class="logo">
                 <div class="logo-icon">
-                    <img src="" alt="logo Prime Logistics">
+                    <img :src="logoPrimeLogistics" alt="logo Prime Logistics">
                 </div>
                 <span class="logo-text">Prime Logistics</span>
                 <h1 class="page-title">Dashboard
@@ -216,6 +216,8 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+
+const logoPrimeLogistics = ref('/public/img/prime-logistics-logo.png')
 
 // Datos reactivos
 const sidebarOpen = ref(false)
