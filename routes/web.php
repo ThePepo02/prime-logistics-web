@@ -6,6 +6,6 @@ Route::get('/', function () {
     return view('index');
 });
 
-Route::get('/operador', function () {
+Route::get('/dashboard', function () {
     return view('operador');
 });
