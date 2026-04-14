@@ -13,14 +13,14 @@
                 <!-- Botones de acción -->
                 <div class="actions-bar">
                     <button type="button" class="btn_exportarDatos" @click="exportData">
-                        <img :src="iconoExportarDatos" alt="Icono exportarDatos">
+                        <img :src="imgBtnExportarDatos" alt="Icono exportarDatos">
                         Exportar datos
                     </button>
                     <a href="#" class="btn_notificaciones" @click.prevent="clickNotification">
-                        <img :src="iconoNotificaciones" alt="Icono notificaciones">
+                        <img :src="imgBtnNotificaciones" alt="Icono notificaciones">
                     </a>
                     <div class="perfil-icon" @click="clickProfile">
-                        <img :src="iconoPerfilUsuarioAdmin" alt="Imagen Perfil Usuario admin">
+                        <img :src="imgPerfilUsuarioAdmin" alt="Imagen Perfil Usuario admin">
                     </div>
                 </div>
             </div>
@@ -116,24 +116,8 @@
                         <div class="info_act_semanal">
                             <!-- Gráfico de columnas agrupadas (añadir datos de la BD) -->
                             <div class="grafico-columnas">
-                                <div class="columnas-container">
-                                    <div class="columna-semana" v-for="semana in datosSemanales" :key="semana.nombre">
-                                        <div class="barras-agrupadas">
-                                            <div class="barra-columna enviadas"
-                                                :style="{ height: (semana.enviadas / maxEnviadas * 200) + 'px' }">
-                                                <span class="valor-columna">{{ semana.enviadas }}</span>
-                                            </div>
-                                            <div class="barra-columna aceptadas"
-                                                :style="{ height: (semana.aceptadas / maxAceptadas * 200) + 'px' }">
-                                                <span class="valor-columna">{{ semana.aceptadas }}</span>
-                                            </div>
-                                            <div class="barra-columna incidentes"
-                                                :style="{ height: (semana.incidentes / maxIncidentes * 200) + 'px' }">
-                                                <span class="valor-columna">{{ semana.incidentes }}</span>
-                                            </div>
-                                        </div>
-                                        <div class="etiqueta-semana">{{ semana.nombre }}</div>
-                                    </div>
+                                <div>
+                                    <img :src="imgGraficos" alt="gráficos" class="imgGraficos">
                                 </div>
                                 <div class="leyenda-grafico">
                                     <span class="leyenda-item enviadas-leyenda">Enviadas</span>
@@ -208,7 +192,7 @@
         </div>
 
         <footer class="dashboard-footer">
-            <span>Nombre usuario</span>
+            <span>Carlos Martinez</span>
             <span class="rol_user">Administrador</span>
         </footer>
     </div>
@@ -216,11 +200,17 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import logotipo from '@/img/prime-logistics-logo.png'
+import iconoExportarDatos from '@/img/iconoExportarDatos.png'
+import fotoPerfil from '@/img/perfilUsuarioAdmin.png'
+import iconoNotificaciones from '@/img/notificaciones-logo.png'
+import graficos from '@/img/graficos.png'
 
-const logoPrimeLogistics = ref('/public/img/prime-logistics-logo.png')
-const iconoExportarDatos = ref('/public/img/iconoExportarDatos.png')
-const iconoNotificaciones = ref('/public/img/notificaciones-logo.png')
-const iconoPerfilUsuarioAdmin = ref('/public/img/perfilUsuarioAdmin.png')
+const logoPrimeLogistics = logotipo
+const imgBtnExportarDatos = iconoExportarDatos
+const imgPerfilUsuarioAdmin = fotoPerfil
+const imgBtnNotificaciones = iconoNotificaciones
+const imgGraficos = graficos
 
 // Datos reactivos
 const sidebarOpen = ref(false)
@@ -251,6 +241,10 @@ const weeklyData = ref([
     { name: 'Granada', value: 560, percentage: 35 },
     { name: 'Valencia', value: 1970, percentage: 78 }
 ])
+
+const safeMax = (arr, key) => {
+    return Math.max(...arr.map(d => d[key]), 1)
+}
 
 // Datos de ofertas (vendrían desde API)
 const offers = ref([
@@ -376,9 +370,8 @@ $text-muted: #6c757d;
 }
 
 .logo-icon {
-    width: 36px;
-    height: 36px;
-    background: $primary-color;
+    width: 200px;
+    height: 100px;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -498,7 +491,7 @@ i {
 
 .actions-bar {
     display: flex;
-    margin-left: 1250px;
+    margin-left: 900px;
     gap: 1rem;
 
     .btn_exportarDatos {
@@ -510,7 +503,7 @@ i {
         border: 1px solid $gray-border;
         border-radius: 40px;
         height: 50px;
-        width: 100px;
+        width: 180px;
 
         &:hover {
             background: $gray-light;
@@ -518,13 +511,25 @@ i {
         }
     }
 
-    .btn_notificaciones,
+    .btn_notificaciones {
+        width: 60px;
+        height: 50px;
+        background: white;
+        border-radius: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            background: $gray-light;
+        }
+    }
+
     .perfil-icon {
         width: 60px;
-        height: 40px;
+        height: 50px;
         background: white;
-        border: 1px solid $gray-border;
-        border-radius: 50%;
+        border-radius: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -976,5 +981,8 @@ i {
             }
         }
     }
+}
+.imgGraficos{
+    width: 1500px;
 }
 </style>
