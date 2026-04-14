@@ -1,152 +1,576 @@
 <template>
-    <section class="client-dashboard">
-        <header class="topbar">
-            <div>
-                <p class="eyebrow">Prime Logistics</p>
-                <h1>Dashboard Cliente</h1>
+    <div class="dashboard-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <img :src="logoSrc" alt="Prime Logistics" />
             </div>
-            <a class="cta" href="#">Crear nueva solicitud</a>
-        </header>
 
-        <div class="cards-grid">
-            <article class="card">
-                <p class="card-label">Envios activos</p>
-                <p class="card-value">18</p>
-                <small>3 en seguimiento prioritario</small>
-            </article>
-
-            <article class="card">
-                <p class="card-label">Entregas completadas</p>
-                <p class="card-value">124</p>
-                <small>Ultimos 30 dias</small>
-            </article>
-
-            <article class="card">
-                <p class="card-label">Incidencias abiertas</p>
-                <p class="card-value">2</p>
-                <small>Tiempo promedio de resolucion: 4h</small>
-            </article>
-        </div>
-
-        <section class="panel">
-            <h2>Actividad reciente</h2>
-            <ul>
-                <li>
-                    <span>Pedido #PL-4021</span>
-                    <strong>En transito</strong>
-                </li>
-                <li>
-                    <span>Pedido #PL-4018</span>
-                    <strong>Entregado</strong>
-                </li>
-                <li>
-                    <span>Pedido #PL-4016</span>
-                    <strong>En revision</strong>
-                </li>
+            <p class="section-title">Principal</p>
+            <ul class="menu">
+                <li class="active">Dashboard</li>
+                <li><a href="/cliente/nuevo-pedido">Nuevos Pedidos</a></li>
+                <li><a href="/cliente/mis-pedidos">Mis Pedidos</a> <span class="dot"></span></li>
+                <li><a href="/cliente/tracking">Tracking</a></li>
+                <li><a href="/cliente/notificaciones">Notificaciones</a> <span class="dot"></span></li>
             </ul>
-        </section>
-    </section>
+
+            <p class="section-title muted">Cuenta</p>
+            <ul class="menu">
+                <li>Ajustes</li>
+            </ul>
+
+            <div class="user-card">
+                <span class="avatar">MG</span>
+                <div>
+                    <strong>Maria Garcia</strong>
+                    <small>Cliente</small>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="topbar">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Bienvenido, Maria - Transi SA</p>
+                </div>
+                <div class="actions">
+                    <a class="new-order" href="/cliente/nuevo-pedido">+ Nuevo Pedido</a>
+                    <button class="icon-btn">🔔</button>
+                    <span class="mini-avatar">MO</span>
+                </div>
+            </header>
+
+            <section class="kpi-grid">
+                <article class="kpi blue">
+                    <h3>Pedidos activos</h3>
+                    <p>24</p>
+                    <small>2 esta semana</small>
+                </article>
+                <article class="kpi green">
+                    <h3>Entregados</h3>
+                    <p>18</p>
+                    <small>Sin reclamaciones</small>
+                </article>
+                <article class="kpi red">
+                    <h3>Retrasados</h3>
+                    <p>3</p>
+                    <small>1 en ruta critica</small>
+                </article>
+                <article class="kpi orange">
+                    <h3>Incidencias</h3>
+                    <p>2</p>
+                    <small>1 nueva hoy</small>
+                </article>
+            </section>
+
+            <section class="middle-grid">
+                <article class="panel compact">
+                    <h4>Operaciones activas</h4>
+                    <p class="big-number">7</p>
+                    <small>2 esta semana</small>
+                </article>
+
+                <article class="panel">
+                    <h4>Ultimo pedido activo</h4>
+                    <p class="shipment">OC-2024-021 - Envio Maritimo FCL</p>
+                    <small>Valencia -> Shanghai | ETA 15 feb 2025</small>
+                    <div class="inline-actions">
+                        <span class="pill">EN TRANSITO</span>
+                        <a href="/cliente/tracking">Ver Tracking</a>
+                    </div>
+                </article>
+            </section>
+
+            <section class="panel chart-panel">
+                <div class="panel-head">
+                    <h4>Actividad de pedidos</h4>
+                    <small>Ultima 8 semanas</small>
+                </div>
+                <div class="fake-chart">
+                    <div v-for="(bar, index) in chartData" :key="index" class="bar-group">
+                        <span class="bar blue-bar" :style="{ height: `${bar.pedidos}px` }"></span>
+                        <span class="bar orange-bar" :style="{ height: `${bar.incidencias}px` }"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel table-panel">
+                <div class="table-head">
+                    <h4>Mis pedidos recientes</h4>
+                    <a href="#">Ver todos</a>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Orden</th>
+                            <th>Modo</th>
+                            <th>Ruta</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th>Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>OC-2024-021</td>
+                            <td>Maritimo</td>
+                            <td>Valencia -> Shanghai</td>
+                            <td>10 feb 2025</td>
+                            <td><span class="pill pending">EN TRANSITO</span></td>
+                            <td><a class="tracking-btn" href="/cliente/tracking">Tracking</a></td>
+                        </tr>
+                        <tr>
+                            <td>OC-2024-019</td>
+                            <td>Aereo</td>
+                            <td>Madrid -> Miami</td>
+                            <td>02 ene 2025</td>
+                            <td><span class="pill done">ACEPTADA</span></td>
+                            <td><a class="tracking-btn" href="/cliente/tracking">Tracking</a></td>
+                        </tr>
+                        <tr>
+                            <td>OC-2024-018</td>
+                            <td>Terrestre</td>
+                            <td>Barcelona -> Paris</td>
+                            <td>28 dic 2024</td>
+                            <td><span class="pill complete">COMPLETADA</span></td>
+                            <td><a class="tracking-btn" href="/cliente/tracking">Tracking</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
 </template>
 
+<script setup>
+const logoSrc = '/prime-logistics-logo.png';
+
+const chartData = [
+    { pedidos: 46, incidencias: 8 },
+    { pedidos: 58, incidencias: 10 },
+    { pedidos: 31, incidencias: 58 },
+    { pedidos: 64, incidencias: 14 },
+    { pedidos: 52, incidencias: 8 },
+    { pedidos: 61, incidencias: 11 },
+    { pedidos: 70, incidencias: 9 },
+    { pedidos: 55, incidencias: 12 }
+];
+</script>
+
 <style scoped>
-.client-dashboard {
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap');
+
+.dashboard-shell {
     min-height: 100vh;
-    padding: 2rem;
-    background: radial-gradient(circle at 20% 20%, #f6e3b8 0%, #f1f5f9 50%, #dce8f7 100%);
-    color: #1e293b;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #e9edf4;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    font-family: 'Manrope', sans-serif;
+    color: #152238;
 }
 
-.topbar {
+.sidebar {
+    background: linear-gradient(180deg, #0a2243 0%, #071a33 100%);
+    color: #dbe7ff;
+    padding: 1.2rem 1rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    flex-direction: column;
+    gap: 0.7rem;
 }
 
-.eyebrow {
+.brand {
+    padding: 0.2rem 0.5rem 0.9rem;
+}
+
+.brand img {
+    height: 30px;
+    object-fit: contain;
+}
+
+.section-title {
+    margin: 0.5rem 0 0.2rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.75rem;
+    font-size: 0.67rem;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
+}
+
+.section-title.muted {
+    margin-top: 0.9rem;
+    opacity: 0.58;
+}
+
+.menu {
+    list-style: none;
     margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.26rem;
 }
 
-h1 {
-    margin: 0.2rem 0 0;
-    font-size: 2rem;
+.menu li {
+    padding: 0.6rem 0.72rem;
+    border-radius: 9px;
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #c6d8fb;
 }
 
-.cta {
-    background: #0f172a;
-    color: #fff;
-    padding: 0.75rem 1rem;
-    border-radius: 0.7rem;
+.menu li a {
+    color: inherit;
     text-decoration: none;
 }
 
-.cards-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.2rem;
-}
-
-.card {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(30, 41, 59, 0.12);
-    border-radius: 1rem;
-    padding: 1rem;
-    backdrop-filter: blur(3px);
-}
-
-.card-label {
-    margin: 0;
-    color: #334155;
-}
-
-.card-value {
-    margin: 0.4rem 0;
-    font-size: 2rem;
+.menu li.active {
+    background: #ff7e26;
+    color: #fff;
     font-weight: 700;
 }
 
-.panel {
-    background: #ffffffcc;
-    border-radius: 1rem;
-    border: 1px solid rgba(30, 41, 59, 0.12);
-    padding: 1rem;
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff7e26;
 }
 
-.panel h2 {
-    margin-top: 0;
+.user-card {
+    margin-top: auto;
+    padding-top: 0.9rem;
+    border-top: 1px solid rgba(198, 216, 251, 0.17);
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
 }
 
-.panel ul {
-    padding: 0;
+.avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #2d65b0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.user-card strong {
+    font-size: 0.75rem;
+    display: block;
+}
+
+.user-card small {
+    opacity: 0.75;
+    font-size: 0.68rem;
+}
+
+.content {
+    padding: 1rem 1.1rem 1.2rem;
+}
+
+.topbar {
+    background: #f3f5f8;
+    border: 1px solid #d6dee8;
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+}
+
+h1 {
     margin: 0;
-    list-style: none;
+    font-size: 1rem;
+    font-weight: 800;
 }
 
-.panel li {
+.topbar p {
+    margin: 0.12rem 0 0;
+    font-size: 0.72rem;
+    color: #607089;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.new-order {
+    border: 0;
+    background: #ff7e26;
+    color: #fff;
+    padding: 0.45rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.icon-btn {
+    border: 1px solid #d2dae6;
+    background: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.mini-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #dce8fb;
+    color: #2d65b0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.7rem;
+}
+
+.kpi,
+.panel {
+    background: #f7f9fc;
+    border: 1px solid #d6dee8;
+    border-radius: 9px;
+    padding: 0.72rem;
+}
+
+.kpi {
+    border-top-width: 3px;
+}
+
+.kpi h3 {
+    margin: 0;
+    font-size: 0.69rem;
+    color: #5e6e87;
+    font-weight: 700;
+}
+
+.kpi p {
+    margin: 0.2rem 0 0;
+    font-size: 1.65rem;
+    font-weight: 800;
+}
+
+.kpi small {
+    font-size: 0.66rem;
+}
+
+.blue {
+    border-top-color: #1f6fcc;
+}
+
+.green {
+    border-top-color: #3ea86e;
+}
+
+.red {
+    border-top-color: #e24f4c;
+}
+
+.orange {
+    border-top-color: #ff7e26;
+}
+
+.middle-grid {
+    display: grid;
+    grid-template-columns: 1fr 2.2fr;
+    gap: 0.6rem;
+    margin-bottom: 0.7rem;
+}
+
+.compact {
+    display: grid;
+    align-content: center;
+}
+
+.big-number {
+    font-size: 2.25rem;
+    line-height: 1;
+    margin: 0.1rem 0;
+    font-weight: 800;
+}
+
+.panel h4 {
+    margin: 0;
+    font-size: 0.74rem;
+    font-weight: 800;
+}
+
+.shipment {
+    margin: 0.35rem 0 0.2rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.panel small {
+    color: #607089;
+    font-size: 0.67rem;
+}
+
+.inline-actions {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+}
+
+.inline-actions a {
+    color: #1f6fcc;
+    text-decoration: none;
+    font-size: 0.69rem;
+    font-weight: 700;
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.17rem 0.6rem;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.pending {
+    background: #dbe8ff;
+    color: #2f69bd;
+}
+
+.done {
+    background: #d8f3de;
+    color: #257e4f;
+}
+
+.complete {
+    background: #e9f5df;
+    color: #3e7a3d;
+}
+
+.chart-panel {
+    margin-bottom: 0.7rem;
+}
+
+.panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.35rem;
+}
+
+.fake-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.4rem;
+    height: 90px;
+    padding: 0.3rem 0.7rem;
+}
+
+.bar-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.bar {
+    width: 23px;
+    border-radius: 4px 4px 0 0;
+}
+
+.blue-bar {
+    background: #1f6fcc;
+}
+
+.orange-bar {
+    background: #ff7e26;
+}
+
+.table-head {
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px dashed rgba(30, 41, 59, 0.2);
-    padding: 0.75rem 0;
+    align-items: center;
+    margin-bottom: 0.4rem;
 }
 
-.panel li:last-child {
-    border-bottom: 0;
+.table-head a {
+    color: #73849d;
+    text-decoration: none;
+    font-size: 0.68rem;
+    font-weight: 700;
 }
 
-@media (max-width: 900px) {
-    .cards-grid {
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 0.45rem 0.35rem;
+    font-size: 0.68rem;
+    border-top: 1px solid #e0e6ef;
+}
+
+th {
+    color: #7a8aa2;
+    font-weight: 700;
+    border-top: 0;
+}
+
+.tracking-btn {
+    border: 1px solid #d3dbe8;
+    background: #fff;
+    border-radius: 8px;
+    font-size: 0.63rem;
+    padding: 0.2rem 0.5rem;
+    text-decoration: none;
+    color: #1f3556;
+    display: inline-flex;
+}
+
+@media (max-width: 1100px) {
+    .dashboard-shell {
         grid-template-columns: 1fr;
     }
 
-    .topbar {
-        flex-direction: column;
-        align-items: flex-start;
+    .sidebar {
+        position: static;
+    }
+
+    .kpi-grid,
+    .middle-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fake-chart {
+        gap: 0.8rem;
+        overflow-x: auto;
+    }
+
+    .bar {
+        width: 16px;
+    }
+
+    th,
+    td {
+        font-size: 0.64rem;
     }
 }
 </style>
