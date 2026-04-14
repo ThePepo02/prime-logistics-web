@@ -42,17 +42,23 @@
             </header>
 
             <section class="panel filters">
-                <input type="text" placeholder="Buscar por ID, ruta..." />
-                <select>
-                    <option>Todos los estados</option>
+                <input v-model="filters.q" type="text" placeholder="Buscar por ID, ruta..." @keyup.enter="loadOrders" />
+                    <select v-model="filters.status" @change="loadOrders(1)">
+                        <option value="">Todos los estados</option>
+                        <option value="EN TRANSITO">En transito</option>
+                        <option value="COMPLETADA">Completada</option>
+                        <option value="EN PREPARACION">En preparacion</option>
                 </select>
-                <select>
-                    <option>Todos los modos</option>
+                    <select v-model="filters.mode" @change="loadOrders(1)">
+                        <option value="">Todos los modos</option>
+                        <option value="Maritimo">Maritimo</option>
+                        <option value="Aereo">Aereo</option>
+                        <option value="Terrestre">Terrestre</option>
                 </select>
                 <select>
                     <option>Cualquier fecha</option>
                 </select>
-                <small>8 pedidos</small>
+                    <small>{{ meta.total }} pedidos</small>
             </section>
 
             <section class="panel table-wrap">
@@ -88,13 +94,12 @@
                 </table>
 
                 <div class="table-footer">
-                    <small>Mostrando <strong>8</strong> de <strong>24</strong> pedidos</small>
+                    <small>Mostrando <strong>{{ orders.length }}</strong> de <strong>{{ meta.total }}</strong> pedidos</small>
                     <div class="pagination">
-                        <button type="button">&lt;</button>
-                        <button type="button" class="active">1</button>
-                        <button type="button">2</button>
-                        <button type="button">3</button>
-                        <button type="button">&gt;</button>
+                        <button type="button" @click="goPage(meta.current_page - 1)">&lt;</button>
+                        <button type="button" class="active">{{ meta.current_page }}</button>
+                        <button type="button">{{ meta.last_page }}</button>
+                        <button type="button" @click="goPage(meta.current_page + 1)">&gt;</button>
                     </div>
                 </div>
             </section>
@@ -103,18 +108,44 @@
 </template>
 
 <script setup>
+import { onMounted, reactive, ref } from 'vue';
+
 const logoSrc = '/prime-logistics-logo.png';
 
-const orders = [
-    { id: 'OC-2024-021', ref: 'TSA-2024-091', mode: 'Maritimo', route: 'Valencia -> Shanghai', weight: '12.400kg / 38m3', date: '10 Ene', etd: '12 Ene', status: 'EN TRANSITO' },
-    { id: 'OC-2024-019', ref: 'TSA-2024-088', mode: 'Aereo', route: 'Madrid -> Miami', weight: '340kg / 2.1m3', date: '02 Ene', etd: '05 Ene', status: 'ACEPTADA' },
-    { id: 'OC-2024-018', ref: 'TSA-2024-085', mode: 'Terrestre', route: 'Barcelona -> Paris', weight: '3.200kg / 14m3', date: '28 Dic', etd: '30 Dic', status: 'COMPLETADA' },
-    { id: 'OC-2024-015', ref: 'TSA-2024-079', mode: 'Maritimo', route: 'Bilbao -> Rotterdam', weight: '8.700kg / 28m3', date: '15 Dic', etd: '---', status: 'RECHAZADA' },
-    { id: 'OC-2024-012', ref: 'TSA-2024-071', mode: 'Aereo', route: 'Valencia -> Nueva York', weight: '520kg / 3.4m3', date: '01 Dic', etd: '03 Dic', status: 'COMPLETADA' },
-    { id: 'OC-2024-009', ref: 'TSA-2024-062', mode: 'Maritimo', route: 'Valencia -> Singapur', weight: '18.000kg / 45m3', date: '10 Nov', etd: '12 Nov', status: 'COMPLETADA' },
-    { id: 'OC-2024-006', ref: 'TSA-2024-051', mode: 'Terrestre', route: 'Madrid -> Lisboa', weight: '1.100kg / 6m3', date: '20 Oct', etd: '---', status: 'RECHAZADA' },
-    { id: 'OC-2024-002', ref: 'TSA-2024-030', mode: 'Aereo', route: 'Barcelona -> Dubai', weight: '680kg / 4.2m3', date: '15 Sep', etd: '17 Sep', status: 'COMPLETADA' }
-];
+const orders = ref([]);
+const meta = reactive({
+    current_page: 1,
+    last_page: 1,
+    total: 0,
+});
+
+const filters = reactive({
+    q: '',
+    status: '',
+    mode: '',
+});
+
+const loadOrders = async (page = 1) => {
+    const { data } = await window.axios.get('/api/client/orders', {
+        params: {
+            page,
+            q: filters.q || undefined,
+            status: filters.status || undefined,
+            mode: filters.mode || undefined,
+        },
+    });
+
+    orders.value = data.data;
+    Object.assign(meta, data.meta);
+};
+
+const goPage = async (page) => {
+    if (page < 1 || page > meta.last_page) {
+        return;
+    }
+
+    await loadOrders(page);
+};
 
 const statusClass = (status) => {
     if (status === 'EN TRANSITO') {
@@ -131,6 +162,14 @@ const statusClass = (status) => {
 
     return 'rejected';
 };
+
+onMounted(async () => {
+    try {
+        await loadOrders();
+    } catch (error) {
+        console.error('No se pudieron cargar pedidos', error);
+    }
+});
 </script>
 
 <style scoped>

@@ -211,10 +211,12 @@
                     <div class="footer-actions">
                         <button v-if="currentStep > 1" class="btn ghost" type="button" @click="currentStep--">Anterior</button>
                         <button v-if="currentStep < 3" class="btn primary" type="button" @click="currentStep++">Siguiente: {{ nextStepLabel }}</button>
-                        <button v-if="currentStep === 3" class="btn ghost" type="button">Guardar Borrador</button>
-                        <button v-if="currentStep === 3" class="btn primary" type="button">Enviar Pedido</button>
+                        <button v-if="currentStep === 3" class="btn ghost" type="button" :disabled="isSubmitting" @click="submitOrder('Borrador')">Guardar Borrador</button>
+                        <button v-if="currentStep === 3" class="btn primary" type="button" :disabled="isSubmitting" @click="submitOrder('En preparación')">{{ isSubmitting ? 'Guardando...' : 'Enviar Pedido' }}</button>
                     </div>
                 </footer>
+
+                <p v-if="submitMessage" class="submit-message" :class="{ error: submitError }">{{ submitMessage }}</p>
             </section>
         </main>
     </div>
@@ -225,6 +227,9 @@ import { computed, reactive, ref } from 'vue';
 
 const currentStep = ref(1);
 const logoSrc = '/prime-logistics-logo.png';
+const isSubmitting = ref(false);
+const submitMessage = ref('');
+const submitError = ref(false);
 
 const transportOptions = [
     { name: 'Maritimo', route: 'FCL - LCL - Breakbulk' },
@@ -280,6 +285,41 @@ const bubbleLabel = (step) => {
     }
 
     return String(step);
+};
+
+const submitOrder = async (status) => {
+    submitMessage.value = '';
+    submitError.value = false;
+    isSubmitting.value = true;
+
+    try {
+        const payload = {
+            offer_id: form.offerId,
+            status,
+            client_name: form.clientName,
+            transport_mode: form.transportMode,
+            origin: form.originPort,
+            destination: form.destinationPort,
+            cargo_type: form.cargoType,
+            description: form.description,
+            weight_kg: form.weight,
+            incoterm: form.incoterm,
+            urgency: 'Media',
+            company: form.clientName,
+        };
+
+        const { data } = await window.axios.post('/api/client/orders', payload);
+        submitMessage.value = `Pedido creado correctamente: ${data.offer_id}`;
+
+        if (status !== 'Borrador') {
+            window.location.href = '/cliente/mis-pedidos';
+        }
+    } catch (error) {
+        submitError.value = true;
+        submitMessage.value = error?.response?.data?.message || 'No se pudo crear el pedido. Revisa los campos.';
+    } finally {
+        isSubmitting.value = false;
+    }
 };
 </script>
 
@@ -690,6 +730,17 @@ label small {
     background: #ff7e26;
     color: #fff;
     border-color: #ff7e26;
+}
+
+.submit-message {
+    margin: 0.65rem 0 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #2b7a4e;
+}
+
+.submit-message.error {
+    color: #be4d43;
 }
 
 @media (max-width: 1100px) {

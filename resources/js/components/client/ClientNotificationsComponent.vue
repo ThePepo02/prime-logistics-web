@@ -47,7 +47,7 @@
                         <h2>Bandeja de entrada</h2>
                         <div class="tabs">
                             <button class="active">Todas</button>
-                            <button>No leidas - 3</button>
+                            <button>No leidas - {{ stats.unread }}</button>
                             <button>Ofertas</button>
                             <button>Sistema</button>
                         </div>
@@ -73,7 +73,7 @@
                     </ul>
 
                     <div class="list-footer">
-                        <small>Mostrando 6 de 18 notificaciones</small>
+                        <small>Mostrando {{ notices.length }} de {{ stats.total }} notificaciones</small>
                         <div class="pagination">
                             <button type="button">&lt;</button>
                             <button type="button" class="active">1</button>
@@ -87,14 +87,14 @@
                 <aside class="right-col">
                     <article class="panel priority-card">
                         <small class="tag">Accion requerida</small>
-                        <h3>OC-2025-025 - Contraoferta</h3>
-                        <p>Valencia -> Shanghai - Maritimo FCL</p>
+                        <h3>{{ priority.title }}</h3>
+                        <p>{{ priority.message }}</p>
                         <div class="offer-grid">
-                            <span>Precio original</span><strong>EUR 2.800</strong>
-                            <span>Contraoferta</span><strong class="highlight">EUR 3.200</strong>
-                            <span>Validez</span><strong>Hasta 20 Mar 2025</strong>
+                            <span>Codigo</span><strong>{{ priority.code }}</strong>
+                            <span>Tipo</span><strong class="highlight">{{ priority.type }}</strong>
+                            <span>Fecha</span><strong>{{ priority.time }}</strong>
                         </div>
-                        <textarea readonly>Ajuste por incremento tarifas MSC Q1 2025</textarea>
+                        <textarea readonly>{{ priority.message }}</textarea>
                         <button class="accept" type="button">Aceptar Contraoferta</button>
                         <button class="reject" type="button">Rechazar</button>
                     </article>
@@ -102,10 +102,10 @@
                     <article class="panel status-card">
                         <h3>Estado de notificaciones</h3>
                         <ul>
-                            <li><span>No leidas</span><strong>3</strong></li>
-                            <li><span>Pendientes accion</span><strong>1</strong></li>
-                            <li><span>Resueltas este mes</span><strong>12</strong></li>
-                            <li><span>Total historico</span><strong>47</strong></li>
+                            <li><span>No leidas</span><strong>{{ stats.unread }}</strong></li>
+                            <li><span>Pendientes accion</span><strong>{{ stats.pending_action }}</strong></li>
+                            <li><span>Resueltas este mes</span><strong>{{ stats.resolved_month }}</strong></li>
+                            <li><span>Total historico</span><strong>{{ stats.total }}</strong></li>
                         </ul>
                     </article>
                 </aside>
@@ -115,82 +115,43 @@
 </template>
 
 <script setup>
+import { onMounted, reactive, ref } from 'vue';
+
 const logoSrc = '/prime-logistics-logo.png';
 
-const notices = [
-    {
-        id: 1,
-        title: 'Nueva contraoferta recibida',
-        message: 'Prime Logistics ha revisado tu solicitud OC-2025-025 y ha enviado una contraoferta con nuevas condiciones.',
-        code: 'OC-2025-025',
-        type: 'Contraoferta',
-        typeClass: 'counter',
-        time: 'Hace 2 horas',
-        primary: 'Ver Contraoferta',
-        secondary: 'Rechazar',
-        featured: true
-    },
-    {
-        id: 2,
-        title: 'Oferta OC-2025-024 enviada al operador',
-        message: 'Tu solicitud de cotizacion para Valencia-Shanghai ha sido enviada. El operador respondera en 24-48h.',
-        code: 'OC-2025-024',
-        type: 'Enviada',
-        typeClass: 'sent',
-        time: 'Hace 5 horas',
-        primary: 'Ver Oferta',
-        secondary: null,
-        featured: false
-    },
-    {
-        id: 3,
-        title: 'Documento subido a tu operacion',
-        message: 'Se ha añadido el Bill of Lading (BL) a la operacion OC-2024-021.',
-        code: 'OC-2024-021',
-        type: 'Documentos',
-        typeClass: 'docs',
-        time: 'Ayer 16:30',
-        primary: 'Descargar BL',
-        secondary: null,
-        featured: false
-    },
-    {
-        id: 4,
-        title: 'Oferta OC-2025-023 aceptada',
-        message: 'Has aceptado la oferta comercial para Barcelona-Nueva York. Se ha generado automáticamente la operacion.',
-        code: 'OC-2025-023',
-        type: 'Aceptada',
-        typeClass: 'ok',
-        time: 'Ayer 10:15',
-        primary: 'Ver Operacion',
-        secondary: null,
-        featured: false
-    },
-    {
-        id: 5,
-        title: 'Operacion OC-2024-021 actualizada',
-        message: 'Tu envio Valencia-Shanghai ha avanzado a la fase Transporte Maritimo. ETA estimada: 15 Feb 2025.',
-        code: 'OC-2024-021',
-        type: 'Seguimiento',
-        typeClass: 'track',
-        time: 'Hace 2 dias',
-        primary: 'Ver Tracking',
-        secondary: null,
-        featured: false
-    },
-    {
-        id: 6,
-        title: 'Oferta OC-2025-022 rechazada',
-        message: 'La oferta para Bilbao-Rotterdam fue rechazada. Motivo: precio fuera de presupuesto.',
-        code: 'OC-2025-022',
-        type: 'Rechazada',
-        typeClass: 'no',
-        time: 'Hace 3 dias',
-        primary: 'Nueva cotizacion',
-        secondary: null,
-        featured: false
+const notices = ref([]);
+const stats = reactive({
+    unread: 0,
+    pending_action: 0,
+    resolved_month: 0,
+    total: 0,
+});
+
+const priority = reactive({
+    title: '-',
+    message: '-',
+    code: '-',
+    type: '-',
+    time: '-',
+});
+
+const loadNotifications = async () => {
+    const { data } = await window.axios.get('/api/client/notifications');
+    notices.value = data.notices;
+    Object.assign(stats, data.stats);
+
+    if (data.priority) {
+        Object.assign(priority, data.priority);
     }
-];
+};
+
+onMounted(async () => {
+    try {
+        await loadNotifications();
+    } catch (error) {
+        console.error('No se pudieron cargar notificaciones', error);
+    }
+});
 </script>
 
 <style scoped>

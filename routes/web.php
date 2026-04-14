@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClientDataController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,3 +26,11 @@ Route::get('/cliente/tracking', function () {
 Route::get('/cliente/notificaciones', function () {
     return view('client.notifications');
 })->name('client.notifications');
+
+Route::prefix('/api/client')->group(function () {
+    Route::get('/dashboard', [ClientDataController::class, 'dashboard']);
+    Route::get('/orders', [ClientDataController::class, 'orders']);
+    Route::post('/orders', [ClientDataController::class, 'createOrder']);
+    Route::get('/tracking', [ClientDataController::class, 'tracking']);
+    Route::get('/notifications', [ClientDataController::class, 'notifications']);
+});

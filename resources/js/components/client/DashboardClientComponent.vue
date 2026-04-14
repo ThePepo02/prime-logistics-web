@@ -32,7 +32,7 @@
             <header class="topbar">
                 <div>
                     <h1>Dashboard</h1>
-                    <p>Bienvenido, Maria - Transi SA</p>
+                    <p>Bienvenido, {{ userLabel }}</p>
                 </div>
                 <div class="actions">
                     <a class="new-order" href="/cliente/nuevo-pedido">+ Nuevo Pedido</a>
@@ -44,22 +44,22 @@
             <section class="kpi-grid">
                 <article class="kpi blue">
                     <h3>Pedidos activos</h3>
-                    <p>24</p>
+                    <p>{{ dashboard.kpis.active }}</p>
                     <small>2 esta semana</small>
                 </article>
                 <article class="kpi green">
                     <h3>Entregados</h3>
-                    <p>18</p>
+                    <p>{{ dashboard.kpis.delivered }}</p>
                     <small>Sin reclamaciones</small>
                 </article>
                 <article class="kpi red">
                     <h3>Retrasados</h3>
-                    <p>3</p>
+                    <p>{{ dashboard.kpis.delayed }}</p>
                     <small>1 en ruta critica</small>
                 </article>
                 <article class="kpi orange">
                     <h3>Incidencias</h3>
-                    <p>2</p>
+                    <p>{{ dashboard.kpis.incidents }}</p>
                     <small>1 nueva hoy</small>
                 </article>
             </section>
@@ -67,16 +67,16 @@
             <section class="middle-grid">
                 <article class="panel compact">
                     <h4>Operaciones activas</h4>
-                    <p class="big-number">7</p>
+                    <p class="big-number">{{ dashboard.kpis.active }}</p>
                     <small>2 esta semana</small>
                 </article>
 
                 <article class="panel">
                     <h4>Ultimo pedido activo</h4>
-                    <p class="shipment">OC-2024-021 - Envio Maritimo FCL</p>
-                    <small>Valencia -> Shanghai | ETA 15 feb 2025</small>
+                    <p class="shipment">{{ highlightedOrder.id }} - {{ highlightedOrder.mode }}</p>
+                    <small>{{ highlightedOrder.route }} | Fecha {{ highlightedOrder.date }}</small>
                     <div class="inline-actions">
-                        <span class="pill">EN TRANSITO</span>
+                        <span class="pill">{{ highlightedOrder.status }}</span>
                         <a href="/cliente/tracking">Ver Tracking</a>
                     </div>
                 </article>
@@ -112,28 +112,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>OC-2024-021</td>
-                            <td>Maritimo</td>
-                            <td>Valencia -> Shanghai</td>
-                            <td>10 feb 2025</td>
-                            <td><span class="pill pending">EN TRANSITO</span></td>
-                            <td><a class="tracking-btn" href="/cliente/tracking">Tracking</a></td>
-                        </tr>
-                        <tr>
-                            <td>OC-2024-019</td>
-                            <td>Aereo</td>
-                            <td>Madrid -> Miami</td>
-                            <td>02 ene 2025</td>
-                            <td><span class="pill done">ACEPTADA</span></td>
-                            <td><a class="tracking-btn" href="/cliente/tracking">Tracking</a></td>
-                        </tr>
-                        <tr>
-                            <td>OC-2024-018</td>
-                            <td>Terrestre</td>
-                            <td>Barcelona -> Paris</td>
-                            <td>28 dic 2024</td>
-                            <td><span class="pill complete">COMPLETADA</span></td>
+                        <tr v-for="order in recentOrders" :key="order.id">
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.mode }}</td>
+                            <td>{{ order.route }}</td>
+                            <td>{{ order.date }}</td>
+                            <td><span class="pill" :class="statusClass(order.status)">{{ order.status }}</span></td>
                             <td><a class="tracking-btn" href="/cliente/tracking">Tracking</a></td>
                         </tr>
                     </tbody>
@@ -144,18 +128,66 @@
 </template>
 
 <script setup>
+import { computed, onMounted, reactive, ref } from 'vue';
+
 const logoSrc = '/prime-logistics-logo.png';
 
-const chartData = [
-    { pedidos: 46, incidencias: 8 },
-    { pedidos: 58, incidencias: 10 },
-    { pedidos: 31, incidencias: 58 },
-    { pedidos: 64, incidencias: 14 },
-    { pedidos: 52, incidencias: 8 },
-    { pedidos: 61, incidencias: 11 },
-    { pedidos: 70, incidencias: 9 },
-    { pedidos: 55, incidencias: 12 }
-];
+const dashboard = reactive({
+    kpis: {
+        active: 0,
+        delivered: 0,
+        delayed: 0,
+        incidents: 0,
+    },
+});
+
+const chartData = ref([]);
+const recentOrders = ref([]);
+
+const userLabel = computed(() => {
+    if (recentOrders.value.length > 0) {
+        return 'Cliente';
+    }
+
+    return 'Cliente';
+});
+
+const highlightedOrder = computed(() => {
+    return recentOrders.value[0] ?? {
+        id: 'N/A',
+        mode: 'Sin datos',
+        route: 'Sin ruta',
+        date: '-',
+        status: 'PENDIENTE',
+    };
+});
+
+const statusClass = (status) => {
+    if (status === 'EN TRANSITO') {
+        return 'pending';
+    }
+
+    if (status === 'ACEPTADA') {
+        return 'done';
+    }
+
+    return 'complete';
+};
+
+const loadDashboard = async () => {
+    const { data } = await window.axios.get('/api/client/dashboard');
+    dashboard.kpis = data.kpis;
+    chartData.value = data.chartData;
+    recentOrders.value = data.recentOrders.slice(0, 3);
+};
+
+onMounted(async () => {
+    try {
+        await loadDashboard();
+    } catch (error) {
+        console.error('No se pudo cargar dashboard', error);
+    }
+});
 </script>
 
 <style scoped>

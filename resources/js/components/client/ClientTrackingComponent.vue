@@ -32,7 +32,7 @@
             <header class="topbar">
                 <div>
                     <h1>Tracking</h1>
-                    <p>OC-2024-021 - Valencia -> Shanghai</p>
+                    <p>{{ tracking.code }} - {{ tracking.route }}</p>
                 </div>
                 <div class="actions">
                     <a class="new-order" href="/cliente/nuevo-pedido">+ Nuevo Pedido</a>
@@ -43,27 +43,27 @@
 
             <section class="panel search-row">
                 <input v-model="trackingCode" type="text" placeholder="OC-2024-021" />
-                <button class="btn-track" type="button">Rastrear</button>
+                <button class="btn-track" type="button" @click="loadTracking">Rastrear</button>
             </section>
 
             <section class="grid-main">
                 <article class="panel left-panel">
                     <div class="shipment-head">
                         <div>
-                            <h2>{{ trackingCode }}</h2>
-                            <small>Valencia -> Shanghai</small>
+                            <h2>{{ tracking.code }}</h2>
+                            <small>{{ tracking.route }}</small>
                         </div>
-                        <span class="pill in-transit">EN TRANSITO</span>
+                        <span class="pill in-transit">{{ tracking.status }}</span>
                     </div>
 
                     <div class="progress-wrap">
-                        <div class="progress-line"><span :style="{ width: '50%' }"></span></div>
-                        <small>50%</small>
+                        <div class="progress-line"><span :style="{ width: `${tracking.progress}%` }"></span></div>
+                        <small>{{ tracking.progress }}%</small>
                     </div>
 
                     <div class="timeline">
                         <div
-                            v-for="(step, index) in timeline"
+                            v-for="(step, index) in tracking.timeline"
                             :key="index"
                             class="timeline-item"
                             :class="step.state"
@@ -83,28 +83,26 @@
                     <article class="panel info-card">
                         <h3>Datos del Envio</h3>
                         <div class="data-grid">
-                            <span>Naviera</span><strong>MSC Mediterranean</strong>
-                            <span>Buque</span><strong>MSC Gulsin</strong>
-                            <span>Contenedor</span><strong>MSCU1234567 - 40 HC Dry</strong>
-                            <span>Incoterm</span><strong>FOB Valencia</strong>
-                            <span>ETD</span><strong>12 Ene 2025</strong>
-                            <span>ETA</span><strong>15 Feb 2025</strong>
-                            <span>Dias en transito</span><strong>34 dias estimados</strong>
+                            <span>Naviera</span><strong>{{ tracking.details.shipping_line }}</strong>
+                            <span>Buque</span><strong>{{ tracking.details.vessel }}</strong>
+                            <span>Contenedor</span><strong>{{ tracking.details.container }}</strong>
+                            <span>Incoterm</span><strong>{{ tracking.details.incoterm }}</strong>
+                            <span>ETD</span><strong>{{ tracking.details.etd }}</strong>
+                            <span>ETA</span><strong>{{ tracking.details.eta }}</strong>
+                            <span>Dias en transito</span><strong>{{ tracking.details.days_in_transit }} dias estimados</strong>
                         </div>
                     </article>
 
                     <article class="panel info-card">
                         <h3>Agente Aduanal</h3>
-                        <p class="agent">Aduana Express SL</p>
-                        <small>+34 96 123 4567 - info@aduanaexpress.es</small>
+                        <p class="agent">{{ tracking.agent.name }}</p>
+                        <small>{{ tracking.agent.contact }}</small>
                     </article>
 
                     <article class="panel info-card">
                         <h3>Documentos</h3>
                         <ul class="docs">
-                            <li><span>B/L (Bill of Lading)</span><button>⬇</button></li>
-                            <li><span>Factura Comercial</span><button>⬇</button></li>
-                            <li><span>Packing List</span><button>⬇</button></li>
+                            <li v-for="doc in tracking.documents" :key="doc"><span>{{ doc }}</span><button>⬇</button></li>
                         </ul>
                     </article>
 
@@ -116,22 +114,57 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 
 const logoSrc = '/prime-logistics-logo.png';
 const trackingCode = ref('OC-2024-021');
 
-const timeline = [
-    { icon: '📦', title: 'Preparacion Mercancia', status: 'COMPLETADA', date: 'Completado 05 Ene', state: 'done' },
-    { icon: '🚚', title: 'Transporte Interior Origen', status: 'COMPLETADA', date: 'Completado 08 Ene', state: 'done' },
-    { icon: '⚓', title: 'Terminal / Puerto Origen', status: 'COMPLETADA', date: 'Completado 10 Ene', state: 'done' },
-    { icon: '🛳', title: 'Carga a Bordo', status: 'COMPLETADA', date: 'Completado 12 Ene', state: 'done' },
-    { icon: '🚢', title: 'Transporte Maritimo', status: 'EN CURSO', date: 'En curso - ETA 15 Feb', state: 'current' },
-    { icon: '⚓', title: 'Puerto Destino', status: 'PENDIENTE', date: 'Pendiente', state: 'pending' },
-    { icon: '📄', title: 'Aduana Importacion', status: 'PENDIENTE', date: 'Pendiente', state: 'pending' },
-    { icon: '🚛', title: 'Transporte Interior Destino', status: 'PENDIENTE', date: 'Pendiente', state: 'pending' },
-    { icon: '📍', title: 'Entrega Final', status: 'PENDIENTE', date: 'Pendiente', state: 'pending' }
-];
+const tracking = reactive({
+    code: 'OC-2024-021',
+    route: '-',
+    status: 'EN TRANSITO',
+    progress: 0,
+    details: {
+        shipping_line: 'Pendiente',
+        vessel: 'Pendiente',
+        container: 'Pendiente',
+        incoterm: 'Pendiente',
+        etd: '-',
+        eta: '-',
+        days_in_transit: 0,
+    },
+    agent: {
+        name: 'Pendiente',
+        contact: '-',
+    },
+    documents: [],
+    timeline: [],
+});
+
+const loadTracking = async () => {
+    const { data } = await window.axios.get('/api/client/tracking', {
+        params: {
+            code: trackingCode.value || undefined,
+        },
+    });
+
+    tracking.code = data.code;
+    tracking.route = data.route;
+    tracking.status = data.status;
+    tracking.progress = data.progress;
+    tracking.details = data.details;
+    tracking.agent = data.agent;
+    tracking.documents = data.documents;
+    tracking.timeline = data.timeline;
+};
+
+onMounted(async () => {
+    try {
+        await loadTracking();
+    } catch (error) {
+        console.error('No se pudo cargar tracking', error);
+    }
+});
 </script>
 
 <style scoped>
