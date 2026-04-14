@@ -168,7 +168,7 @@
                                     <td>{{ offer.ruta }}</td>
                                     <td>{{ offer.distancia }}</td>
                                     <td><span :class="['status-badge', getStatusClass(offer.estado)]">{{ offer.estado
-                                            }}</span></td>
+                                    }}</span></td>
                                     <td>
                                         <button class="action-btn" @click="viewOffer(offer.id)">
                                             <i class="bi bi-eye"></i> Ver
@@ -200,7 +200,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import logotipo from '@/img/prime-logistics-logo.png'
+import logotipo from '@/img/logo-empresa.png'
 import iconoExportarDatos from '@/img/iconoExportarDatos.png'
 import fotoPerfil from '@/img/perfilUsuarioAdmin.png'
 import iconoNotificaciones from '@/img/notificaciones-logo.png'
@@ -982,7 +982,8 @@ i {
         }
     }
 }
-.imgGraficos{
+
+.imgGraficos {
     width: 1500px;
 }
 </style>
