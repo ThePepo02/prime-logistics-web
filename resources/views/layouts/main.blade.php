@@ -7,10 +7,11 @@
     <title>
         @yield('title', 'Prime Logistics Web')
     </title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
     <div id="app">
-        @section('content')
+        @yield('content')
     </div>
 </body>
 </html>
