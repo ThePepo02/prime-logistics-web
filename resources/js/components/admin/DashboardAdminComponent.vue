@@ -168,7 +168,7 @@
                                     <td>{{ offer.ruta }}</td>
                                     <td>{{ offer.distancia }}</td>
                                     <td><span :class="['status-badge', getStatusClass(offer.estado)]">{{ offer.estado
-                                    }}</span></td>
+                                            }}</span></td>
                                     <td>
                                         <button class="action-btn" @click="viewOffer(offer.id)">
                                             <i class="bi bi-eye"></i> Ver
