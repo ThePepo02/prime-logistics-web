@@ -159,6 +159,11 @@ const loadTracking = async () => {
 };
 
 onMounted(async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const offerId = urlParams.get('offer_id');
+    if (offerId) {
+        trackingCode.value = 'OC-' + offerId.toString().padStart(6, '0');
+    }
     try {
         await loadTracking();
     } catch (error) {

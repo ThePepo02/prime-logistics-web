@@ -54,7 +54,7 @@
                     </div>
 
                     <ul class="notice-list">
-                        <li v-for="notice in notices" :key="notice.id" class="notice-item" :class="{ featured: notice.featured }">
+                        <li v-for="notice in notices" :key="notice.id" class="notice-item" :class="{ featured: notice.featured, selected: priority.id === notice.id }" @click="selectNotice(notice)">
                             <div class="bullet"></div>
                             <div class="notice-content">
                                 <h3>{{ notice.title }}</h3>
@@ -66,7 +66,7 @@
                                 <small>{{ notice.time }}</small>
                             </div>
                             <div class="notice-actions">
-                                <button v-if="notice.primary" type="button" class="action-btn">{{ notice.primary }}</button>
+                                <button v-if="notice.primary" type="button" class="action-btn" @click="handlePrimaryAction(notice)">{{ notice.primary }}</button>
                                 <button v-if="notice.secondary" type="button" class="action-btn ghost">{{ notice.secondary }}</button>
                             </div>
                         </li>
@@ -95,8 +95,8 @@
                             <span>Fecha</span><strong>{{ priority.time }}</strong>
                         </div>
                         <textarea readonly>{{ priority.message }}</textarea>
-                        <button class="accept" type="button">Aceptar Contraoferta</button>
-                        <button class="reject" type="button">Rechazar</button>
+                        <button v-if="priority.typeClass === 'sent'" class="accept" type="button" @click="acceptOffer(priority.id)">Aceptar Contraoferta</button>
+                        <button v-if="priority.typeClass === 'sent'" class="reject" type="button" @click="rejectOffer(priority.id)">Rechazar</button>
                     </article>
 
                     <article class="panel status-card">
@@ -142,6 +142,37 @@ const loadNotifications = async () => {
 
     if (data.priority) {
         Object.assign(priority, data.priority);
+    }
+};
+
+const selectNotice = (notice) => {
+    Object.assign(priority, notice);
+};
+
+const handlePrimaryAction = (notice) => {
+    if (notice.primary === 'Ver Tracking') {
+        window.location.href = `/cliente/tracking?offer_id=${notice.id}`;
+    } else if (notice.primary === 'Ver Oferta') {
+        // Perhaps select the notice or redirect to offer details
+        selectNotice(notice);
+    }
+};
+
+const acceptOffer = async (offerId) => {
+    try {
+        await window.axios.post('/api/client/accept-offer', { offer_id: offerId });
+        await loadNotifications();
+    } catch (error) {
+        console.error('Error accepting offer', error);
+    }
+};
+
+const rejectOffer = async (offerId) => {
+    try {
+        await window.axios.post('/api/client/reject-offer', { offer_id: offerId });
+        await loadNotifications();
+    } catch (error) {
+        console.error('Error rejecting offer', error);
     }
 };
 
@@ -214,6 +245,7 @@ h1 { margin: 0; font-size: 1rem; font-weight: 800; }
 .notice-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.42rem; }
 .notice-item { display: grid; grid-template-columns: auto 1fr auto; gap: 0.55rem; border: 1px solid #e1e8f1; border-radius: 10px; padding: 0.55rem; background: #fff; }
 .notice-item.featured { background: #f0f6ff; border-color: #cfe0f7; }
+.notice-item.selected { background: #e0f7fa; border-color: #b2ebf2; }
 .bullet { width: 7px; height: 7px; border-radius: 50%; background: #2f69bd; margin-top: 0.3rem; }
 .notice-content h3 { margin: 0; font-size: 0.74rem; }
 .notice-content p { margin: 0.2rem 0 0.35rem; font-size: 0.62rem; color: #687b95; line-height: 1.35; }
