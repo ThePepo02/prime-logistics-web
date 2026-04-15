@@ -3,8 +3,8 @@
 
     <!-- SIDEBAR -->
     <aside class="w-64 bg-gray-900 text-white flex flex-col flex-shrink-0">
-      <div class="flex items-center gap-2 px-6 py-5 border-b border-gray-700">
-        <img :src="logoUrl" alt="Prime Logistics" class="h-8" />
+      <div class="flex items-center justify-center px-6 py-5 border-b border-gray-700">
+        <img :src="logoUrl" alt="Prime Logistics" class="w-40 h-auto mx-auto" />
       </div>
       <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
 
@@ -284,7 +284,7 @@ export default {
       // Igual que en LoginComponent teníamos loading: false para controlar el estado
       paginaActual: 'dashboard',
 
-      logoUrl: '/images/Prime-Logistics.png',
+     logoUrl: '/logo-empresa.png',
 
       // Datos del dashboard
       kpis: [

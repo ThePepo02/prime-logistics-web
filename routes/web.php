@@ -9,3 +9,7 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('operador');
 });
+
+Route::get('/clientes', function () {
+    return view('operador');            // usa el mismo blade del operador
+});

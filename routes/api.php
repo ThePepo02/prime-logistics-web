@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardOperadorController;
-use App\Http\Controllers\ClientesController;  // ← AÑADIR
+use App\Http\Controllers\ClientesController; // 👈 AÑADE
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,4 +14,6 @@ Route::get('/dashboard/ofertes', [DashboardOperadorController::class, 'ultimes']
 Route::get('/dashboard/alertes', [DashboardOperadorController::class, 'alertes']);
 Route::get('/dashboard/distribucio', [DashboardOperadorController::class, 'distribucio']);
 
-Route::get('/clientes', [ClientesController::class, 'index']);  // ← AÑADIR
+// Clientes 👈 AÑADE
+Route::get('/clientes', [ClientesController::class, 'index']);
+Route::put('/clientes/{id}/estado', [ClientesController::class, 'toggleEstado']);
