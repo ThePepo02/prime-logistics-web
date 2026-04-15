@@ -19,6 +19,9 @@ class Usuarios extends Authenticatable
         'cognoms',
         'empresa',
         'rol_id',
+        'telefon',
+        'cif',
+        'actiu',
     ];
 
     protected $hidden = ['contrasenya'];
@@ -26,5 +29,10 @@ class Usuarios extends Authenticatable
     public function getAuthPassword()
     {
         return $this->contrasenya;
+    }
+
+    public function ofertes()
+    {
+        return $this->hasMany(\App\Models\Oferta::class, 'client_id');
     }
 }

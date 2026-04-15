@@ -243,23 +243,13 @@ export default {
 
     data() {
         return {
-            // Datos mock — igual que en el Dashboard teníamos weeklyData y pendingRequests
-            // TODO: reemplazar con fetch('/api/clientes') cuando conectemos el backend
-            clientes: [
-                { id: 1, empresa: 'Textil SA', cif: 'B-12345678', contacto: 'María García', email: 'maria@textil.com', telefono: '+34 961 234 567', ofertas: 24, activo: true },
-                { id: 2, empresa: 'Moda Express SL', cif: 'A-87654321', contacto: 'Pedro López', email: 'pedro@moda.com', telefono: '+34 932 345 678', ofertas: 18, activo: true },
-                { id: 3, empresa: 'Import Global', cif: 'C-11223344', contacto: 'Sara Ruiz', email: 'sara@import.com', telefono: '+34 944 456 789', ofertas: 9, activo: false },
-                { id: 4, empresa: 'Tech Imports SA', cif: 'B-99887766', contacto: 'Laura Gómez', email: 'laura@tech.com', telefono: '+34 913 567 890', ofertas: 6, activo: false },
-            ],
-
+            clientes: [],
             busqueda: '',
             filtroEstado: '',
-
             modalVer: false,
             modalForm: false,
             clienteSeleccionado: null,
             modoEdicion: false,
-
             form: { empresa: '', cif: '', contacto: '', email: '', telefono: '' },
             errorForm: null,
         }
@@ -284,11 +274,34 @@ export default {
         totalOfertas() { return this.clientes.reduce((suma, c) => suma + c.ofertas, 0) },
     },
 
+    mounted() {
+        this.cargarClientes()
+    },
+
     methods: {
-        toggleEstado(cliente) {
-            cliente.activo = !cliente.activo
-            // TODO: PUT /api/clientes/{cliente.id} con { activo: cliente.activo }
+        async cargarClientes() {
+            try {
+                const response = await fetch('/api/clientes')
+                const data = await response.json()
+                this.clientes = data
+            } catch (e) {
+                console.error('Error cargando clientes:', e)
+            }
         },
+
+        async toggleEstado(cliente) {
+            try {
+                const response = await fetch(`/api/clientes/${cliente.id}/estado`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                })
+                const data = await response.json()
+                cliente.activo = data.activo
+            } catch (e) {
+                console.error('Error actualizando estado:', e)
+            }
+        },
+
         verCliente(cliente) {
             this.clienteSeleccionado = cliente
             this.modalVer = true
@@ -315,11 +328,9 @@ export default {
             if (this.modoEdicion) {
                 const idx = this.clientes.findIndex(c => c.id === this.clienteSeleccionado.id)
                 if (idx !== -1) Object.assign(this.clientes[idx], this.form)
-                // TODO: PUT /api/clientes/{id}
             } else {
                 const nuevoId = Math.max(...this.clientes.map(c => c.id)) + 1
                 this.clientes.push({ ...this.form, id: nuevoId, ofertas: 0, activo: true })
-                // TODO: POST /api/clientes
             }
             this.cerrarModal()
         },
