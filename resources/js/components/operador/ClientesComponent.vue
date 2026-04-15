@@ -168,17 +168,17 @@
                 </div>
                 <div class="modal-body" v-if="clienteSeleccionado">
                     <div class="modal-field"><span class="modal-label">Empresa</span><span>{{
-                            clienteSeleccionado.empresa }}</span></div>
+                        clienteSeleccionado.empresa }}</span></div>
                     <div class="modal-field"><span class="modal-label">CIF/NIF</span><span>{{ clienteSeleccionado.cif
                             }}</span></div>
                     <div class="modal-field"><span class="modal-label">Contacto</span><span>{{
-                            clienteSeleccionado.contacto }}</span></div>
+                        clienteSeleccionado.contacto }}</span></div>
                     <div class="modal-field"><span class="modal-label">Email</span><span>{{ clienteSeleccionado.email
                             }}</span></div>
                     <div class="modal-field"><span class="modal-label">Teléfono</span><span>{{
-                            clienteSeleccionado.telefono }}</span></div>
+                        clienteSeleccionado.telefono }}</span></div>
                     <div class="modal-field"><span class="modal-label">Ofertas</span><span>{{
-                            clienteSeleccionado.ofertas }}</span></div>
+                        clienteSeleccionado.ofertas }}</span></div>
                     <div class="modal-field">
                         <span class="modal-label">Estado</span>
                         <span :class="clienteSeleccionado.activo ? 'badge-activo' : 'badge-inactivo'">
@@ -284,6 +284,11 @@ export default {
         totalOfertas() { return this.clientes.reduce((suma, c) => suma + c.ofertas, 0) },
     },
 
+    // mounted() se ejecuta al cargar el componente — carga los datos reales de la API
+    mounted() {
+        this.cargarClientes()
+    },
+
     methods: {
         toggleEstado(cliente) {
             cliente.activo = !cliente.activo
@@ -331,6 +336,32 @@ export default {
             this.modalForm = false
             this.clienteSeleccionado = null
             this.errorForm = null
+        },
+
+        async cargarClientes() {
+            try {
+                const token = localStorage.getItem('token')
+                const response = await fetch('/api/clientes', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                    }
+                })
+                const data = await response.json()
+                // Mapeamos los campos de la BD a los campos que usa la tabla
+                this.clientes = data.map(c => ({
+                    id: c.id,
+                    empresa: c.empresa,
+                    cif: '—',           // no existe en BD, lo dejamos vacío
+                    contacto: c.nom + ' ' + c.cognoms,
+                    email: c.correu,
+                    telefono: '—',           // no existe en BD
+                    ofertas: 0,             // TODO: conectar con tabla ofertes
+                    activo: true,
+                }))
+            } catch (e) {
+                console.error('Error cargando clientes:', e)
+            }
         },
     },
 }
