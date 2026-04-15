@@ -12,6 +12,7 @@ const app = createApp({});
 
 
 app.component('dashboardAdmin-component', DashboardAdminComponent);
+app.component('gestion-usuarios-component', GestionUsuariosComponent);
 
 
 
