@@ -7,8 +7,8 @@
                     <img :src="logoPrimeLogistics" alt="logo Prime Logistics">
                 </div>
                 <span class="logo-text">Prime Logistics</span>
-                <h1 class="page-title">Dashboard
-                    <span class="title-sub">Vista global del sistema — Prime Logistics</span>
+                <h1 class="page-title">Gestión de Usuarios
+                    <span class="title-sub">Crear, adquirir roles y gestionar acciones</span>
                 </h1>
                 <!-- Botones de acción -->
                 <div class="actions-bar">
