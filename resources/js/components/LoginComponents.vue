@@ -94,11 +94,11 @@ export default {
                 localStorage.setItem('user', JSON.stringify(data.user));
                 const rolId = data.user.rol_id;
 
-                if (rolId === 1) {
+                if (rolId == 1) {
                     window.location.href = '/dashboard';
-                } else if (rolId === 2) {
+                } else if (rolId == 2) {
                     window.location.href = '/operador';
-                } else if (rolId === 3) {
+                } else if (rolId == 3) {
                     window.location.href = '/cliente';
                 } else {
                     this.error = 'Rol de usuario desconocido';
