@@ -17,3 +17,7 @@ Route::get('/dashboard', function() {
 Route::get('/operador', function () {
     return view('operador');
 });
+
+Route::get('/clientes', function () {
+    return view('operador');            // usa el mismo blade del operador
+});
