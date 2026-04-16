@@ -168,17 +168,17 @@
                 </div>
                 <div class="modal-body" v-if="clienteSeleccionado">
                     <div class="modal-field"><span class="modal-label">Empresa</span><span>{{
-                            clienteSeleccionado.empresa }}</span></div>
+                        clienteSeleccionado.empresa }}</span></div>
                     <div class="modal-field"><span class="modal-label">CIF/NIF</span><span>{{ clienteSeleccionado.cif
                             }}</span></div>
                     <div class="modal-field"><span class="modal-label">Contacto</span><span>{{
-                            clienteSeleccionado.contacto }}</span></div>
+                        clienteSeleccionado.contacto }}</span></div>
                     <div class="modal-field"><span class="modal-label">Email</span><span>{{ clienteSeleccionado.email
                             }}</span></div>
                     <div class="modal-field"><span class="modal-label">Teléfono</span><span>{{
-                            clienteSeleccionado.telefono }}</span></div>
+                        clienteSeleccionado.telefono }}</span></div>
                     <div class="modal-field"><span class="modal-label">Ofertas</span><span>{{
-                            clienteSeleccionado.ofertas }}</span></div>
+                        clienteSeleccionado.ofertas }}</span></div>
                     <div class="modal-field">
                         <span class="modal-label">Estado</span>
                         <span :class="clienteSeleccionado.activo ? 'badge-activo' : 'badge-inactivo'">
@@ -281,24 +281,34 @@ export default {
     methods: {
         async cargarClientes() {
             try {
-                const response = await fetch('/api/clientes')
-                const data = await response.json()
-                this.clientes = data
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/clientes', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                    }
+                });
+                const data = await response.json();
+                this.clientes = data;
             } catch (e) {
-                console.error('Error cargando clientes:', e)
+                console.error('Error cargando clientes:', e);
             }
         },
 
         async toggleEstado(cliente) {
             try {
+                const token = localStorage.getItem('token');
                 const response = await fetch(`/api/clientes/${cliente.id}/estado`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                })
-                const data = await response.json()
-                cliente.activo = data.activo
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                const data = await response.json();
+                cliente.activo = data.activo;
             } catch (e) {
-                console.error('Error actualizando estado:', e)
+                console.error('Error actualizando estado:', e);
             }
         },
 
