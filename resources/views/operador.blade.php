@@ -2,3 +2,4 @@
 @section('content')
     <dashboard-operador></dashboard-operador>
 @endsection
+
