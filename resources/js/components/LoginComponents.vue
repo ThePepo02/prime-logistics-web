@@ -21,22 +21,14 @@
 
         <!-- Correu -->
         <div class="mb-4">
-            <input
-                v-model="form.correu"
-                type="email"
-                placeholder="Correo electrónico"
-                class="border border-gray-300 text-gray-900 placeholder-gray-400 rounded-lg block w-full p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
-            />
+            <input v-model="form.correu" type="email" placeholder="Correo electrónico"
+                class="border border-gray-300 text-gray-900 placeholder-gray-400 rounded-lg block w-full p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
         </div>
 
         <!-- Contrasenya -->
         <div class="mb-2">
-            <input
-                v-model="form.contrasenya"
-                type="password"
-                placeholder="Contraseña"
-                class="border border-gray-300 text-gray-900 placeholder-gray-400 rounded-lg block w-full p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
-            />
+            <input v-model="form.contrasenya" type="password" placeholder="Contraseña"
+                class="border border-gray-300 text-gray-900 placeholder-gray-400 rounded-lg block w-full p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
         </div>
 
         <!-- Olvidaste contraseña -->
@@ -45,11 +37,8 @@
         </div>
 
         <!-- Botó -->
-        <button
-            @click="handleLogin"
-            :disabled="loading"
-            class="w-full text-white bg-orange-500 hover:bg-orange-600 font-medium rounded-lg text-sm px-5 py-4 text-center disabled:opacity-50 cursor-pointer transition duration-200 flex items-center justify-center gap-2"
-        >
+        <button @click="handleLogin" :disabled="loading"
+            class="w-full text-white bg-orange-500 hover:bg-orange-600 font-medium rounded-lg text-sm px-5 py-4 text-center disabled:opacity-50 cursor-pointer transition duration-200 flex items-center justify-center gap-2">
             {{ loading ? 'Accediendo...' : 'Acceder' }}
             <span v-if="!loading">›</span>
         </button>
@@ -103,7 +92,17 @@ export default {
 
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-                window.location.href = '/dashboard';
+                const rolId = data.user.rol_id;
+
+                if (rolId === 1) {
+                    window.location.href = '/dashboard';
+                } else if (rolId === 2) {
+                    window.location.href = '/operador';
+                } else if (rolId === 3) {
+                    window.location.href = '/cliente';
+                } else {
+                    this.error = 'Rol de usuario desconocido';
+                }
 
             } catch (e) {
                 this.error = 'Error de connexió amb el servidor';
