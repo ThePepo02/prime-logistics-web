@@ -186,8 +186,8 @@
                                 <div v-for="(w, i) in weeklyData" :key="i"
                                     class="flex-1 flex flex-col items-center gap-1">
                                     <div class="w-full flex items-end gap-px h-28">
-                                        <div class="flex-1 bg-blue-500 rounded-t"
-                                            :style="{ height: w.sent + '%' }"></div>
+                                        <div class="flex-1 bg-blue-500 rounded-t" :style="{ height: w.sent + '%' }">
+                                        </div>
                                         <div class="flex-1 bg-green-500 rounded-t"
                                             :style="{ height: w.accepted + '%' }"></div>
                                         <div class="flex-1 bg-orange-400 rounded-t"
@@ -233,7 +233,7 @@
                                 <div v-for="alert in alerts" :key="alert.id"
                                     class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                                     <span class="text-sm font-medium text-gray-700 w-32 flex-shrink-0">{{ alert.id
-                                        }}</span>
+                                    }}</span>
                                     <span class="text-sm text-gray-500 flex-1">{{ alert.issue }}</span>
                                     <button
                                         class="text-xs border border-gray-300 text-gray-600 hover:bg-gray-50 px-3 py-1 rounded-lg transition ml-2">Ver</button>
@@ -251,7 +251,7 @@
                                             :style="{ width: op.percent + '%' }"></div>
                                     </div>
                                     <span class="text-xs text-gray-500 w-8 text-right flex-shrink-0">{{ op.percent
-                                        }}%</span>
+                                    }}%</span>
                                 </div>
                             </div>
                         </div>
@@ -455,29 +455,35 @@ export default {
         // Llama a las 4 APIs del dashboard en paralelo
         async cargarDatosDashboard() {
             try {
+                const token = localStorage.getItem('token');
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                };
+
                 const [statsRes, ofertesRes, alertesRes, distribucioRes] = await Promise.all([
-                    fetch('/api/dashboard/stats'),
-                    fetch('/api/dashboard/ofertes'),
-                    fetch('/api/dashboard/alertes'),
-                    fetch('/api/dashboard/distribucio'),
-                ])
+                    fetch('/api/dashboard/stats', { headers }),
+                    fetch('/api/dashboard/ofertes', { headers }),
+                    fetch('/api/dashboard/alertes', { headers }),
+                    fetch('/api/dashboard/distribucio', { headers }),
+                ]);
 
-                const stats = await statsRes.json()
-                const ofertes = await ofertesRes.json()
-                const alertesData = await alertesRes.json()
-                const distribucio = await distribucioRes.json()
+                const stats = await statsRes.json();
+                const ofertes = await ofertesRes.json();
+                const alertesData = await alertesRes.json();
+                const distribucio = await distribucioRes.json();
 
-                this.kpis[0].value = stats.pendents
-                this.kpis[1].value = stats.acceptades
-                this.kpis[2].value = stats.en_curs
-                this.kpis[3].value = stats.incidencies
+                this.kpis[0].value = stats.pendents;
+                this.kpis[1].value = stats.acceptades;
+                this.kpis[2].value = stats.en_curs;
+                this.kpis[3].value = stats.incidencies;
 
-                this.offers = ofertes
-                this.alerts = alertesData
-                this.operations = distribucio
+                this.offers = ofertes;
+                this.alerts = alertesData;
+                this.operations = distribucio;
 
             } catch (e) {
-                console.error('Error cargando datos del dashboard:', e)
+                console.error('Error cargando datos del dashboard:', e);
             }
         },
 
