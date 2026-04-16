@@ -7,6 +7,7 @@ import { createApp } from 'vue/dist/vue.esm-bundler.js';
 // Componentes Admin
 import DashboardAdminComponent from './components/admin/DashboardAdminComponent.vue';
 import GestionUsuariosComponent from './components/admin/GestionUsuariosComponent.vue';
+import NuevoUsuarioComponent from './components/admin/NuevoUsuarioComponent.vue';
 
 // Componentes Login
 import LoginComponents from './components/LoginComponents.vue';
@@ -22,6 +23,7 @@ const app = createApp({});
 // Admin
 app.component('dashboardAdmin-component', DashboardAdminComponent);
 app.component('gestion-usuarios-component', GestionUsuariosComponent);
+app.component('nuevo-usuario-component', NuevoUsuarioComponent);
 
 // Login
 app.component('login-components', LoginComponents);
