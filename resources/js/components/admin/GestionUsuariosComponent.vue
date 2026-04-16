@@ -12,9 +12,10 @@
                 </h1>
                 <!-- Botones de acción -->
                 <div class="actions-bar">
-                    <button type="button" class="btn_exportarDatos" @click="exportData">
+                    <button type="button" class="btn_exportarDatos" @click="">
                         <img :src="iconoBtnNuevoUsuario" alt="Icono exportarDatos">
                         Nuevo Usuario
+                        <nuevo-usuario-component></nuevo-usuario-component>
                     </button>
                     <a href="#" class="btn_notificaciones" @click.prevent="clickNotification">
                         <img :src="imgBtnNotificaciones" alt="Icono notificaciones">
