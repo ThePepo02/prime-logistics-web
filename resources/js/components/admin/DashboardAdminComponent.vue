@@ -205,11 +205,6 @@
 // import iconoNotificaciones from '@/img/notificaciones-logo.png'
 // import graficos from '@/img/graficos.png'
 
-const logoPrimeLogistics = ''
-const imgBtnExportarDatos = ''
-const imgPerfilUsuarioAdmin = ''
-const imgBtnNotificaciones = ''
-const imgGraficos = ''
 
 const logoPrimeLogistics = logotipo
 const imgBtnExportarDatos = ''

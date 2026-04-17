@@ -14,7 +14,7 @@ RUN npm run build
 # ============================================
 # STAGE 2: Imagen final con PHP + NGINX
 # ============================================
-FROM php:8.2-fpm-alpine
+FROM php:8.3-fpm-alpine
 
 RUN apk add --no-cache \
     nginx \
@@ -25,7 +25,13 @@ RUN apk add --no-cache \
     oniguruma-dev \
     autoconf \
     g++ \
-    make
+    make \
+    unixodbc-dev
+
+# Driver SQL Server para Alpine
+RUN apk add --no-cache unixodbc-dev \
+    && pecl install sqlsrv pdo_sqlsrv \
+    && docker-php-ext-enable sqlsrv pdo_sqlsrv
 
 RUN docker-php-ext-install pdo mbstring bcmath pcntl
 
