@@ -199,22 +199,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+// import logotipo from '@/img/logo-empresa.png'
+// import iconoExportarDatos from '@/img/iconoExportarDatos.png'
+// import fotoPerfil from '@/img/perfilUsuarioAdmin.png'
+// import iconoNotificaciones from '@/img/notificaciones-logo.png'
+// import graficos from '@/img/graficos.png'
 
-
-const exportIcon = ref('/iconoExportarDatos.png');
-const notificacionesIcon = ref('/notificaciones-logo.png');
-const perfilIcon = ref('/perfilUsuarioAdmin.png');
-const primeLogisticsWebIcon = ref('/prime-logistics-logo.png');
-import { ref, reactive, computed, onMounted } from 'vue'
-import logotipo from '@/img/logo-empresa.png'
-import iconoExportarDatos from '@/img/iconoExportarDatos.png'
-import fotoPerfil from '@/img/perfilUsuarioAdmin.png'
-import iconoNotificaciones from '@/img/notificaciones-logo.png'
-import graficos from '@/img/graficos.png'
+const logoPrimeLogistics = ''
+const imgBtnExportarDatos = ''
+const imgPerfilUsuarioAdmin = ''
+const imgBtnNotificaciones = ''
+const imgGraficos = ''
 
 const logoPrimeLogistics = logotipo
-const imgBtnExportarDatos = iconoExportarDatos
+const imgBtnExportarDatos = ''
 const imgPerfilUsuarioAdmin = fotoPerfil
 const imgBtnNotificaciones = iconoNotificaciones
 const imgGraficos = graficos

@@ -1,14 +1,5 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard · Prime Logistics</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body>
-    <div id="app">
-        <dashboard-operador></dashboard-operador>
-    </div>
-</body>
-</html>
+@extends('layouts.main')
+@section('content')
+    <dashboard-operador></dashboard-operador>
+@endsection
+

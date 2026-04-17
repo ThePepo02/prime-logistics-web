@@ -7,14 +7,14 @@
                     <img :src="logoPrimeLogistics" alt="logo Prime Logistics">
                 </div>
                 <span class="logo-text">Prime Logistics</span>
-                <h1 class="page-title">Dashboard
-                    <span class="title-sub">Vista global del sistema — Prime Logistics</span>
+                <h1 class="page-title">Gestión de Usuarios
+                    <span class="title-sub">Crear, adquirir roles y gestionar acciones</span>
                 </h1>
                 <!-- Botones de acción -->
                 <div class="actions-bar">
                     <button type="button" class="btn_exportarDatos" @click="exportData">
-                        <img :src="imgBtnExportarDatos" alt="Icono exportarDatos">
-                        Exportar datos
+                        <img :src="iconoBtnNuevoUsuario" alt="Icono exportarDatos">
+                        Nuevo Usuario
                     </button>
                     <a href="#" class="btn_notificaciones" @click.prevent="clickNotification">
                         <img :src="imgBtnNotificaciones" alt="Icono notificaciones">
@@ -153,16 +153,13 @@
 <script setup>
 import { ref, computed } from 'vue'
 import logotipo from '@/img/logo-empresa.png'
-import iconoExportarDatos from '@/img/iconoExportarDatos.png'
+import iconoBtnNuevoUsuario from '@/img/iconoNuevoUsuario.png'
 import fotoPerfil from '@/img/perfilUsuarioAdmin.png'
 import iconoNotificaciones from '@/img/notificaciones-logo.png'
-import graficos from '@/img/graficos.png'
 
 const logoPrimeLogistics = logotipo
-const imgBtnExportarDatos = iconoExportarDatos
 const imgPerfilUsuarioAdmin = fotoPerfil
 const imgBtnNotificaciones = iconoNotificaciones
-const imgGraficos = graficos
 const userSearch = ref('')
 const roleFilter = ref('')
 
