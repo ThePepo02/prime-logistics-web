@@ -36,7 +36,9 @@ WORKDIR /var/www/html
 COPY . .
 COPY --from=frontend-build /app/public/build ./public/build
 
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+RUN git config --global --add safe.directory /var/www/html && \
+    rm -f composer.lock && \
+    composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \

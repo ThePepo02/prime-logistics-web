@@ -211,11 +211,6 @@ const imgPerfilUsuarioAdmin = ''
 const imgBtnNotificaciones = ''
 const imgGraficos = ''
 
-const logoPrimeLogistics = logotipo
-const imgBtnExportarDatos = ''
-const imgPerfilUsuarioAdmin = fotoPerfil
-const imgBtnNotificaciones = iconoNotificaciones
-const imgGraficos = graficos
 
 // Datos reactivos
 const sidebarOpen = ref(false)
