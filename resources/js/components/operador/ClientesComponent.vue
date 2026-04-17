@@ -1,20 +1,6 @@
 <template>
     <div class="clientes-page">
 
-        <!-- CABECERA -->
-        <div class="page-header">
-            <div>
-                <h1 class="page-title">Clientes</h1>
-                <p class="page-subtitle">Gestión de empresas y contactos</p>
-            </div>
-            <button class="btn-primary" @click="abrirModalNuevo">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12h14" />
-                </svg>
-                Nuevo Cliente
-            </button>
-        </div>
-
         <!-- TARJETAS RESUMEN -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -363,26 +349,6 @@ export default {
     background: #F3F4F6;
     min-height: 100%;
     font-family: 'Segoe UI', system-ui, sans-serif;
-}
-
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 28px;
-}
-
-.page-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1E2A3B;
-    margin: 0;
-}
-
-.page-subtitle {
-    font-size: 13px;
-    color: #6B7280;
-    margin: 4px 0 0;
 }
 
 .stats-grid {

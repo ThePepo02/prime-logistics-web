@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use App\Models\Rol;
@@ -35,5 +34,9 @@ class Usuarios extends Authenticatable
     public function rol()
     {
         return $this->belongsTo(Rol::class, 'rol_id');
+    }
+    public function ofertes()
+    {
+        return $this->hasMany(\App\Models\Oferta::class, 'client_id');
     }
 }

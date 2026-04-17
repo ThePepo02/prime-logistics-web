@@ -199,15 +199,20 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import logotipo from '@/img/logo-empresa.png'
-import iconoExportarDatos from '@/img/iconoExportarDatos.png'
-import fotoPerfil from '@/img/perfilUsuarioAdmin.png'
-import iconoNotificaciones from '@/img/notificaciones-logo.png'
-import graficos from '@/img/graficos.png'
+// import logotipo from '@/img/logo-empresa.png'
+// import iconoExportarDatos from '@/img/iconoExportarDatos.png'
+// import fotoPerfil from '@/img/perfilUsuarioAdmin.png'
+// import iconoNotificaciones from '@/img/notificaciones-logo.png'
+// import graficos from '@/img/graficos.png'
+
+const logoPrimeLogistics = ''
+const imgBtnExportarDatos = ''
+const imgPerfilUsuarioAdmin = ''
+const imgBtnNotificaciones = ''
+const imgGraficos = ''
 
 const logoPrimeLogistics = logotipo
-const imgBtnExportarDatos = iconoExportarDatos
+const imgBtnExportarDatos = ''
 const imgPerfilUsuarioAdmin = fotoPerfil
 const imgBtnNotificaciones = iconoNotificaciones
 const imgGraficos = graficos
