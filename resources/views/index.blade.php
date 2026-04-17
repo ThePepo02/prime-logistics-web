@@ -5,4 +5,5 @@
     <gestion-usuarios-component></gestion-usuarios-component>
     {{-- subcomponentes de gestion de usuarios --}}
     <nuevo-usuario-componente></nuevo-usuario-componente>
+    <editar-nuevo-usuario-componente></editar-nuevo-usuario-componente>
 @endsection
