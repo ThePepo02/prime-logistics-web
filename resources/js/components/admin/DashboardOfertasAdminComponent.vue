@@ -1,6 +1,6 @@
 <template>
     <div class="ofertas-container">
-        <!-- Sidebar / Menú lateral -->
+        <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo">Admin</div>
             <nav class="nav-menu">
@@ -26,38 +26,54 @@
         <div class="main-content">
             <div class="header">
                 <h1>TODAS LAS OFERTAS</h1>
-                <div class="info-badge">Mostrando {{ pagination.from }}-{{ pagination.to }} de {{ totalOfertas }}
+                <div class="info-badge">Mostrando {{ paginationInfo.from }}-{{ paginationInfo.to }} de {{ totalItems }}
                     ofertas</div>
             </div>
 
-            <!-- Buscador -->
-            <div class="search-bar">
-                <input v-model="searchTerm" type="text" placeholder="Buscar por ID, cliente, ruta..."
+            <!-- Filtros -->
+            <div class="filters-bar">
+                <input v-model="filters.search" type="text" placeholder="Buscar por ID, cliente, ruta..."
                     class="search-input" />
+                <select v-model="filters.estado" class="filter-select">
+                    <option value="">Todos los estados</option>
+                    <option value="EN TRANSITO">En Tránsito</option>
+                    <option value="ACEPTADA">Aceptada</option>
+                    <option value="COMPLETADA">Completada</option>
+                    <option value="RECHAZADA">Rechazada</option>
+                </select>
             </div>
 
-            <!-- Tabla de ofertas -->
+            <!-- Tabla -->
             <div class="table-wrapper">
                 <table class="ofertas-table">
                     <thead>
                         <tr>
-                            <th>ID Oferta</th>
-                            <th>Cliente</th>
+                            <th @click="sortBy('id')" class="sortable">
+                                ID Oferta
+                                <span class="sort-icon">{{ getSortIcon('id') }}</span>
+                            </th>
+                            <th @click="sortBy('cliente')" class="sortable">
+                                Cliente
+                                <span class="sort-icon">{{ getSortIcon('cliente') }}</span>
+                            </th>
                             <th>Empresa</th>
                             <th>Modo</th>
                             <th>Ruta</th>
-                            <th>Fecha</th>
+                            <th @click="sortBy('fecha')" class="sortable">
+                                Fecha
+                                <span class="sort-icon">{{ getSortIcon('fecha') }}</span>
+                            </th>
                             <th>Estado</th>
                             <th>Acondicionado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="oferta in ofertasFiltradas" :key="oferta.id">
-                            <td>{{ oferta.id }}</td>
+                        <tr v-for="oferta in paginatedOfertas" :key="oferta.id">
+                            <td class="id-cell">{{ oferta.id }}</td>
                             <td>{{ oferta.cliente }}</td>
                             <td>{{ oferta.empresa }}</td>
-                            <td>{{ oferta.modo }}</td>
+                            <td><span class="modo-badge">{{ oferta.modo }}</span></td>
                             <td>{{ oferta.ruta }}</td>
                             <td>{{ formatDate(oferta.fecha) }}</td>
                             <td>
@@ -80,14 +96,17 @@
                 </table>
             </div>
 
-            <!-- Paginador -->
+            <!-- Paginación -->
             <div class="pagination">
-                <button v-for="page in pagination.pages" :key="page"
-                    :class="['page-btn', { active: page === pagination.currentPage }]" @click="goToPage(page)">
+                <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">
+                    Anterior
+                </button>
+                <button v-for="page in visiblePages" :key="page" :class="['page-btn', { active: page === currentPage }]"
+                    @click="goToPage(page)">
                     {{ page }}
                 </button>
-                <button v-if="pagination.showLast" class="page-btn" @click="goToPage(totalPages)">
-                    {{ totalPages }}
+                <button class="page-btn" :disabled="currentPage === totalPages" @click="currentPage++">
+                    Siguiente
                 </button>
             </div>
         </div>
@@ -97,13 +116,18 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-// Estado reactivo
-const searchTerm = ref('')
+// Estado
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
-const totalOfertas = ref(4200)
+const totalItems = ref(4200)
+const sortField = ref('id')
+const sortOrder = ref('asc')
+const filters = ref({
+    search: '',
+    estado: ''
+})
 
-// Datos de ejemplo
+// Datos
 const ofertas = ref([
     {
         id: 'OC-2024-021',
@@ -197,48 +221,67 @@ const ofertas = ref([
     }
 ])
 
-// Computed properties
-const totalPages = computed(() => Math.ceil(totalOfertas.value / itemsPerPage.value))
+// Computed
+const filteredOfertas = computed(() => {
+    let result = [...ofertas.value]
 
-const pagination = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage.value + 1
-    const end = Math.min(start + itemsPerPage.value - 1, totalOfertas.value)
-
-    let pages = []
-    const maxVisible = 3
-
-    if (totalPages.value <= maxVisible + 1) {
-        pages = Array.from({ length: totalPages.value }, (_, i) => i + 1)
-    } else {
-        for (let i = 1; i <= maxVisible; i++) {
-            pages.push(i)
-        }
-        pages.push('...')
-    }
-
-    return {
-        currentPage: currentPage.value,
-        from: start,
-        to: end,
-        pages: pages,
-        showLast: totalPages.value > maxVisible + 1
-    }
-})
-
-const ofertasFiltradas = computed(() => {
-    let filtered = [...ofertas.value]
-
-    if (searchTerm.value) {
-        const term = searchTerm.value.toLowerCase()
-        filtered = filtered.filter(oferta =>
-            oferta.id.toLowerCase().includes(term) ||
-            oferta.cliente.toLowerCase().includes(term) ||
-            oferta.ruta.toLowerCase().includes(term)
+    // Búsqueda
+    if (filters.value.search) {
+        const term = filters.value.search.toLowerCase()
+        result = result.filter(o =>
+            o.id.toLowerCase().includes(term) ||
+            o.cliente.toLowerCase().includes(term) ||
+            o.ruta.toLowerCase().includes(term)
         )
     }
 
+    // Filtro por estado
+    if (filters.value.estado) {
+        result = result.filter(o => o.estado === filters.value.estado)
+    }
+
+    // Ordenamiento
+    result.sort((a, b) => {
+        let aVal = a[sortField.value]
+        let bVal = b[sortField.value]
+
+        if (sortField.value === 'fecha') {
+            aVal = new Date(aVal)
+            bVal = new Date(bVal)
+        }
+
+        if (aVal < bVal) return sortOrder.value === 'asc' ? -1 : 1
+        if (aVal > bVal) return sortOrder.value === 'asc' ? 1 : -1
+        return 0
+    })
+
+    return result
+})
+
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
+
+const paginatedOfertas = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value
-    return filtered.slice(start, start + itemsPerPage.value)
+    return filteredOfertas.value.slice(start, start + itemsPerPage.value)
+})
+
+const paginationInfo = computed(() => {
+    const from = (currentPage.value - 1) * itemsPerPage.value + 1
+    const to = Math.min(from + itemsPerPage.value - 1, totalItems.value)
+    return { from, to }
+})
+
+const visiblePages = computed(() => {
+    const maxVisible = 5
+    const pages = []
+
+    if (totalPages.value <= maxVisible) {
+        for (let i = 1; i <= totalPages.value; i++) pages.push(i)
+    } else {
+        pages.push(1, 2, 3, '...', totalPages.value)
+    }
+
+    return pages
 })
 
 // Métodos
@@ -258,8 +301,27 @@ const getEstadoClass = (estado) => {
     return classes[estado] || ''
 }
 
+const getSortIcon = (field) => {
+    if (sortField.value !== field) return '↕️'
+    return sortOrder.value === 'asc' ? '↑' : '↓'
+}
+
+const sortBy = (field) => {
+    if (sortField.value === field) {
+        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+    } else {
+        sortField.value = field
+        sortOrder.value = 'asc'
+    }
+}
+
+const goToPage = (page) => {
+    if (page === '...') return
+    currentPage.value = page
+}
+
 const verAcondicionado = (oferta) => {
-    console.log('Ver acondicionado de:', oferta.id)
+    console.log('Ver acondicionado:', oferta.id)
     alert(`Ver acondicionado de la oferta ${oferta.id}`)
 }
 
@@ -267,14 +329,10 @@ const editarOferta = (oferta) => {
     console.log('Editar oferta:', oferta.id)
     alert(`Editar oferta ${oferta.id}`)
 }
-
-const goToPage = (page) => {
-    if (page === '...') return
-    currentPage.value = page
-}
 </script>
 
 <style scoped>
+/* Estilos similares al componente anterior pero con mejoras */
 .ofertas-container {
     display: flex;
     min-height: 100vh;
@@ -282,7 +340,6 @@ const goToPage = (page) => {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Sidebar */
 .sidebar {
     width: 260px;
     background: #2c3e50;
@@ -330,7 +387,6 @@ const goToPage = (page) => {
     color: #3498db;
 }
 
-/* Main content */
 .main-content {
     flex: 1;
     padding: 20px 30px;
@@ -357,28 +413,30 @@ const goToPage = (page) => {
     color: #7f8c8d;
 }
 
-/* Search bar */
-.search-bar {
+.filters-bar {
+    display: flex;
+    gap: 15px;
     margin-bottom: 20px;
 }
 
 .search-input {
-    width: 100%;
+    flex: 1;
     max-width: 400px;
     padding: 10px 15px;
     border: 1px solid #ddd;
     border-radius: 8px;
     font-size: 14px;
-    transition: all 0.3s;
 }
 
-.search-input:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+.filter-select {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
 }
 
-/* Table */
 .table-wrapper {
     background: white;
     border-radius: 8px;
@@ -401,6 +459,20 @@ const goToPage = (page) => {
     font-size: 13px;
 }
 
+.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sortable:hover {
+    background: #3d5a6b;
+}
+
+.sort-icon {
+    margin-left: 5px;
+    font-size: 12px;
+}
+
 .ofertas-table td {
     padding: 12px 15px;
     border-bottom: 1px solid #ecf0f1;
@@ -411,7 +483,18 @@ const goToPage = (page) => {
     background: #f8f9fa;
 }
 
-/* Estado badges */
+.id-cell {
+    font-weight: 600;
+    color: #3498db;
+}
+
+.modo-badge {
+    background: #ecf0f1;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
 .estado-badge {
     display: inline-block;
     padding: 4px 10px;
@@ -440,7 +523,6 @@ const goToPage = (page) => {
     color: #721c24;
 }
 
-/* Action buttons */
 .action-btn {
     padding: 5px 12px;
     border: none;
@@ -448,6 +530,7 @@ const goToPage = (page) => {
     cursor: pointer;
     font-size: 12px;
     transition: all 0.3s;
+    margin: 0 2px;
 }
 
 .view-btn {
@@ -468,7 +551,6 @@ const goToPage = (page) => {
     background: #e67e22;
 }
 
-/* Pagination */
 .pagination {
     display: flex;
     justify-content: center;
@@ -485,8 +567,13 @@ const goToPage = (page) => {
     transition: all 0.3s;
 }
 
-.page-btn:hover {
+.page-btn:hover:not(:disabled) {
     background: #ecf0f1;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .page-btn.active {
