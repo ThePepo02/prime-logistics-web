@@ -17,6 +17,8 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
+    //Gestion Usuarios Administrador
+
     // Dashboard Operador
     Route::get('/dashboard/stats', [DashboardOperadorController::class, 'stats']);
     Route::get('/dashboard/ofertes', [DashboardOperadorController::class, 'ultimes']);
