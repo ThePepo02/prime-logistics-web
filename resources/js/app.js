@@ -9,6 +9,10 @@ import DashboardAdminComponent from './components/admin/DashboardAdminComponent.
 import GestionUsuariosComponent from './components/admin/GestionUsuariosComponent.vue';
 import NuevoUsuarioComponent from './components/admin/NuevoUsuarioComponent.vue';
 import EditarNuevoUsuarioComponent from './components/admin/EditarNuevoUsuarioComponent.vue';
+import EliminarNuevoUsuarioComponent from './components/admin/EliminarNuevoUsuarioComponent.vue';
+import DashboardOfertasAdminComponent from './components/admin/DashboardOfertasAdminComponent.vue';
+import OfertasActivasAdminComponent from './components/admin/OfertasActivasAdminComponent.vue'
+import DatosMaestrosComponent from './components/admin/DatosMaestrosComponent.vue';
 
 // Componentes Login
 import LoginComponents from './components/LoginComponents.vue';
@@ -22,10 +26,14 @@ import OfertasComerciales from './components/operador/OfertasComerciales.vue';
 const app = createApp({});
 
 // Admin
-app.component('dashboardAdmin-component', DashboardAdminComponent);
+app.component('dashboard-admin-component', DashboardAdminComponent);
 app.component('gestion-usuarios-component', GestionUsuariosComponent);
 app.component('nuevo-usuario-component', NuevoUsuarioComponent);
 app.component('editar-nuevo-usuario-component', EditarNuevoUsuarioComponent);
+app.component('eliminar-nuevo-usuario-component', EliminarNuevoUsuarioComponent);
+app.component('dashboard-ofertas-admin-component', DashboardOfertasAdminComponent);
+app.component('ofertas-activas-admin-component', OfertasActivasAdminComponent);
+app.component('datos-maestros-component', DatosMaestrosComponent);
 
 // Login
 app.component('login-components', LoginComponents);
