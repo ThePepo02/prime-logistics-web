@@ -328,10 +328,12 @@
                 <!-- Es el mismo patrón que usamos con v-if="error" en el LoginComponent -->
                 <clientes-component v-if="paginaActual === 'clientes'" />
                 <ofertas-comerciales v-if="paginaActual === 'ofertas'" />
+                <operaciones-component v-if="paginaActual === 'operaciones'" />
                 <!-- ── FIN VISTA: CLIENTES ── -->
 
+
                 <!-- ── VISTAS PENDIENTES ── -->
-                <div v-if="paginaActual !== 'dashboard' && paginaActual !== 'clientes' && paginaActual !== 'ofertas'"
+                <div v-if="paginaActual !== 'dashboard' && paginaActual !== 'clientes' && paginaActual !== 'ofertas' && paginaActual !== 'operaciones'"
                     class="flex flex-col items-center justify-center h-full text-gray-400 gap-3 p-12">
                     <svg class="w-14 h-14 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -351,6 +353,7 @@
 // La diferencia es que aquí lo registramos LOCALMENTE solo para este componente
 import ClientesComponent from './ClientesComponent.vue'
 import OfertasComerciales from './OfertasComerciales.vue'
+import OperacionesComponent from './OperacionesComponent.vue'
 
 export default {
     name: 'DashboardOperador',
@@ -359,7 +362,8 @@ export default {
     // Así Vue sabe que <clientes-component> existe cuando lo usa en el template
     components: {
         ClientesComponent,
-        OfertasComerciales
+        OfertasComerciales,
+        OperacionesComponent,
     },
 
     data() {
