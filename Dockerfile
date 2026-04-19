@@ -12,24 +12,28 @@ COPY . .
 RUN npm run build
 
 # ============================================
-# STAGE 2: Imagen final con PHP + NGINX
+# STAGE 2: Imagen final con PHP + NGINX (Debian)
 # ============================================
-FROM php:8.3-fpm-alpine
+FROM php:8.3-fpm-bullseye
 
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     nginx \
     supervisor \
     curl \
     unzip \
     git \
-    oniguruma-dev \
+    libonig-dev \
     autoconf \
     g++ \
     make \
-    unixodbc-dev
+    gnupg2 \
+    apt-transport-https
 
-# Driver SQL Server para Alpine
-RUN apk add --no-cache unixodbc-dev \
+# Driver SQL Server oficial para Debian
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev \
     && pecl install sqlsrv pdo_sqlsrv \
     && docker-php-ext-enable sqlsrv pdo_sqlsrv
 
