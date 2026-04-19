@@ -7,6 +7,7 @@ use App\Http\Controllers\EstatOfertaController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\OperacionesController;
 use App\Http\Controllers\TipusTransportController;
+use App\Http\Controllers\NotificacionsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,4 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/operaciones/stats',       [OperacionesController::class, 'stats']);
     Route::get('/operaciones/distribucio', [OperacionesController::class, 'distribucio']);
     Route::get('/operaciones/operacions',  [OperacionesController::class, 'operacions']);
+
+    // NOTIFICACIONS
+    Route::get('/notificacions',                [NotificacionsController::class, 'index']);
+    Route::put('/notificacions/marcar-totes',   [NotificacionsController::class, 'marcarTotes']);
+    Route::put('/notificacions/{id}/llegir',    [NotificacionsController::class, 'marcarLlegida']);
 });
