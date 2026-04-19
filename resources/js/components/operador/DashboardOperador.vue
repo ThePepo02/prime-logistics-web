@@ -329,11 +329,12 @@
                 <clientes-component v-if="paginaActual === 'clientes'" />
                 <ofertas-comerciales v-if="paginaActual === 'ofertas'" />
                 <operaciones-component v-if="paginaActual === 'operaciones'" />
+                <notificacions-component v-if="paginaActual === 'notificaciones'" />
                 <!-- ── FIN VISTA: CLIENTES ── -->
 
 
                 <!-- ── VISTAS PENDIENTES ── -->
-                <div v-if="paginaActual !== 'dashboard' && paginaActual !== 'clientes' && paginaActual !== 'ofertas' && paginaActual !== 'operaciones'"
+                <div v-if="paginaActual !== 'dashboard' && paginaActual !== 'clientes' && paginaActual !== 'ofertas' && paginaActual !== 'operaciones' && paginaActual !== 'notificaciones'"
                     class="flex flex-col items-center justify-center h-full text-gray-400 gap-3 p-12">
                     <svg class="w-14 h-14 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -354,6 +355,7 @@
 import ClientesComponent from './ClientesComponent.vue'
 import OfertasComerciales from './OfertasComerciales.vue'
 import OperacionesComponent from './OperacionesComponent.vue'
+import NotificacionsComponent from './NotificacionsComponent.vue';
 
 export default {
     name: 'DashboardOperador',
@@ -364,6 +366,7 @@ export default {
         ClientesComponent,
         OfertasComerciales,
         OperacionesComponent,
+        NotificacionsComponent,
     },
 
     data() {
