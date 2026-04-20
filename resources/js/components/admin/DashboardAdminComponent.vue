@@ -199,18 +199,13 @@
 </template>
 
 <script setup>
-import logotipo from '../../../img/logo-empresa.png'
-import iconoExportarDatos from '../../../img/iconoExportarDatos.png'
-import fotoPerfil from '../../../img/perfilUsuarioAdmin.png'
-import iconoNotificaciones from '../../../img/notificaciones-logo.png'
-import graficos from '../../../img/graficos.png'
+// Elimina todos los imports de imágenes y pon esto:
+const logoPrimeLogistics = '/images/logo-empresa.png'
+const imgBtnExportarDatos = '/images/iconoExportarDatos.png'
+const imgPerfilUsuarioAdmin = '/images/perfilUsuarioAdmin.png'
+const imgBtnNotificaciones = '/images/notificaciones-logo.png'
+const imgGraficos = '/images/graficos.png'
 
-
-const logoPrimeLogistics = logotipo
-const imgBtnExportarDatos = iconoExportarDatos
-const imgPerfilUsuarioAdmin = fotoPerfil
-const imgBtnNotificaciones = iconoNotificaciones
-const imgGraficos = graficos
 
 // Datos reactivos
 const sidebarOpen = ref(false)
