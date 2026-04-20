@@ -108,8 +108,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import logotipo from '../../img/logo-empresa.png'
-import iconoNuevoUsuario from '../../img/iconoNuevoUsuario.png'
+import logotipo from '../../../img/logo-empresa.png'
+import iconoNuevoUsuario from '../../../img/iconoNuevoUsuario.png'
 
 
 const logoPrimeLogistics = logotipo
