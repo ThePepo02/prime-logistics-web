@@ -1,105 +1,141 @@
 <template>
     <div class="datos-maestros-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo">Admin</div>
-            <nav class="nav-menu">
-                <div class="nav-section">
-                    <div class="nav-title">Aprendizaje</div>
-                    <ul>
-                        <li><a href="#" class="active">Datos Maestros</a></li>
-                    </ul>
-                </div>
-            </nav>
-        </div>
-
-        <!-- Contenido principal -->
+        <!-- Contenido principal sin sidebar -->
         <div class="main-content">
-            <h1>Datos Maestros</h1>
+            <h1>Datos Maestros admin</h1>
 
-            <!-- Grid de categorías -->
-            <div class="categorias-grid">
-                <!-- Empresas -->
-                <div class="categoria-card">
-                    <h2>Empresas</h2>
-                    <div class="badge">4 programas ejecutables</div>
-                    <ul class="lista-items">
-                        <li>
-                            <strong>Tecni5 SA</strong>
-                            <span class="detalle">2.0 para Intel® Core™ i3</span>
-                        </li>
-                        <li>
-                            <strong>Modus Express SL</strong>
-                            <span class="detalle">Línea: 1,6 GHz</span>
-                        </li>
-                        <li>
-                            <strong>Impart Global</strong>
-                            <span class="detalle">Línea: 2 unidades</span>
-                        </li>
-                        <li>
-                            <strong>Tech Imports SA</strong>
-                            <span class="detalle">Línea: 2 unidades</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Navieras & Carriers -->
-                <div class="categoria-card">
-                    <h2>Navieras & Carriers</h2>
-                    <div class="badge">1 gran línea única</div>
-                    <ul class="lista-items">
-                        <li>
-                            <strong>MSC Mediterranean</strong>
-                            <span class="detalle">Área: 10,000 toneladas</span>
-                        </li>
-                        <li>
-                            <strong>Merax</strong>
-                            <span class="detalle">Metales: 12 operaciones</span>
-                        </li>
-                        <li>
-                            <strong>CMA OGM</strong>
-                            <span class="detalle">Metales: 7 operaciones</span>
-                        </li>
-                        <li>
-                            <strong>Rerla Cargo</strong>
-                            <span class="detalle">Metales: 11 operaciones</span>
-                        </li>
-                        <li>
-                            <strong>DHL Express</strong>
-                            <span class="detalle">Área: 8 operaciones</span>
-                        </li>
-                    </ul>
+            <!-- Empresas -->
+            <div class="seccion">
+                <h2>Empresas</h2>
+                <div class="badge">Empresas regionales</div>
+                <div class="lista-empresas">
+                    <div class="empresa-card">
+                        <div class="empresa-nombre">Textil SA</div>
+                        <div class="empresa-stats">3 usuarios: 26 pedidos</div>
+                    </div>
+                    <div class="empresa-card">
+                        <div class="empresa-nombre">Moda Express SL</div>
+                        <div class="empresa-stats">2 usuarios: 19 pedidos</div>
+                    </div>
+                    <div class="empresa-card">
+                        <div class="empresa-nombre">Import Global</div>
+                        <div class="empresa-stats">1 usuario: 9 pedidos</div>
+                    </div>
+                    <div class="empresa-card">
+                        <div class="empresa-nombre">Tech Imports SA</div>
+                        <div class="empresa-stats">1 usuario: 6 pedidos</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Incoterms -->
-            <div class="incoterms-section">
+            <!-- Puertos / Aeropuertos -->
+            <div class="seccion">
+                <h2>Puertos / Aeropuertos</h2>
+                <div class="badge">6 cajeros activos</div>
+                <div class="puertos-grid">
+                    <div class="puerto-card">
+                        <div class="puerto-nombre">Valencia (VLC)</div>
+                        <div class="puerto-tipo">Puerto marítimo: 33 operaciones</div>
+                    </div>
+                    <div class="puerto-card">
+                        <div class="puerto-nombre">Barcelona (BCN)</div>
+                        <div class="puerto-tipo">Puerto + Aeropuerto: 24 operaciones</div>
+                    </div>
+                    <div class="puerto-card">
+                        <div class="puerto-nombre">Bilbao (BIO)</div>
+                        <div class="puerto-tipo">Puerto marítimo: 12 operaciones</div>
+                    </div>
+                    <div class="puerto-card">
+                        <div class="puerto-nombre">Madrid-Barajas (MAD)</div>
+                        <div class="puerto-tipo">Aeropuerto: 10 operaciones</div>
+                    </div>
+                    <div class="puerto-card">
+                        <div class="puerto-nombre">Algeciras (AGP)</div>
+                        <div class="puerto-tipo">Puerto marítimo: 8 operaciones</div>
+                    </div>
+                    <div class="puerto-card">
+                        <div class="puerto-nombre">Palma (PMI)</div>
+                        <div class="puerto-tipo">Aeropuerto: 2 operaciones</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navieras & Carriers -->
+            <div class="seccion">
+                <h2>Navieras & Carriers</h2>
+                <div class="badge">5 carteras activas</div>
+                <div class="navieras-grid">
+                    <div class="naviera-card">
+                        <div class="naviera-nombre">MSC Mediterraneum</div>
+                        <div class="naviera-tipo">Marítimo: 10 operaciones</div>
+                    </div>
+                    <div class="naviera-card">
+                        <div class="naviera-nombre">Maersk</div>
+                        <div class="naviera-tipo">Marítimo: 12 operaciones</div>
+                    </div>
+                    <div class="naviera-card">
+                        <div class="naviera-nombre">CMA CGM</div>
+                        <div class="naviera-tipo">Marítimo: 7 operaciones</div>
+                    </div>
+                    <div class="naviera-card">
+                        <div class="naviera-nombre">Iberia Cargo</div>
+                        <div class="naviera-tipo">Aéreo: 11 operaciones</div>
+                    </div>
+                    <div class="naviera-card">
+                        <div class="naviera-nombre">DHL Express</div>
+                        <div class="naviera-tipo">Aéreo: 8 operaciones</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agentes Aduanales -->
+            <div class="seccion">
+                <h2>Agentes Aduanales</h2>
+                <div class="badge">3 agentes activos</div>
+                <div class="agentes-grid">
+                    <div class="agente-card">
+                        <div class="agente-nombre">Aduana Express SL</div>
+                        <div class="agente-detalle">Madrid + Valencia: 28 operaciones</div>
+                    </div>
+                    <div class="agente-card">
+                        <div class="agente-nombre">Global Customs SA</div>
+                        <div class="agente-detalle">Sanciones + Bitaco: 15 expedientes</div>
+                    </div>
+                    <div class="agente-card">
+                        <div class="agente-nombre">Iberian Brokers</div>
+                        <div class="agente-detalle">Vientre: 10 expedientes</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Incoterms Activos -->
+            <div class="seccion">
                 <h2>Incoterms Activos</h2>
-                <div class="badge">7 operaciones</div>
+                <div class="badge">7 configuraciones</div>
                 <div class="incoterms-grid">
                     <div class="incoterm-card">
                         <div class="incoterm-code">FOB</div>
-                        <div class="incoterm-desc">Free in Force</div>
+                        <div class="incoterm-desc">Free On Board</div>
                     </div>
                     <div class="incoterm-card">
                         <div class="incoterm-code">CIF</div>
-                        <div class="incoterm-desc">Cost estimate Project</div>
+                        <div class="incoterm-desc">Cost Insurance Freight</div>
                     </div>
                     <div class="incoterm-card">
                         <div class="incoterm-code">EXW</div>
-                        <div class="incoterm-desc">Ex Notes</div>
+                        <div class="incoterm-desc">Ex Works</div>
                     </div>
                     <div class="incoterm-card">
                         <div class="incoterm-code">DDP</div>
-                        <div class="incoterm-desc">Delivery Duty Price</div>
+                        <div class="incoterm-desc">Delivered Duty Paid</div>
                     </div>
                     <div class="incoterm-card">
                         <div class="incoterm-code">DAP</div>
-                        <div class="incoterm-desc">Delivered to Port</div>
+                        <div class="incoterm-desc">Delivered At Place</div>
                     </div>
                     <div class="incoterm-card">
                         <div class="incoterm-code">CFR</div>
-                        <div class="incoterm-desc">Chai and Hangar</div>
+                        <div class="incoterm-desc">Cost and Freight</div>
                     </div>
                     <div class="incoterm-card">
                         <div class="incoterm-code">FCA</div>
@@ -108,144 +144,49 @@
                 </div>
             </div>
 
-            <!-- Puertos / Aeropuertos -->
-            <div class="puertos-section">
-                <h2>Puertos / Aeropuertos</h2>
-                <div class="badge">5 aeropuertos activos</div>
-                <div class="puertos-grid">
-                    <div class="puerto-card">
-                        <div class="puerto-code">Valencia (VLC)</div>
-                        <div class="puerto-desc">Surge monto: 50 aeropuertos</div>
-                    </div>
-                    <div class="puerto-card">
-                        <div class="puerto-code">Barcelona (BCN)</div>
-                        <div class="puerto-desc">Punto + Antenas: 24 aeropuertos</div>
-                    </div>
-                    <div class="puerto-card">
-                        <div class="puerto-code">Dibao (DBO)</div>
-                        <div class="puerto-desc">Punto máximo: 10 aeropuertos</div>
-                    </div>
-                    <div class="puerto-card">
-                        <div class="puerto-code">Madrid-Granja (MAD)</div>
-                        <div class="puerto-desc">Aeropuerto: 8 aeropuertos</div>
-                    </div>
-                    <div class="puerto-card">
-                        <div class="puerto-code">Algeciras (AGH)</div>
-                        <div class="puerto-desc">Punto máximo: 6 aeropuertos</div>
-                    </div>
-                    <div class="puerto-card">
-                        <div class="puerto-code">Palma (PMI)</div>
-                        <div class="puerto-desc">Almacenado: 3 almacenes</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Agentes -->
-            <div class="agentes-section">
-                <h2>Agentes Abandonados</h2>
-                <div class="badge">2 agentes activos</div>
-                <div class="agentes-lista">
-                    <div class="agente-item">
-                        <div class="agente-nombre">Adsuara Express SL</div>
-                        <div class="agente-stats">Mando: 7 aeropuertos</div>
-                        <div class="subagente">
-                            <span>→ Global Customs SA</span>
-                            <span class="sub-detail">Gestión: 9 billetes</span>
-                            <div class="sub-sub">
-                                <span>→ Isabella Brekens</span>
-                                <span class="sub-detail">Vendedor: 16 operaciones</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Footer -->
+            <footer class="dashboard-footer">
+                <span>Carlos Martínez</span>
+            </footer>
         </div>
     </div>
 </template>
 
 <script setup>
-// No se necesita lógica adicional para este componente
+// Sin lógica adicional
 </script>
 
 <style scoped>
 .datos-maestros-container {
-    display: flex;
     min-height: 100vh;
     background: #f5f5f5;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.sidebar {
-    width: 260px;
-    background: #2c3e50;
-    color: white;
-    padding: 20px 0;
-}
-
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-    padding: 0 20px 20px;
-    border-bottom: 1px solid #34495e;
-    margin-bottom: 20px;
-}
-
-.nav-title {
-    padding: 10px 20px;
-    font-size: 12px;
-    text-transform: uppercase;
-    color: #7f8c8d;
-    letter-spacing: 1px;
-}
-
-.nav-menu ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.nav-menu li a {
-    display: block;
-    padding: 10px 20px;
-    color: #ecf0f1;
-    text-decoration: none;
-    transition: all 0.3s;
-}
-
-.nav-menu li a:hover,
-.nav-menu li a.active {
-    background: #34495e;
-    color: #3498db;
-}
-
 .main-content {
-    flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 20px 30px;
 }
 
 h1 {
     color: #2c3e50;
     margin-bottom: 30px;
+    font-size: 24px;
 }
 
 h2 {
     color: #2c3e50;
     font-size: 18px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
-.categorias-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.categoria-card {
+.seccion {
     background: white;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 .badge {
@@ -258,42 +199,74 @@ h2 {
     margin-bottom: 15px;
 }
 
-.lista-items {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.lista-empresas,
+.navieras-grid,
+.agentes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
 }
 
-.lista-items li {
-    padding: 10px 0;
-    border-bottom: 1px solid #ecf0f1;
+.empresa-card,
+.naviera-card,
+.agente-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    transition: all 0.3s;
 }
 
-.lista-items li strong {
-    display: block;
+.empresa-card:hover,
+.naviera-card:hover,
+.agente-card:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.empresa-nombre,
+.naviera-nombre,
+.agente-nombre {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.empresa-stats,
+.naviera-tipo,
+.agente-detalle {
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+.puertos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.puerto-card {
+    background: #f8f9fa;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border-left: 3px solid #3498db;
+}
+
+.puerto-nombre {
+    font-weight: bold;
     color: #2c3e50;
     margin-bottom: 5px;
 }
 
-.detalle {
+.puerto-tipo {
     font-size: 12px;
     color: #7f8c8d;
 }
 
-.incoterms-section,
-.puertos-section,
-.agentes-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-}
-
 .incoterms-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
     margin-top: 15px;
 }
 
@@ -313,7 +286,7 @@ h2 {
 
 .incoterm-code {
     font-weight: bold;
-    font-size: 16px;
+    font-size: 18px;
     margin-bottom: 5px;
 }
 
@@ -326,73 +299,12 @@ h2 {
     color: white;
 }
 
-.puertos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.puerto-card {
-    background: #f8f9fa;
-    padding: 12px;
-    border-radius: 6px;
-    border-left: 3px solid #3498db;
-}
-
-.puerto-code {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.puerto-desc {
-    font-size: 12px;
-    color: #7f8c8d;
-}
-
-.agentes-lista {
-    margin-top: 15px;
-}
-
-.agente-item {
-    background: #f8f9fa;
+.dashboard-footer {
+    margin-top: 30px;
     padding: 15px;
-    border-radius: 6px;
-}
-
-.agente-nombre {
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 5px;
-}
-
-.agente-stats {
-    font-size: 13px;
+    text-align: center;
     color: #7f8c8d;
-    margin-bottom: 10px;
-}
-
-.subagente {
-    margin-left: 20px;
-    padding-left: 15px;
-    border-left: 2px solid #3498db;
-}
-
-.subagente span {
-    display: block;
-    margin: 5px 0;
-}
-
-.sub-sub {
-    margin-left: 20px;
-    padding-left: 15px;
-    border-left: 2px solid #e74c3c;
-    margin-top: 8px;
-}
-
-.sub-detail {
-    font-size: 12px;
-    color: #95a5a6;
-    margin-left: 10px;
+    border-top: 1px solid #ecf0f1;
+    font-size: 14px;
 }
 </style>
