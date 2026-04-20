@@ -192,22 +192,22 @@
         </div>
 
         <footer class="dashboard-footer">
-            <span>Carlos Martinez</span>
+            <span><img :src="imgPerfilUsuarioAdmin" alt="Imagen Perfil Usuario admin"> Carlos Martinez</span>
             <span class="rol_user">Administrador</span>
         </footer>
     </div>
 </template>
 
 <script setup>
-// import logotipo from '@/img/logo-empresa.png'
-// import iconoExportarDatos from '@/img/iconoExportarDatos.png'
-// import fotoPerfil from '@/img/perfilUsuarioAdmin.png'
-// import iconoNotificaciones from '@/img/notificaciones-logo.png'
-// import graficos from '@/img/graficos.png'
+import logotipo from '/images/logo-empresa.png'
+import iconoExportarDatos from '/iconoExportarDatos.png'
+import fotoPerfil from '/images/perfilUsuarioAdmin.png'
+import iconoNotificaciones from '/images/notificaciones-logo.png'
+import graficos from '/images/graficos.png'
 
 
 const logoPrimeLogistics = logotipo
-const imgBtnExportarDatos = ''
+const imgBtnExportarDatos = iconoExportarDatos
 const imgPerfilUsuarioAdmin = fotoPerfil
 const imgBtnNotificaciones = iconoNotificaciones
 const imgGraficos = graficos
