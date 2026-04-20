@@ -192,7 +192,7 @@
         </div>
 
         <footer class="dashboard-footer">
-            <span>Carlos Martinez</span>
+            <span><img :src="imgPerfilUsuarioAdmin" alt="Imagen Perfil Usuario admin"> Carlos Martinez</span>
             <span class="rol_user">Administrador</span>
         </footer>
     </div>
@@ -207,7 +207,7 @@ import graficos from '/images/graficos.png'
 
 
 const logoPrimeLogistics = logotipo
-const imgBtnExportarDatos = ''
+const imgBtnExportarDatos = iconoExportarDatos
 const imgPerfilUsuarioAdmin = fotoPerfil
 const imgBtnNotificaciones = iconoNotificaciones
 const imgGraficos = graficos
