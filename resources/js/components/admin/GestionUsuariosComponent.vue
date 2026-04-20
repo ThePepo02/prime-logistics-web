@@ -108,12 +108,9 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import logotipo from '../../../img/logo-empresa.png'
-import iconoNuevoUsuario from '../../../img/iconoNuevoUsuario.png'
+const logoPrimeLogistics = '/images/logo-empresa.png'
+const imgNuevoUsuario = '/images/iconoNuevoUsuario.png'
 
-
-const logoPrimeLogistics = logotipo
-const imgNuevoUsuario = iconoNuevoUsuario
 const sidebarOpen = ref(false)
 
 // Datos de usuarios según la imagen

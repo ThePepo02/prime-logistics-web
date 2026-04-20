@@ -137,9 +137,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import logotipo from '../../../img/logo-empresa.png'
-
-const logoPrimeLogistics = logotipo
+const logoPrimeLogistics = '/images/logo-empresa.png'
 
 // Estado
 const currentPage = ref(1)
