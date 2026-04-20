@@ -17,7 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    //Gestion Usuarios Administrador
+    //Datos del administrador (dashboard, usuarios, datos maestros)
 
     // Dashboard Operador
     Route::get('/dashboard/stats', [DashboardOperadorController::class, 'stats']);
