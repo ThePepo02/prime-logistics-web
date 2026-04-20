@@ -108,8 +108,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import logotipo from '/images/logo-empresa.png'
-import iconoNuevoUsuario from '/images/iconoNuevoUsuario.png'
+import logotipo from '@/../../img/logo-empresa.png'
+import iconoNuevoUsuario from '@/../../img/iconoNuevoUsuario.png'
 
 
 const logoPrimeLogistics = logotipo
@@ -409,7 +409,7 @@ const eliminarUsuario = (user) => {
     .dashboard-content {
         max-width: 100%;
     }
-    
+
     .users-table {
         display: block;
         overflow-x: auto;
