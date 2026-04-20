@@ -1,13 +1,16 @@
 <template>
-    <div class="ofertas-container">
+    <div class="operaciones-container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="logo">Admin</div>
+            <div class="logo">
+                <div class="logo-icon">
+                    <img :src="logoPrimeLogistics" alt="logo Prime Logistics">
+                </div>
+            </div>
             <nav class="nav-menu">
                 <div class="nav-section">
-                    <div class="nav-title">Información</div>
+                    <div class="nav-title">Administración</div>
                     <ul>
-                        <li><a href="#">Administradores</a></li>
                         <li><a href="#">Dashboard</a></li>
                         <li><a href="#">Gestión de Usuarios</a></li>
                     </ul>
@@ -15,8 +18,15 @@
                 <div class="nav-section">
                     <div class="nav-title">Comunicaciones</div>
                     <ul>
-                        <li><a href="#" class="active">Todas las Ofertas</a></li>
-                        <li><a href="#">Operaciones Activas</a></li>
+                        <li><a href="#">Todas las Oficinas</a></li>
+                        <li><a href="#" class="active">Operaciones Activas</a></li>
+                    </ul>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-title">Sistema</div>
+                    <ul>
+                        <li><a href="#">Datos Maestros</a></li>
+                        <li><a href="#">Configuración</a></li>
                     </ul>
                 </div>
             </nav>
@@ -25,71 +35,79 @@
         <!-- Contenido principal -->
         <div class="main-content">
             <div class="header">
-                <h1>TODAS LAS OFERTAS</h1>
-                <div class="info-badge">Mostrando {{ paginationInfo.from }}-{{ paginationInfo.to }} de {{ totalItems }}
-                    ofertas</div>
+                <h1>Operaciones Activas</h1>
+            </div>
+
+            <!-- Distribución por Modo de Transporte -->
+            <div class="distribucion-section">
+                <h3>Distribución por Modo de Transporte</h3>
+                <p class="subtitulo">Operaciones activas en curso</p>
+                <div class="modos-grid">
+                    <div class="modo-item" v-for="modo in distribucionModos" :key="modo.nombre">
+                        <div class="modo-nombre">{{ modo.nombre }}</div>
+                        <div class="modo-stats">
+                            <span class="modo-cantidad">{{ modo.cantidad }} envíos</span>
+                            <span class="modo-porcentaje">- {{ modo.porcentaje }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" :style="{ width: modo.porcentaje + '%', backgroundColor: modo.color }"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen operaciones -->
+            <div class="operaciones-resumen">
+                <h3>Operaciones en Curso</h3>
+                <div class="total-envios">{{ totalEnviosActivos }} envíos activos</div>
             </div>
 
             <!-- Filtros -->
             <div class="filters-bar">
-                <input v-model="filters.search" type="text" placeholder="Buscar por ID, cliente, ruta..."
-                    class="search-input" />
-                <select v-model="filters.estado" class="filter-select">
-                    <option value="">Todos los estados</option>
-                    <option value="EN TRANSITO">En Tránsito</option>
-                    <option value="ACEPTADA">Aceptada</option>
-                    <option value="COMPLETADA">Completada</option>
-                    <option value="RECHAZADA">Rechazada</option>
+                <input v-model="filters.search" type="text" placeholder="Buscar operación:" class="search-input" />
+                <select v-model="filters.modo" class="filter-select">
+                    <option value="">Todos los modos</option>
+                    <option value="Marítimo">Marítimo</option>
+                    <option value="Aéreo">Aéreo</option>
+                    <option value="Terrestre">Terrestre</option>
+                    <option value="Multimodal">Multimodal</option>
+                </select>
+                <select v-model="filters.ruta" class="filter-select">
+                    <option value="">Todas las rutas</option>
+                    <option value="Valencia-Shanghai">Valencia-Shanghai</option>
+                    <option value="Barcelona-Nueva York">Barcelona-Nueva York</option>
+                    <option value="Madrid-Miami">Madrid-Miami</option>
                 </select>
             </div>
 
             <!-- Tabla -->
             <div class="table-wrapper">
-                <table class="ofertas-table">
+                <table class="operaciones-table">
                     <thead>
                         <tr>
-                            <th @click="sortBy('id')" class="sortable">
-                                ID Oferta
-                                <span class="sort-icon">{{ getSortIcon('id') }}</span>
-                            </th>
-                            <th @click="sortBy('cliente')" class="sortable">
-                                Cliente
-                                <span class="sort-icon">{{ getSortIcon('cliente') }}</span>
-                            </th>
+                            <th>ID Origen</th>
+                            <th>Cliente</th>
                             <th>Empresa</th>
                             <th>Modo</th>
                             <th>Ruta</th>
-                            <th @click="sortBy('fecha')" class="sortable">
-                                Fecha
-                                <span class="sort-icon">{{ getSortIcon('fecha') }}</span>
-                            </th>
+                            <th>ETD</th>
+                            <th>ETA</th>
+                            <th>Fase Actual</th>
                             <th>Estado</th>
-                            <th>Acondicionado</th>
-                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="oferta in paginatedOfertas" :key="oferta.id">
-                            <td class="id-cell">{{ oferta.id }}</td>
-                            <td>{{ oferta.cliente }}</td>
-                            <td>{{ oferta.empresa }}</td>
-                            <td><span class="modo-badge">{{ oferta.modo }}</span></td>
-                            <td>{{ oferta.ruta }}</td>
-                            <td>{{ formatDate(oferta.fecha) }}</td>
+                        <tr v-for="operacion in paginatedOperaciones" :key="operacion.id">
+                            <td class="id-cell">{{ operacion.id }}</td>
+                            <td>{{ operacion.cliente }}</td>
+                            <td>{{ operacion.empresa }}</td>
+                            <td><span class="modo-badge">{{ operacion.modo }}</span></td>
+                            <td>{{ operacion.ruta }}</td>
+                            <td>{{ operacion.etd }}</td>
+                            <td>{{ operacion.eta }}</td>
+                            <td>{{ operacion.faseActual }}</td>
                             <td>
-                                <span :class="['estado-badge', getEstadoClass(oferta.estado)]">
-                                    {{ oferta.estado }}
-                                </span>
-                            </td>
-                            <td>
-                                <button class="action-btn view-btn" @click="verAcondicionado(oferta)">
-                                    Ver
-                                </button>
-                            </td>
-                            <td>
-                                <button class="action-btn edit-btn" @click="editarOferta(oferta)">
-                                    Editar
-                                </button>
+                                <span class="estado-transito-badge">EN TRANSITO</span>
                             </td>
                         </tr>
                     </tbody>
@@ -97,6 +115,10 @@
             </div>
 
             <!-- Paginación -->
+            <div class="pagination-info">
+                Movimiento de {{ paginationInfo.from }} de {{ totalItems }} operaciones
+            </div>
+
             <div class="pagination">
                 <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">
                     Anterior
@@ -115,117 +137,119 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import logotipo from '/images/logo-empresa.png'
+
+const logoPrimeLogistics = logotipo
 
 // Estado
 const currentPage = ref(1)
-const itemsPerPage = ref(10)
-const totalItems = ref(4200)
-const sortField = ref('id')
-const sortOrder = ref('asc')
+const itemsPerPage = ref(6)
+const totalItems = ref(30)
+
 const filters = ref({
     search: '',
-    estado: ''
+    modo: '',
+    ruta: ''
 })
 
-// Datos
-const ofertas = ref([
+// Distribución de modos de transporte
+const distribucionModos = ref([
+    { nombre: 'Marítimo', cantidad: 21, porcentaje: 56, color: '#3498db' },
+    { nombre: 'Aéreo', cantidad: 12, porcentaje: 33, color: '#2ecc71' },
+    { nombre: 'Terrestre', cantidad: 4, porcentaje: 11, color: '#f39c12' },
+    { nombre: 'Multimodal', cantidad: 1, porcentaje: 2, color: '#9b59b6' }
+])
+
+const totalEnviosActivos = ref(38)
+
+// Datos de operaciones basados en la imagen
+const operaciones = ref([
     {
         id: 'OC-2024-021',
         cliente: 'María García',
-        empresa: 'Testi SA',
-        modo: 'Marlimo',
-        ruta: 'Valencia → Shanghai',
-        fecha: '2025-01-10',
-        estado: 'EN TRANSITO'
-    },
-    {
-        id: 'OC-2024-020',
-        cliente: 'Pedro López',
-        empresa: 'Moda Express SL',
-        modo: 'Adeno',
-        ruta: 'Barcelona → Nueva York',
-        fecha: '2025-01-08',
-        estado: 'ACEPTADA'
+        empresa: 'Textil SA',
+        modo: 'Marítimo',
+        ruta: 'Valencia-Shanghai',
+        etd: '12 Ene',
+        eta: '15 Feb',
+        faseActual: 'En Transporte Marítimo'
     },
     {
         id: 'OC-2024-019',
-        cliente: 'María García',
-        empresa: 'Testi SA',
-        modo: 'Adeno',
-        ruta: 'Madrid → Miami',
-        fecha: '2025-01-02',
-        estado: 'ACEPTADA'
-    },
-    {
-        id: 'OC-2024-018',
-        cliente: 'Sara Ruiz',
-        empresa: 'Import Global',
-        modo: 'Temiste',
-        ruta: 'Madrid → Lisboa',
-        fecha: '2024-12-26',
-        estado: 'COMPLETADA'
-    },
-    {
-        id: 'OC-2024-017',
         cliente: 'Pedro López',
-        empresa: 'Moda Express SL',
-        modo: 'Marlimo',
-        ruta: 'Valencia → Rostredum',
-        fecha: '2024-12-22',
-        estado: 'COMPLETADA'
+        empresa: 'Moda Express',
+        modo: 'Aéreo',
+        ruta: 'Barcelona-Nueva York',
+        etd: '9 Ene',
+        eta: '11 Feb',
+        faseActual: 'En Aduana'
     },
     {
-        id: 'OC-2024-016',
+        id: 'OC-2024-020',
+        cliente: 'María García',
+        empresa: 'Textil SA',
+        modo: 'Aéreo',
+        ruta: 'Madrid-Miami',
+        etd: '5 Ene',
+        eta: '5 Feb',
+        faseActual: 'En Importación'
+    },
+    {
+        id: 'OC-2024-023',
         cliente: 'Laura Gómez',
-        empresa: 'Tech Imports SA',
-        modo: 'Adeno',
-        ruta: 'Bilbao → Chicago',
-        fecha: '2024-12-16',
-        estado: 'RECHAZADA'
+        empresa: 'Tech Impresiones',
+        modo: 'Marítimo',
+        ruta: 'Valencia-Quibai',
+        etd: '13 Ene',
+        eta: '28 Feb',
+        faseActual: 'Carga a Bordo'
     },
     {
-        id: 'OC-2024-015',
-        cliente: 'María García',
-        empresa: 'Testi SA',
-        modo: 'Marlimo',
-        ruta: 'Bilbao → Rotterdam',
-        fecha: '2024-12-15',
-        estado: 'RECHAZADA'
+        id: 'OC-2024-024',
+        cliente: 'Pedro López',
+        empresa: 'Moda Express',
+        modo: 'Terrestre',
+        ruta: 'Madrid-París',
+        etd: '13 Ene',
+        eta: '15 Feb',
+        faseActual: 'Transporte Interior'
     },
     {
-        id: 'OC-2024-014',
+        id: 'OC-2024-025',
         cliente: 'Sara Ruiz',
         empresa: 'Import Global',
-        modo: 'Temiste',
-        ruta: 'Barcelona → Lyon',
-        fecha: '2024-12-10',
-        estado: 'COMPLETADA'
+        modo: 'Marítimo',
+        ruta: 'Rotterdam-Barcelona',
+        etd: '10 Ene',
+        eta: '18 Feb',
+        faseActual: 'Puerto Destino'
     },
     {
-        id: 'OC-2024-013',
-        cliente: 'Pedro López',
-        empresa: 'Moda Express SL',
-        modo: 'Marlimo',
-        ruta: 'Valencia → Singapore',
-        fecha: '2024-12-05',
-        estado: 'COMPLETADA'
-    },
-    {
-        id: 'OC-2024-012',
+        id: 'OC-2024-026',
         cliente: 'María García',
-        empresa: 'Testi SA',
-        modo: 'Adeno',
-        ruta: 'Valencia → Nueva York',
-        fecha: '2024-12-01',
-        estado: 'COMPLETADA'
+        empresa: 'Textil SA',
+        modo: 'Aéreo',
+        ruta: 'Shanghai-Madrid',
+        etd: '11 Ene',
+        eta: '12 Feb',
+        faseActual: 'Terminal Origen'
+    },
+    {
+        id: 'OC-2024-027',
+        cliente: 'Pedro López',
+        empresa: 'Moda Express',
+        modo: 'Multimodal',
+        ruta: 'Valencia-Toledo',
+        etd: '14 Ene',
+        eta: '10 Feb',
+        faseActual: 'Preparación'
     }
 ])
 
 // Computed
-const filteredOfertas = computed(() => {
-    let result = [...ofertas.value]
+const filteredOperaciones = computed(() => {
+    let result = [...operaciones.value]
 
-    // Búsqueda
     if (filters.value.search) {
         const term = filters.value.search.toLowerCase()
         result = result.filter(o =>
@@ -235,40 +259,27 @@ const filteredOfertas = computed(() => {
         )
     }
 
-    // Filtro por estado
-    if (filters.value.estado) {
-        result = result.filter(o => o.estado === filters.value.estado)
+    if (filters.value.modo) {
+        result = result.filter(o => o.modo === filters.value.modo)
     }
 
-    // Ordenamiento
-    result.sort((a, b) => {
-        let aVal = a[sortField.value]
-        let bVal = b[sortField.value]
-
-        if (sortField.value === 'fecha') {
-            aVal = new Date(aVal)
-            bVal = new Date(bVal)
-        }
-
-        if (aVal < bVal) return sortOrder.value === 'asc' ? -1 : 1
-        if (aVal > bVal) return sortOrder.value === 'asc' ? 1 : -1
-        return 0
-    })
+    if (filters.value.ruta) {
+        result = result.filter(o => o.ruta === filters.value.ruta)
+    }
 
     return result
 })
 
-const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
+const totalPages = computed(() => Math.ceil(filteredOperaciones.value.length / itemsPerPage.value))
 
-const paginatedOfertas = computed(() => {
+const paginatedOperaciones = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value
-    return filteredOfertas.value.slice(start, start + itemsPerPage.value)
+    return filteredOperaciones.value.slice(start, start + itemsPerPage.value)
 })
 
 const paginationInfo = computed(() => {
-    const from = (currentPage.value - 1) * itemsPerPage.value + 1
-    const to = Math.min(from + itemsPerPage.value - 1, totalItems.value)
-    return { from, to }
+    const from = filteredOperaciones.value.length
+    return { from }
 })
 
 const visiblePages = computed(() => {
@@ -284,56 +295,14 @@ const visiblePages = computed(() => {
     return pages
 })
 
-// Métodos
-const formatDate = (dateStr) => {
-    const date = new Date(dateStr)
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
-}
-
-const getEstadoClass = (estado) => {
-    const classes = {
-        'EN TRANSITO': 'estado-transito',
-        'ACEPTADA': 'estado-aceptada',
-        'COMPLETADA': 'estado-completada',
-        'RECHAZADA': 'estado-rechazada'
-    }
-    return classes[estado] || ''
-}
-
-const getSortIcon = (field) => {
-    if (sortField.value !== field) return '↕️'
-    return sortOrder.value === 'asc' ? '↑' : '↓'
-}
-
-const sortBy = (field) => {
-    if (sortField.value === field) {
-        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-    } else {
-        sortField.value = field
-        sortOrder.value = 'asc'
-    }
-}
-
 const goToPage = (page) => {
     if (page === '...') return
     currentPage.value = page
 }
-
-const verAcondicionado = (oferta) => {
-    console.log('Ver acondicionado:', oferta.id)
-    alert(`Ver acondicionado de la oferta ${oferta.id}`)
-}
-
-const editarOferta = (oferta) => {
-    console.log('Editar oferta:', oferta.id)
-    alert(`Editar oferta ${oferta.id}`)
-}
 </script>
 
 <style scoped>
-/* Estilos similares al componente anterior pero con mejoras */
-.ofertas-container {
+.operaciones-container {
     display: flex;
     min-height: 100vh;
     background: #f5f5f5;
@@ -348,8 +317,6 @@ const editarOferta = (oferta) => {
 }
 
 .logo {
-    font-size: 24px;
-    font-weight: bold;
     padding: 0 20px 20px;
     border-bottom: 1px solid #34495e;
     margin-bottom: 20px;
@@ -365,6 +332,7 @@ const editarOferta = (oferta) => {
     text-transform: uppercase;
     color: #7f8c8d;
     letter-spacing: 1px;
+    font-weight: 600;
 }
 
 .nav-menu ul {
@@ -379,6 +347,7 @@ const editarOferta = (oferta) => {
     color: #ecf0f1;
     text-decoration: none;
     transition: all 0.3s;
+    font-size: 14px;
 }
 
 .nav-menu li a:hover,
@@ -392,25 +361,94 @@ const editarOferta = (oferta) => {
     padding: 20px 30px;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
 .header h1 {
-    margin: 0;
+    margin: 0 0 20px 0;
     color: #2c3e50;
     font-size: 24px;
 }
 
-.info-badge {
-    background: #ecf0f1;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-size: 14px;
+.distribucion-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.distribucion-section h3 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+    font-size: 16px;
+}
+
+.subtitulo {
     color: #7f8c8d;
+    font-size: 13px;
+    margin: 0 0 15px 0;
+}
+
+.modos-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.modo-item {
+    width: 100%;
+}
+
+.modo-nombre {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.modo-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+.modo-cantidad {
+    color: #7f8c8d;
+}
+
+.modo-porcentaje {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.progress-bar {
+    background: #ecf0f1;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s;
+}
+
+.operaciones-resumen {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 15px;
+}
+
+.operaciones-resumen h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.total-envios {
+    color: #7f8c8d;
+    font-size: 14px;
 }
 
 .filters-bar {
@@ -421,17 +459,17 @@ const editarOferta = (oferta) => {
 
 .search-input {
     flex: 1;
-    max-width: 400px;
-    padding: 10px 15px;
+    max-width: 300px;
+    padding: 8px 12px;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 4px;
     font-size: 14px;
 }
 
 .filter-select {
-    padding: 10px 15px;
+    padding: 8px 12px;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 4px;
     font-size: 14px;
     background: white;
     cursor: pointer;
@@ -444,13 +482,13 @@ const editarOferta = (oferta) => {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.ofertas-table {
+.operaciones-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px;
+    min-width: 1000px;
 }
 
-.ofertas-table th {
+.operaciones-table th {
     background: #34495e;
     color: white;
     padding: 12px 15px;
@@ -459,27 +497,13 @@ const editarOferta = (oferta) => {
     font-size: 13px;
 }
 
-.sortable {
-    cursor: pointer;
-    user-select: none;
-}
-
-.sortable:hover {
-    background: #3d5a6b;
-}
-
-.sort-icon {
-    margin-left: 5px;
-    font-size: 12px;
-}
-
-.ofertas-table td {
+.operaciones-table td {
     padding: 12px 15px;
     border-bottom: 1px solid #ecf0f1;
     font-size: 14px;
 }
 
-.ofertas-table tr:hover {
+.operaciones-table tr:hover {
     background: #f8f9fa;
 }
 
@@ -495,67 +519,28 @@ const editarOferta = (oferta) => {
     font-size: 12px;
 }
 
-.estado-badge {
+.estado-transito-badge {
     display: inline-block;
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
-}
-
-.estado-transito {
     background: #fff3cd;
     color: #856404;
 }
 
-.estado-aceptada {
-    background: #d4edda;
-    color: #155724;
-}
-
-.estado-completada {
-    background: #d1ecf1;
-    color: #0c5460;
-}
-
-.estado-rechazada {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.action-btn {
-    padding: 5px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.3s;
-    margin: 0 2px;
-}
-
-.view-btn {
-    background: #3498db;
-    color: white;
-}
-
-.view-btn:hover {
-    background: #2980b9;
-}
-
-.edit-btn {
-    background: #f39c12;
-    color: white;
-}
-
-.edit-btn:hover {
-    background: #e67e22;
+.pagination-info {
+    text-align: center;
+    margin-top: 15px;
+    color: #7f8c8d;
+    font-size: 13px;
 }
 
 .pagination {
     display: flex;
     justify-content: center;
     gap: 8px;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 .page-btn {
