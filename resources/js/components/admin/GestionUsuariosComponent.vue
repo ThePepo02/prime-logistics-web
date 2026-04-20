@@ -1,54 +1,28 @@
 <template>
     <div class="dashboard-container">
-        <!-- encabezado -->
+        <!-- Header simplificado -->
         <header class="dashboard-header">
             <div class="logo">
                 <div class="logo-icon">
                     <img :src="logoPrimeLogistics" alt="logo Prime Logistics">
                 </div>
-                <span class="logo-text">Prime Logistics</span>
-                <h1 class="page-title">Gestión de Usuarios
-                    <span class="title-sub">Crear, adquirir roles y gestionar acciones</span>
-                </h1>
-                <!-- Botones de acción -->
-                <div class="actions-bar">
-                    <button type="button" class="btn_exportarDatos" @click="">
-                        <img :src="iconoBtnNuevoUsuario" alt="Icono exportarDatos">
-                        Nuevo Usuario
-                        <nuevo-usuario-component></nuevo-usuario-component>
-                    </button>
-                    <a href="#" class="btn_notificaciones" @click.prevent="clickNotification">
-                        <img :src="imgBtnNotificaciones" alt="Icono notificaciones">
-                    </a>
-                    <div class="perfil-icon" @click="clickProfile">
-                        <img :src="imgPerfilUsuarioAdmin" alt="Imagen Perfil Usuario admin">
-                    </div>
-                </div>
+                <span class="logo-text">Prime</span>
             </div>
+            <h1 class="page-title">Gestión de Usuarios admin</h1>
         </header>
 
         <div class="dashboard-layout">
-            <!-- Menú lateral -->
+            <!-- Menú lateral corregido -->
             <aside :class="['sidebar', { 'sidebar-mobile-open': sidebarOpen }]">
                 <nav class="side-nav">
+                    <div class="logo-prime">Prime</div>
                     <div class="nav-section-administracion">
                         <h2 class="nav-section-title">Administración</h2>
                         <ul class="nav-list">
-                            <li><a href="#" class="nav-link active" @click.prevent>Dashboard</a></li>
-                            <li><a href="#" class="nav-link" @click.prevent>Gestión de Usuarios</a></li>
-                        </ul>
-                    </div>
-                    <div class="nav-section-operaciones">
-                        <h2 class="nav-section-title">Operaciones</h2>
-                        <ul class="nav-list">
-                            <li><a href="#" class="nav-link" @click.prevent>Todas las Ofertas</a></li>
-                            <li><a href="#" class="nav-link" @click.prevent>Operaciones Activas</a></li>
-                        </ul>
-                    </div>
-                    <div class="nav-section-sistema">
-                        <h2 class="nav-section-title">Sistema</h2>
-                        <ul class="nav-list">
-                            <li><a href="#" class="nav-link" @click.prevent>Datos Maestros</a></li>
+                            <li><a href="#" class="nav-link" @click.prevent>Desafío</a></li>
+                            <li><a href="#" class="nav-link" @click.prevent>Contratos</a></li>
+                            <li><a href="#" class="nav-link active" @click.prevent>Operaciones Activas</a></li>
+                            <li><a href="#" class="nav-link" @click.prevent>Servicios</a></li>
                             <li><a href="#" class="nav-link" @click.prevent>Configuración</a></li>
                         </ul>
                     </div>
@@ -60,27 +34,18 @@
                 <!-- KPI usuarios -->
                 <div class="users-kpi-grid">
                     <div class="user-kpi-card">
-                        <div class="icon blue">👥</div>
-                        <div>
-                            <h2>14</h2>
-                            <p>Usuarios Totales</p>
-                        </div>
+                        <div class="kpi-number">14</div>
+                        <div class="kpi-label">Usuarios Totales</div>
                     </div>
 
                     <div class="user-kpi-card">
-                        <div class="icon green">✔</div>
-                        <div>
-                            <h2>11</h2>
-                            <p>Usuarios Activos</p>
-                        </div>
+                        <div class="kpi-number">11</div>
+                        <div class="kpi-label">Usuarios Activos</div>
                     </div>
 
                     <div class="user-kpi-card">
-                        <div class="icon red">✖</div>
-                        <div>
-                            <h2>3</h2>
-                            <p>Desactivados</p>
-                        </div>
+                        <div class="kpi-number">3</div>
+                        <div class="kpi-label">Desactivados</div>
                     </div>
                 </div>
 
@@ -88,120 +53,106 @@
                 <div class="users-table-container">
                     <div class="table-header">
                         <h3>Usuarios del sistema</h3>
-
-                        <div class="filters">
-                            <input v-model="userSearch" placeholder="Buscar usuario..." />
-                            <select v-model="roleFilter">
-                                <option value="">Todos los roles</option>
-                                <option value="ADMIN">Admin</option>
-                                <option value="CLIENTE">Cliente</option>
-                                <option value="OPERADOR">Operador</option>
-                            </select>
-                        </div>
+                        <span class="table-subtitle">Todos los activos registrados</span>
                     </div>
 
                     <table class="users-table">
                         <thead>
                             <tr>
-                                <th>Usuario</th>
+                                <th>Nombre</th>
                                 <th>Correo</th>
                                 <th>Empresa</th>
-                                <th>Rol</th>
-                                <th>Último acceso</th>
+                                <th>Jefe</th>
+                                <th>Último Acceso</th>
                                 <th>Estado</th>
-                                <th></th>
+                                <th>Acordes</th>
                             </tr>
                         </thead>
-
                         <tbody>
-                            <tr v-for="user in filteredUsers" :key="user.id">
-                                <td class="user-cell">
-                                    <div class="avatar">{{ user.iniciales }}</div>
-                                    {{ user.nombre }}
-                                </td>
+                            <tr v-for="user in users" :key="user.id">
+                                <td class="user-cell">{{ user.nombre }}</td>
                                 <td>{{ user.email }}</td>
                                 <td>{{ user.empresa }}</td>
-
+                                <td>{{ user.jefe || '' }}</td>
+                                <td>{{ user.ultimoAcceso }}</td>
                                 <td>
-                                    <span :class="['role-badge', user.rol.toLowerCase()]">
-                                        {{ user.rol }}
-                                    </span>
+                                    <div :class="['status-indicator', user.activo ? 'active' : 'inactive']"></div>
                                 </td>
-
-                                <td>{{ user.ultimo }}</td>
-
-                                <td>
-                                    <div class="toggle" :class="{ active: user.activo }"></div>
-                                </td>
-
                                 <td class="actions">
-                                    ✏️ 🗑️
+                                    <button class="action-btn edit-btn" @click="editarUsuario(user)">✏️</button>
+                                    <button class="action-btn delete-btn" @click="eliminarUsuario(user)">🗑️</button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+
+                    <!-- Nota de paginación -->
+                    <div class="table-footer">
+                        <span class="pagination-note">Máximo 7 de 16 usuarios</span>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="action-buttons">
+                    <button class="btn-nuevo-usuario" @click="nuevoUsuario">
+                        <img :src="imgNuevoUsuario" alt="icono de añadir un nuevo usuario">Nuevo Usuario
+                    </button>
+                    <button class="btn-on" @click="activarTodos">
+                        ON
+                    </button>
                 </div>
             </main>
         </div>
-
-        <footer class="dashboard-footer">
-            <span>Carlos Martinez</span>
-            <span class="rol_user">Administrador</span>
-        </footer>
     </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import logotipo from '@/img/logo-empresa.png'
-import iconoBtnNuevoUsuario from '@/img/iconoNuevoUsuario.png'
-import fotoPerfil from '@/img/perfilUsuarioAdmin.png'
-import iconoNotificaciones from '@/img/notificaciones-logo.png'
+import logotipo from '/images/logo-empresa.png'
+import iconoNuevoUsuario from '/images/iconoNuevoUsuario.png'
+
 
 const logoPrimeLogistics = logotipo
-const imgPerfilUsuarioAdmin = fotoPerfil
-const imgBtnNotificaciones = iconoNotificaciones
-const userSearch = ref('')
-const roleFilter = ref('')
+const imgNuevoUsuario = iconoNuevoUsuario
+const sidebarOpen = ref(false)
 
+// Datos de usuarios según la imagen
 const users = ref([
-    { id: 1, nombre: 'Carlos Martínez', iniciales: 'CM', email: 'carlos@prime.com', empresa: 'Prime Logistics', rol: 'ADMIN', ultimo: 'Hoy 09:42', activo: true },
-    { id: 2, nombre: 'María García', iniciales: 'MG', email: 'maria@textil.com', empresa: 'Textil SA', rol: 'CLIENTE', ultimo: 'Hoy 08:15', activo: true },
-    { id: 3, nombre: 'Ana López', iniciales: 'AL', email: 'ana@prime.com', empresa: 'Prime Logistics', rol: 'OPERADOR', ultimo: 'Ayer', activo: true },
-    { id: 4, nombre: 'Sara Ruiz', iniciales: 'SR', email: 'sara@import.com', empresa: 'Import Global', rol: 'CLIENTE', ultimo: 'Hace 8 días', activo: false }
+    { id: 1, nombre: 'Carlos Martínez', email: 'carlos@prime.com', empresa: 'Prime Logistics', jefe: '', ultimoAcceso: 'Hoy 08:42', activo: true },
+    { id: 2, nombre: 'María García', email: 'maria@prime.com', empresa: 'Textil S.A.', jefe: '', ultimoAcceso: 'Hoy 08:15', activo: true },
+    { id: 3, nombre: 'Ana López', email: 'ana@prime.com', empresa: 'Prime Logistics', jefe: '', ultimoAcceso: 'Hoy 07:30', activo: true },
+    { id: 4, nombre: 'Pedro López', email: 'pedro@prime.com', empresa: 'Moto Exames SL', jefe: '', ultimoAcceso: 'Hoy 10:22', activo: true },
+    { id: 5, nombre: 'David Ruiz', email: 'david@prime.com', empresa: 'Prime Logistics', jefe: '', ultimoAcceso: 'Mar 2:00', activo: true },
+    { id: 6, nombre: 'Sara Ruiz', email: 'sara@prime.com', empresa: 'Import Global', jefe: '', ultimoAcceso: 'Mar 5:00', activo: true },
+    { id: 7, nombre: 'Laura Gómez', email: 'laura@mctc.com', empresa: 'Tech Imports SA', jefe: '', ultimoAcceso: 'Mar 13:00', activo: true }
 ])
 
-const filteredUsers = computed(() => {
-    return users.value.filter(u => {
-        const matchSearch =
-            u.nombre.toLowerCase().includes(userSearch.value.toLowerCase()) ||
-            u.email.toLowerCase().includes(userSearch.value.toLowerCase())
+const nuevoUsuario = () => {
+    alert('Abrir formulario para nuevo usuario')
+}
 
-        const matchRole = roleFilter.value ? u.rol === roleFilter.value : true
+const activarTodos = () => {
+    alert('Activar todos los usuarios')
+}
 
-        return matchSearch && matchRole
-    })
-})
+const editarUsuario = (user) => {
+    alert(`Editar usuario: ${user.nombre}`)
+}
+
+const eliminarUsuario = (user) => {
+    alert(`Eliminar usuario: ${user.nombre}`)
+}
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-$primary-color: #1a5d8c;
-$primary-dark: #0e3d5c;
-$success-color: #2a9d8f;
-$danger-color: #e76f51;
-$gray-light: #f8f9fa;
-$gray-border: #e9ecef;
-$text-dark: #2c3e50;
-$text-muted: #6c757d;
-
 .dashboard-container {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f4f7fc;
     min-height: 100vh;
 }
@@ -209,10 +160,10 @@ $text-muted: #6c757d;
 .dashboard-header {
     background: white;
     padding: 1rem 2rem;
-    border-bottom: 1px solid $gray-border;
-    display: grid;
-    justify-content: space-between;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
     align-items: center;
+    gap: 2rem;
 }
 
 .logo {
@@ -221,24 +172,21 @@ $text-muted: #6c757d;
     gap: 0.75rem;
 }
 
-.logo-icon {
-    width: 200px;
-    height: 100px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-}
-
-i {
-    font-size: 1.3rem;
+.logo-icon img {
+    height: 40px;
 }
 
 .logo-text {
     font-weight: 700;
     font-size: 1.25rem;
-    color: $primary-dark;
+    color: #0e3d5c;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
 }
 
 .dashboard-layout {
@@ -251,317 +199,220 @@ i {
     background: #0a2b3e;
     min-height: calc(100vh - 73px);
     padding: 1.5rem;
-    transition: transform 0.3s ease;
-
-    @media (max-width: 992px) {
-        position: fixed;
-        top: 73px;
-        left: 0;
-        z-index: 1000;
-        transform: translateX(-100%);
-
-        &.sidebar-mobile-open {
-            transform: translateX(0);
-        }
-    }
-
-    .sidebar-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        color: white;
-
-        h3 {
-            margin: 0;
-            font-size: 1rem;
-        }
-
-        .btn-close-sidebar {
-            background: none;
-            border: none;
-            color: white;
-        }
-    }
 }
 
-.side-nav {
-    .nav-section-title {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        color: #80a6c2;
-        margin-bottom: 0.75rem;
-    }
+.logo-prime {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #1a4a6e;
+}
 
-    .nav-list {
-        list-style: none;
-        padding: 0;
-        margin-bottom: 1.5rem;
+.nav-section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #80a6c2;
+    margin-bottom: 0.75rem;
+    letter-spacing: 1px;
+}
 
-        .nav-link {
-            display: block;
-            padding: 0.5rem 0;
-            color: #cfdfed;
-            text-decoration: none;
-            font-size: 0.9rem;
+.nav-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
 
-            &:hover,
-            &.active {
-                color: white;
-            }
-        }
-    }
+.nav-link {
+    display: block;
+    padding: 0.5rem 0;
+    color: #cfdfed;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: white;
+    font-weight: 500;
 }
 
 .dashboard-content {
     flex: 1;
     padding: 1.5rem 2rem;
     max-width: calc(100% - 260px);
-
-    @media (max-width: 992px) {
-        max-width: 100%;
-    }
-}
-
-.page-title {
-    margin-top: 34px;
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: $text-dark;
-
-    .title-sub {
-        display: flex;
-        flex-direction: row;
-        align-items: baseline;
-        gap: 0.5rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: $primary-color;
-        letter-spacing: 0.5px;
-    }
-}
-
-.actions-bar {
-    display: flex;
-    margin-left: 900px;
-    gap: 1rem;
-
-    .btn_exportarDatos {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 1.25rem;
-        background: white;
-        border: 1px solid $gray-border;
-        border-radius: 40px;
-        height: 50px;
-        width: 180px;
-
-        &:hover {
-            background: $gray-light;
-            border-color: $primary-color;
-        }
-    }
-
-    .btn_notificaciones {
-        width: 60px;
-        height: 50px;
-        background: white;
-        border-radius: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        &:hover {
-            background: $gray-light;
-        }
-    }
-
-    .perfil-icon {
-        width: 60px;
-        height: 50px;
-        background: white;
-        border-radius: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        &:hover {
-            background: $gray-light;
-        }
-    }
 }
 
 /* KPI usuarios */
 .users-kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .user-kpi-card {
     background: white;
     border-radius: 12px;
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    min-width: 150px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.kpi-number {
+    font-size: 2rem;
     font-weight: bold;
+    color: #2c3e50;
+}
 
-    &.blue {
-        background: #e0f2fe;
-    }
-
-    &.green {
-        background: #dcfce7;
-    }
-
-    &.red {
-        background: #fee2e2;
-    }
+.kpi-label {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-top: 0.25rem;
 }
 
 /* Tabla */
 .users-table-container {
     background: white;
     border-radius: 12px;
-    padding: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table-header {
+    margin-bottom: 1.5rem;
+}
+
+.table-header h3 {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.table-subtitle {
+    font-size: 0.8rem;
+    color: #7f8c8d;
 }
 
 .users-table {
     width: 100%;
     border-collapse: collapse;
-
-    th,
-    td {
-        padding: 12px;
-        border-bottom: 1px solid #eee;
-    }
 }
 
-/* Usuario */
+.users-table th,
+.users-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.users-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.85rem;
+}
+
+.users-table td {
+    font-size: 0.85rem;
+    color: #495057;
+}
+
 .user-cell {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    font-weight: 500;
+    color: #2c3e50;
 }
 
-.avatar {
-    width: 35px;
-    height: 35px;
+.status-indicator {
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    background: #2563eb;
+}
+
+.status-indicator.active {
+    background-color: #2a9d8f;
+}
+
+.status-indicator.inactive {
+    background-color: #e76f51;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+}
+
+.edit-btn:hover {
+    color: #f39c12;
+}
+
+.delete-btn:hover {
+    color: #e74c3c;
+}
+
+.table-footer {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.pagination-note {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+}
+
+/* Botones de acción */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-nuevo-usuario,
+.btn-on {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-nuevo-usuario {
+    background-color: #1a5d8c;
     color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-/* Roles */
-.role-badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-
-    &.admin {
-        background: #fde68a;
-    }
-
-    &.cliente {
-        background: #bfdbfe;
-    }
-
-    &.operador {
-        background: #bbf7d0;
-    }
+.btn-nuevo-usuario:hover {
+    background-color: #0e3d5c;
 }
 
-/* Toggle */
-.toggle {
-    width: 40px;
-    height: 20px;
-    background: #ccc;
-    border-radius: 20px;
-    position: relative;
-
-    &::after {
-        content: '';
-        width: 16px;
-        height: 16px;
-        background: white;
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        border-radius: 50%;
-        transition: 0.3s;
-    }
-
-    &.active {
-        background: #22c55e;
-    }
-
-    &.active::after {
-        transform: translateX(20px);
-    }
+.btn-on {
+    background-color: #2a9d8f;
+    color: white;
 }
 
-/* Filtros */
-.filters {
-    display: flex;
-    gap: 10px;
-
-    input,
-    select {
-        padding: 6px;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-    }
+.btn-on:hover {
+    background-color: #21867a;
 }
 
-.dashboard-footer {
-    background: white;
-    border-top: 1px solid $gray-border;
-    padding: 1rem 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-
-    .user-name {
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: $text-dark;
-
-        @media (max-width: 768px) {
-            font-size: 0.75rem;
-        }
+@media (max-width: 992px) {
+    .dashboard-content {
+        max-width: 100%;
     }
-
-    .rol_user {
-        background: $primary-color;
-        color: white;
-        padding: 0.15rem 0.5rem;
-        border-radius: 20px;
-        font-size: 0.6rem;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-
-        @media (max-width: 768px) {
-            padding: 0.1rem 0.4rem;
-            font-size: 0.55rem;
-            border-radius: 16px;
-        }
+    
+    .users-table {
+        display: block;
+        overflow-x: auto;
     }
 }
 </style>
