@@ -21,3 +21,4 @@ services:
       DB_USERNAME: simex09
       DB_PASSWORD: "Db@Secure_26!xP"
       DB_TRUST_SERVER_CERTIFICATE: "true"
+      DB_ENCRYPT: "no"
