@@ -199,11 +199,11 @@
 </template>
 
 <script setup>
-import logotipo from '../../img/logo-empresa.png'
-import iconoExportarDatos from '../../img/iconoExportarDatos.png'
-import fotoPerfil from '../../img/perfilUsuarioAdmin.png'
-import iconoNotificaciones from '../../img/notificaciones-logo.png'
-import graficos from '../../img/graficos.png'
+import logotipo from '../../../img/logo-empresa.png'
+import iconoExportarDatos from '../../../img/iconoExportarDatos.png'
+import fotoPerfil from '../../../img/perfilUsuarioAdmin.png'
+import iconoNotificaciones from '../../../img/notificaciones-logo.png'
+import graficos from '../../../img/graficos.png'
 
 
 const logoPrimeLogistics = logotipo
