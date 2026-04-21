@@ -19,7 +19,7 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            '@': '/resources',
+            '@': '/public/images',
         },
     },
 });
