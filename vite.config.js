@@ -19,7 +19,7 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            '@': '/images',
+            '@/services/dashboardService': '/images',
         },
     },
 });
