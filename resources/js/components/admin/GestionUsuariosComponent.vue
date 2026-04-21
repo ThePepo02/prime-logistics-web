@@ -12,7 +12,7 @@
         </header>
 
         <div class="dashboard-layout">
-            <!-- Menú lateral corregido -->
+            <!-- Menú lateral -->
             <aside :class="['sidebar', { 'sidebar-mobile-open': sidebarOpen }]">
                 <nav class="side-nav">
                     <div class="logo-prime">Prime</div>
@@ -34,17 +34,17 @@
                 <!-- KPI usuarios -->
                 <div class="users-kpi-grid">
                     <div class="user-kpi-card">
-                        <div class="kpi-number">14</div>
+                        <div class="kpi-number">{{ stats.total }}</div>
                         <div class="kpi-label">Usuarios Totales</div>
                     </div>
 
                     <div class="user-kpi-card">
-                        <div class="kpi-number">11</div>
+                        <div class="kpi-number">{{ stats.activos }}</div>
                         <div class="kpi-label">Usuarios Activos</div>
                     </div>
 
                     <div class="user-kpi-card">
-                        <div class="kpi-number">3</div>
+                        <div class="kpi-number">{{ stats.desactivados }}</div>
                         <div class="kpi-label">Desactivados</div>
                     </div>
                 </div>
@@ -56,50 +56,87 @@
                         <span class="table-subtitle">Todos los activos registrados</span>
                     </div>
 
-                    <table class="users-table">
+                    <div v-if="cargando" class="loading-spinner">
+                        Cargando usuarios...
+                    </div>
+
+                    <table v-else class="users-table">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
                                 <th>Correo</th>
                                 <th>Empresa</th>
-                                <th>Jefe</th>
                                 <th>Último Acceso</th>
                                 <th>Estado</th>
-                                <th>Acordes</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="user in users" :key="user.id">
-                                <td class="user-cell">{{ user.nombre }}</td>
-                                <td>{{ user.email }}</td>
+                            <tr v-for="user in usuarios" :key="user.id">
+                                <td class="user-cell">{{ user.nom }} {{ user.cognoms }}</td>
+                                <td>{{ user.correu }}</td>
                                 <td>{{ user.empresa }}</td>
-                                <td>{{ user.jefe || '' }}</td>
-                                <td>{{ user.ultimoAcceso }}</td>
+                                <td>{{ formatFecha(user.ultimo_acceso) }}</td>
                                 <td>
                                     <div :class="['status-indicator', user.activo ? 'active' : 'inactive']"></div>
                                 </td>
                                 <td class="actions">
-                                    <button class="action-btn edit-btn" @click="editarUsuario(user)">✏️</button>
-                                    <button class="action-btn delete-btn" @click="eliminarUsuario(user)">🗑️</button>
+                                    <button class="action-btn edit-btn" @click="editarUsuario(user)" title="Editar">✏️</button>
+                                    <button class="action-btn delete-btn" @click="eliminarUsuario(user)" title="Eliminar">🗑️</button>
+                                    <button class="action-btn toggle-btn" @click="toggleEstadoUsuario(user)" :title="user.activo ? 'Desactivar' : 'Activar'">
+                                        {{ user.activo ? '🔴' : '🟢' }}
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <!-- Nota de paginación -->
                     <div class="table-footer">
-                        <span class="pagination-note">Máximo 7 de 16 usuarios</span>
+                        <span class="pagination-note">Mostrando {{ usuarios.length }} de {{ stats.total }} usuarios</span>
                     </div>
                 </div>
 
                 <!-- Botones de acción -->
                 <div class="action-buttons">
-                    <button class="btn-nuevo-usuario" @click="nuevoUsuario">
+                    <button class="btn-nuevo-usuario" @click="mostrarModalNuevoUsuario">
                         <img :src="imgNuevoUsuario" alt="icono de añadir un nuevo usuario">Nuevo Usuario
                     </button>
                     <button class="btn-on" @click="activarTodos">
-                        ON
+                        Activar Todos
                     </button>
+                </div>
+
+                <!-- Modal para nuevo/editar usuario -->
+                <div v-if="modalVisible" class="modal-overlay" @click.self="cerrarModal">
+                    <div class="modal-content">
+                        <h3>{{ modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}</h3>
+                        <form @submit.prevent="guardarUsuario">
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input v-model="formData.nom" type="text" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Apellidos</label>
+                                <input v-model="formData.cognoms" type="text" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input v-model="formData.correu" type="email" required :disabled="modoEdicion">
+                            </div>
+                            <div class="form-group">
+                                <label>Empresa</label>
+                                <input v-model="formData.empresa" type="text" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Contraseña</label>
+                                <input v-model="formData.contrasenya" type="password" :required="!modoEdicion">
+                            </div>
+                            <div class="modal-buttons">
+                                <button type="button" @click="cerrarModal" class="btn-cancelar">Cancelar</button>
+                                <button type="submit" class="btn-guardar">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </main>
         </div>
@@ -107,309 +144,250 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
+// Configuración de API
+const API_BASE_URL = 'http://localhost:8000/api' // Ajusta según tu configuración
+
 const logoPrimeLogistics = '/images/logo-empresa.png'
 const imgNuevoUsuario = '/images/iconoNuevoUsuario.png'
 
+// Estado
 const sidebarOpen = ref(false)
+const usuarios = ref([])
+const stats = ref({ total: 0, activos: 0, desactivados: 0 })
+const cargando = ref(false)
+const modalVisible = ref(false)
+const modoEdicion = ref(false)
+const usuarioEditando = ref(null)
 
-// Datos de usuarios según la imagen
-const users = ref([
-    { id: 1, nombre: 'Carlos Martínez', email: 'carlos@prime.com', empresa: 'Prime Logistics', jefe: '', ultimoAcceso: 'Hoy 08:42', activo: true },
-    { id: 2, nombre: 'María García', email: 'maria@prime.com', empresa: 'Textil S.A.', jefe: '', ultimoAcceso: 'Hoy 08:15', activo: true },
-    { id: 3, nombre: 'Ana López', email: 'ana@prime.com', empresa: 'Prime Logistics', jefe: '', ultimoAcceso: 'Hoy 07:30', activo: true },
-    { id: 4, nombre: 'Pedro López', email: 'pedro@prime.com', empresa: 'Moto Exames SL', jefe: '', ultimoAcceso: 'Hoy 10:22', activo: true },
-    { id: 5, nombre: 'David Ruiz', email: 'david@prime.com', empresa: 'Prime Logistics', jefe: '', ultimoAcceso: 'Mar 2:00', activo: true },
-    { id: 6, nombre: 'Sara Ruiz', email: 'sara@prime.com', empresa: 'Import Global', jefe: '', ultimoAcceso: 'Mar 5:00', activo: true },
-    { id: 7, nombre: 'Laura Gómez', email: 'laura@mctc.com', empresa: 'Tech Imports SA', jefe: '', ultimoAcceso: 'Mar 13:00', activo: true }
-])
+// Formulario
+const formData = ref({
+    nom: '',
+    cognoms: '',
+    correu: '',
+    empresa: '',
+    contrasenya: ''
+})
 
-const nuevoUsuario = () => {
-    alert('Abrir formulario para nuevo usuario')
+// Métodos
+const cargarUsuarios = async () => {
+    cargando.value = true
+    try {
+        const response = await axios.get(`${API_BASE_URL}/usuarios`)
+        usuarios.value = response.data.data
+        await cargarEstadisticas()
+    } catch (error) {
+        console.error('Error al cargar usuarios:', error)
+        alert('Error al cargar los usuarios')
+    } finally {
+        cargando.value = false
+    }
 }
 
-const activarTodos = () => {
-    alert('Activar todos los usuarios')
+const cargarEstadisticas = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/usuarios/stats`)
+        stats.value = response.data
+    } catch (error) {
+        console.error('Error al cargar estadísticas:', error)
+    }
+}
+
+const guardarUsuario = async () => {
+    try {
+        if (modoEdicion.value) {
+            await axios.put(`${API_BASE_URL}/usuarios/${usuarioEditando.value.id}`, formData.value)
+            alert('Usuario actualizado correctamente')
+        } else {
+            await axios.post(`${API_BASE_URL}/usuarios`, formData.value)
+            alert('Usuario creado correctamente')
+        }
+        cerrarModal()
+        await cargarUsuarios()
+    } catch (error) {
+        console.error('Error al guardar usuario:', error)
+        alert(error.response?.data?.message || 'Error al guardar el usuario')
+    }
 }
 
 const editarUsuario = (user) => {
-    alert(`Editar usuario: ${user.nombre}`)
+    modoEdicion.value = true
+    usuarioEditando.value = user
+    formData.value = {
+        nom: user.nom,
+        cognoms: user.cognoms,
+        correu: user.correu,
+        empresa: user.empresa,
+        contrasenya: ''
+    }
+    modalVisible.value = true
 }
 
-const eliminarUsuario = (user) => {
-    alert(`Eliminar usuario: ${user.nombre}`)
+const eliminarUsuario = async (user) => {
+    if (confirm(`¿Estás seguro de eliminar a ${user.nom} ${user.cognoms}?`)) {
+        try {
+            await axios.delete(`${API_BASE_URL}/usuarios/${user.id}`)
+            alert('Usuario eliminado correctamente')
+            await cargarUsuarios()
+        } catch (error) {
+            console.error('Error al eliminar usuario:', error)
+            alert('Error al eliminar el usuario')
+        }
+    }
 }
+
+const toggleEstadoUsuario = async (user) => {
+    try {
+        await axios.put(`${API_BASE_URL}/usuarios/${user.id}`, {
+            activo: !user.activo
+        })
+        await cargarUsuarios()
+    } catch (error) {
+        console.error('Error al cambiar estado:', error)
+        alert('Error al cambiar el estado del usuario')
+    }
+}
+
+const activarTodos = async () => {
+    if (confirm('¿Activar todos los usuarios?')) {
+        try {
+            const promesas = usuarios.value.map(user => 
+                axios.put(`${API_BASE_URL}/usuarios/${user.id}`, { activo: true })
+            )
+            await Promise.all(promesas)
+            await cargarUsuarios()
+            alert('Todos los usuarios han sido activados')
+        } catch (error) {
+            console.error('Error al activar usuarios:', error)
+            alert('Error al activar los usuarios')
+        }
+    }
+}
+
+const nuevoUsuario = () => {
+    modoEdicion.value = false
+    formData.value = {
+        nom: '',
+        cognoms: '',
+        correu: '',
+        empresa: '',
+        contrasenya: ''
+    }
+    modalVisible.value = true
+}
+
+const mostrarModalNuevoUsuario = () => {
+    nuevoUsuario()
+}
+
+const cerrarModal = () => {
+    modalVisible.value = false
+    modoEdicion.value = false
+    usuarioEditando.value = null
+}
+
+const formatFecha = (fecha) => {
+    if (!fecha) return 'Nunca'
+    const date = new Date(fecha)
+    return date.toLocaleString()
+}
+
+// Cargar datos al montar el componente
+onMounted(() => {
+    cargarUsuarios()
+})
 </script>
 
 <style scoped>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* Mantén todos los estilos existentes y añade estos nuevos */
+
+.loading-spinner {
+    text-align: center;
+    padding: 2rem;
+    color: #7f8c8d;
 }
 
-.dashboard-container {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f7fc;
-    min-height: 100vh;
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
-.dashboard-header {
+.modal-content {
     background: white;
-    padding: 1rem 2rem;
-    border-bottom: 1px solid #e9ecef;
-    display: flex;
-    align-items: center;
-    gap: 2rem;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.logo-icon img {
-    height: 40px;
-}
-
-.logo-text {
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: #0e3d5c;
-}
-
-.page-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #2c3e50;
-    margin: 0;
-}
-
-.dashboard-layout {
-    display: flex;
-    flex: 1;
-}
-
-.sidebar {
-    width: 260px;
-    background: #0a2b3e;
-    min-height: calc(100vh - 73px);
-    padding: 1.5rem;
-}
-
-.logo-prime {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #1a4a6e;
-}
-
-.nav-section-title {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    color: #80a6c2;
-    margin-bottom: 0.75rem;
-    letter-spacing: 1px;
-}
-
-.nav-list {
-    list-style: none;
-    padding: 0;
+.modal-content h3 {
     margin-bottom: 1.5rem;
+    color: #2c3e50;
 }
 
-.nav-link {
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
     display: block;
-    padding: 0.5rem 0;
-    color: #cfdfed;
-    text-decoration: none;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     font-size: 0.9rem;
 }
 
-.nav-link:hover,
-.nav-link.active {
+.form-group input:focus {
+    outline: none;
+    border-color: #1a5d8c;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    justify-content: flex-end;
+}
+
+.btn-cancelar,
+.btn-guardar {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-cancelar {
+    background: #e74c3c;
     color: white;
-    font-weight: 500;
 }
 
-.dashboard-content {
-    flex: 1;
-    padding: 1.5rem 2rem;
-    max-width: calc(100% - 260px);
+.btn-guardar {
+    background: #2a9d8f;
+    color: white;
 }
 
-/* KPI usuarios */
-.users-kpi-grid {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.user-kpi-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem 2rem;
-    text-align: center;
-    min-width: 150px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.kpi-number {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #2c3e50;
-}
-
-.kpi-label {
-    font-size: 0.85rem;
-    color: #7f8c8d;
-    margin-top: 0.25rem;
-}
-
-/* Tabla */
-.users-table-container {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.table-header {
-    margin-bottom: 1.5rem;
-}
-
-.table-header h3 {
-    font-size: 1.1rem;
-    color: #2c3e50;
-    margin-bottom: 0.25rem;
-}
-
-.table-subtitle {
-    font-size: 0.8rem;
-    color: #7f8c8d;
-}
-
-.users-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.users-table th,
-.users-table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.users-table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #2c3e50;
-    font-size: 0.85rem;
-}
-
-.users-table td {
-    font-size: 0.85rem;
-    color: #495057;
-}
-
-.user-cell {
-    font-weight: 500;
-    color: #2c3e50;
-}
-
-.status-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-}
-
-.status-indicator.active {
-    background-color: #2a9d8f;
-}
-
-.status-indicator.inactive {
-    background-color: #e76f51;
-}
-
-.actions {
-    display: flex;
-    gap: 8px;
-}
-
-.action-btn {
+.toggle-btn {
     background: none;
     border: none;
     cursor: pointer;
     font-size: 1rem;
-    padding: 4px;
-}
-
-.edit-btn:hover {
-    color: #f39c12;
-}
-
-.delete-btn:hover {
-    color: #e74c3c;
-}
-
-.table-footer {
-    margin-top: 1rem;
-    text-align: center;
-}
-
-.pagination-note {
-    font-size: 0.8rem;
-    color: #7f8c8d;
-}
-
-/* Botones de acción */
-.action-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
-}
-
-.btn-nuevo-usuario,
-.btn-on {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.3s;
-}
-
-.btn-nuevo-usuario {
-    background-color: #1a5d8c;
-    color: white;
-}
-
-.btn-nuevo-usuario:hover {
-    background-color: #0e3d5c;
-}
-
-.btn-on {
-    background-color: #2a9d8f;
-    color: white;
-}
-
-.btn-on:hover {
-    background-color: #21867a;
-}
-
-@media (max-width: 992px) {
-    .dashboard-content {
-        max-width: 100%;
-    }
-
-    .users-table {
-        display: block;
-        overflow-x: auto;
-    }
 }
 </style>
