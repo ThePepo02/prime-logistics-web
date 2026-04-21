@@ -8,14 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TrackingStep extends Model
 {
-    protected $table = 'tracking_steps';
+    protected $table   = 'tracking_steps';
     public $timestamps = false;
 
-    /**
-     * Get the incoterms that owns the TrackingStep
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
+    protected $fillable = [
+        'oferta_id',
+        'estat',
+        'descripcio',
+        'ubicacio',
+        'data_hora',
+    ];
+
     public function incoterms(): BelongsTo
     {
         return $this->belongsTo(Incoterm::class, 'tracking_steps_id', 'id');

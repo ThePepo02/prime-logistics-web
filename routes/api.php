@@ -2,12 +2,13 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientesController;
+use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\DashboardOperadorController;
 use App\Http\Controllers\EstatOfertaController;
+use App\Http\Controllers\NotificacionsController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\OperacionesController;
 use App\Http\Controllers\TipusTransportController;
-use App\Http\Controllers\NotificacionsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,17 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     //Datos del administrador (dashboard, usuarios, datos maestros)
+
+    //Dashboard Admin
+    Route::get('/data', [DashboardAdminController::class, 'getDashboardData']);
+    Route::get('/advanced-stats', [DashboardAdminController::class, 'getAdvancedStats']);
+
+    Route::post('/export', [DashboardAdminController::class, 'exportDashboardData']);
+    Route::get('/export', [DashboardAdminController::class, 'exportDashboardData']);
+
+    Route::get('/notifications', [DashboardAdminController::class, 'getNotifications']);
+    Route::put('/notifications/{id}/read', [DashboardAdminController::class, 'markNotificationAsRead']);
+
 
     // Dashboard Operador
     Route::get('/dashboard/stats', [DashboardOperadorController::class, 'stats']);
