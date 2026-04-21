@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UsuariosResource;
 use App\Models\Usuarios;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,8 @@ class UsuariosController extends Controller
      */
     public function index()
     {
-        //
+        $usuarios = Usuarios::all();
+        return UsuariosResource::collection($usuarios);
     }
 
     /**
@@ -20,7 +22,15 @@ class UsuariosController extends Controller
      */
     public function create()
     {
-        //
+        $usuarios = new Usuarios();
+        $usuarios->correu = $request->correu;
+        $usuarios->contrasenya = $request->contrasenya;
+        $usuarios->nom = $request->nom;
+        $usuarios->cognoms = $request->cognoms;
+        $usuarios->empresa = $request->empresa;
+
+        $usuarios->save();
+        return new UsuariosResource($usuarios);
     }
 
     /**
@@ -28,7 +38,14 @@ class UsuariosController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $usuarios->correu = $request->correu;
+        $usuarios->contrasenya = $request->contrasenya;
+        $usuarios->nom = $request->nom;
+        $usuarios->cognoms = $request->cognoms;
+        $usuarios->empresa = $request->empresa;
+
+        $usuarios->save();
+        return new UsuariosResource($usuarios);
     }
 
     /**
@@ -36,15 +53,8 @@ class UsuariosController extends Controller
      */
     public function show(Usuarios $usuarios)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Usuarios $usuarios)
-    {
-        //
+        $usuarios = Usuarios::find($usuarios->id);
+        return new UsuariosResource($usuarios);
     }
 
     /**
@@ -52,7 +62,13 @@ class UsuariosController extends Controller
      */
     public function update(Request $request, Usuarios $usuarios)
     {
-        //
+        $usuarios->contrasenya = $request->contrasenya;
+        $usuarios->nom = $request->nom;
+        $usuarios->cognoms = $request->cognoms;
+        $usuarios->empresa = $request->empresa;
+
+        $usuarios->save();
+        return new UsuariosResource($usuarios);
     }
 
     /**
@@ -60,6 +76,8 @@ class UsuariosController extends Controller
      */
     public function destroy(Usuarios $usuarios)
     {
-        //
+        $usuarios = Usuarios::find($usuarios->id);
+        $usuarios->delete();
+        return new UsuariosResource($usuarios);
     }
 }
