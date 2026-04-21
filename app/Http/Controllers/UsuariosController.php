@@ -18,25 +18,9 @@ class UsuariosController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $usuarios = new Usuarios();
-        $usuarios->correu = $request->correu;
-        $usuarios->contrasenya = $request->contrasenya;
-        $usuarios->nom = $request->nom;
-        $usuarios->cognoms = $request->cognoms;
-        $usuarios->empresa = $request->empresa;
-
-        $usuarios->save();
-        return new UsuariosResource($usuarios);
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Usuarios $usuarios)
     {
         $usuarios->correu = $request->correu;
         $usuarios->contrasenya = $request->contrasenya;
@@ -79,5 +63,21 @@ class UsuariosController extends Controller
         $usuarios = Usuarios::find($usuarios->id);
         $usuarios->delete();
         return new UsuariosResource($usuarios);
+    }
+
+        /**
+     * Get user statistics
+     */
+    public function stats()
+    {
+        $total = Usuarios::count();
+        $activos = Usuarios::where('activo', true)->count();
+        $desactivados = Usuarios::where('activo', false)->count();
+        
+        return response()->json([
+            'total' => $total,
+            'activos' => $activos,
+            'desactivados' => $desactivados
+        ]);
     }
 }
