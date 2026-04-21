@@ -199,128 +199,137 @@
 </template>
 
 <script setup>
-// Elimina todos los imports de imágenes y pon esto:
-const logoPrimeLogistics = '/images/logo-empresa.png'
-const imgBtnExportarDatos = '/images/iconoExportarDatos.png'
-const imgPerfilUsuarioAdmin = '/images/perfilUsuarioAdmin.png'
-const imgBtnNotificaciones = '/images/notificaciones-logo.png'
-const imgGraficos = '/images/graficos.png'
+import { ref, reactive, computed, onMounted } from 'vue'
+import dashboardService from '@/services/dashboardService'
 
+// ... (mantén los imports de imágenes)
 
-// Datos reactivos
+// Estado
 const sidebarOpen = ref(false)
 const searchTerm = ref('')
 const statusFilter = ref('')
 const loading = ref(false)
+const offers = ref([])
+const totalOffers = ref(0)
 
-// Datos KPI (vendrían desde API de SQL Server)
+// Datos KPI
 const kpiData = reactive({
-    totalOfertas: 4200,
-    tasaOfertasTrend: 12,
-    aceptadas: 3108,
-    porcentajeAceptacion: 38,
-    aceptadasTrend: 7,
-    enFavor: 38,
-    enFavorTrend: 7,
-    incidencias: 7,
-    incidenciasTrend: -2,
-    activas: 189
+    totalOfertas: 0,
+    tasaOfertasTrend: 0,
+    aceptadas: 0,
+    porcentajeAceptacion: 0,
+    aceptadasTrend: 0,
+    enFavor: 0,
+    enFavorTrend: 0,
+    incidencias: 0,
+    incidenciasTrend: 0,
+    activas: 0
 })
 
 // Datos de actividad semanal
-const weeklyData = ref([
-    { name: 'Sevilla', value: 1280, percentage: 82 },
-    { name: 'Santiago', value: 940, percentage: 60 },
-    { name: 'Barcelona', value: 2150, percentage: 92 },
-    { name: 'Madrid', value: 3420, percentage: 100 },
-    { name: 'Granada', value: 560, percentage: 35 },
-    { name: 'Valencia', value: 1970, percentage: 78 }
-])
+const weeklyData = ref([])
 
-const safeMax = (arr, key) => {
-    return Math.max(...arr.map(d => d[key]), 1)
+// Cargar datos desde API
+const loadData = async () => {
+    loading.value = true
+    try {
+        const params = {
+            search: searchTerm.value,
+            status: statusFilter.value,
+            per_page: 10
+        }
+        
+        const response = await dashboardService.getDashboardData(params)
+        
+        if (response.success) {
+            // Actualizar KPI
+            Object.assign(kpiData, response.data.kpi)
+            
+            // Actualizar actividad semanal
+            weeklyData.value = response.data.weekly_activity
+            
+            // Actualizar ofertas
+            offers.value = response.data.offers.data.map(offer => ({
+                id: offer.id,
+                cliente: offer.client ? `${offer.client.nom} ${offer.client.cognoms}` : 'N/A',
+                empresa: offer.empresa || 'N/A',
+                modo: offer.tipus_transport?.nom || 'N/A',
+                ruta: `${offer.origen || 'N/A'}-${offer.desti || 'N/A'}`,
+                distancia: offer.distancia ? `${offer.distancia} Km` : 'N/A',
+                estado: getStatusForFrontend(offer.estat)
+            }))
+            
+            totalOffers.value = response.data.offers.total
+        }
+    } catch (error) {
+        console.error('Error loading dashboard data:', error)
+        alert('Error al cargar los datos del dashboard')
+    } finally {
+        loading.value = false
+    }
 }
 
-// Datos de ofertas (vendrían desde API)
-const offers = ref([
-    { id: 'OC-2024-021', cliente: 'Marta García', empresa: 'Textil SA', modo: 'Marítimo', ruta: 'Valencia-Shanghai', distancia: '0.1 Km', estado: 'EN TRÁNSITO' },
-    { id: 'OC-2024-020', cliente: 'Pedro López', empresa: 'Multiusos Españoles', modo: 'Aéreo', ruta: 'Barcelona-NY', distancia: '0.8 Km', estado: 'ACEPTADA' },
-    { id: 'OC-2024-019', cliente: 'Marta García', empresa: 'Textil SA', modo: 'Aéreo', ruta: 'Madrid-Miami', distancia: '0.1 Km', estado: 'ACEPTADA' },
-    { id: 'OC-2024-018', cliente: 'Sara Ruz', empresa: 'Import Grado', modo: 'Terrestre', ruta: 'Madrid-Lisboa', distancia: '20 Km', estado: 'COMPLETADA' },
-    { id: 'OC-2024-017', cliente: 'Pedro López', empresa: 'Motivo Empresas', modo: 'Marítimo', ruta: 'Valencia-Montenegro', distancia: '22 Km', estado: 'COMPLETADA' },
-    { id: 'OC-2024-016', cliente: 'Laura Gómez', empresa: 'Tech reports', modo: 'Aéreo', ruta: 'Bilbao-Chicago', distancia: '10 Km', estado: 'RECHAZADA' },
-    { id: 'OC-2024-015', cliente: 'María García', empresa: 'Textil SA', modo: 'Marítimo', ruta: 'Bilbao-Reykjavik', distancia: '15 Km', estado: 'RECHAZADA' },
-    { id: 'OC-2024-014', cliente: 'Sara Ruiz', empresa: 'Import Global', modo: 'Terrestre', ruta: 'Barcelona-Lyon', distancia: '10 Km', estado: 'COMPLETADA' },
-    { id: 'OC-2024-013', cliente: 'Pedro López', empresa: 'Multiusos Españoles', modo: 'Marítimo', ruta: 'Valencia-Singapur', distancia: '25 Km', estado: 'COMPLETADA' },
-    { id: 'OC-2024-012', cliente: 'Marta García', empresa: 'Textil SA', modo: 'Aéreo', ruta: 'Valencia-Almería', distancia: '17 Km', estado: 'COMPLETADA' }
-])
-
-// Datos de usuario
-const userData = reactive({
-    nombre: 'Cortes Martínez',
-    rol: 'MANDATARIO'
-})
-
-// Computed: ofertas filtradas
-const filteredOffers = computed(() => {
-    let result = offers.value
-
-    if (searchTerm.value) {
-        const term = searchTerm.value.toLowerCase()
-        result = result.filter(offer =>
-            offer.id.toLowerCase().includes(term) ||
-            offer.cliente.toLowerCase().includes(term) ||
-            offer.empresa.toLowerCase().includes(term) ||
-            offer.ruta.toLowerCase().includes(term)
-        )
-    }
-
-    if (statusFilter.value) {
-        result = result.filter(offer => offer.estado === statusFilter.value)
-    }
-
-    return result
-})
-
-// Métodos
-const formatNumber = (num) => {
-    return new Intl.NumberFormat('es-ES').format(num)
-}
-
-const getStatusClass = (status) => {
+// Helper para convertir estado al formato del frontend
+const getStatusForFrontend = (status) => {
     const statusMap = {
-        'EN TRÁNSITO': 'status-transito',
-        'ACEPTADA': 'status-aceptado',
-        'COMPLETADA': 'status-completada',
-        'RECHAZADA': 'status-rechazada'
+        'PENDIENTE': 'PENDIENTE',
+        'ACEPTADA': 'ACEPTADA',
+        'EN_TRANSIT': 'EN TRÁNSITO',
+        'COMPLETADA': 'COMPLETADA',
+        'RECHAZADA': 'RECHAZADA'
     }
-    return statusMap[status] || 'status-default'
+    return statusMap[status] || status
 }
 
-const toggleSidebar = () => {
-    sidebarOpen.value = !sidebarOpen.value
+// Exportar datos
+const exportData = async () => {
+    try {
+        await dashboardService.exportData('offers', 'csv', {
+            status: statusFilter.value
+        })
+    } catch (error) {
+        console.error('Error exporting data:', error)
+        alert('Error al exportar los datos')
+    }
 }
 
-const exportData = () => {
-    console.log('Exportando datos...')
-    // Aquí iría la lógica de exportación
-    alert('Exportar datos - Conectando con API')
-}
-
-const clickNotification = () => {
-    console.log('Notificaciones clickeado')
-    alert('Notificaciones - Próximamente')
-}
-
-const clickProfile = () => {
-    console.log('Perfil clickeado')
-    alert('Perfil de administrador')
-}
-
+// Ver oferta
 const viewOffer = (offerId) => {
-    console.log('Ver oferta:', offerId)
-    alert(`Ver detalles de la oferta ${offerId}`)
+    // Aquí puedes redirigir a la página de detalle de la oferta
+    router.push(`/ofertas/${offerId}`)
 }
+
+// Cargar notificaciones
+const loadNotifications = async () => {
+    try {
+        const response = await dashboardService.getNotifications()
+        if (response.success) {
+            // Procesar notificaciones
+            console.log('Notifications:', response.data)
+        }
+    } catch (error) {
+        console.error('Error loading notifications:', error)
+    }
+}
+
+// Click en notificaciones
+const clickNotification = () => {
+    loadNotifications()
+    // Aquí podrías abrir un modal o dropdown con las notificaciones
+    alert('Notificaciones - Conectando con API')
+}
+
+// Click en perfil
+const clickProfile = () => {
+    // Redirigir a perfil de usuario
+    router.push('/perfil')
+}
+
+// Watch para cambios en filtros
+import { watch } from 'vue'
+watch([searchTerm, statusFilter], () => {
+    loadData()
+})
 
 onMounted(() => {
     loadData()
