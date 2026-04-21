@@ -108,12 +108,9 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import logotipo from '/images/logo-empresa.png'
-import iconoNuevoUsuario from '/images/iconoNuevoUsuario.png'
+const logoPrimeLogistics = '/images/logo-empresa.png'
+const imgNuevoUsuario = '/images/iconoNuevoUsuario.png'
 
-
-const logoPrimeLogistics = logotipo
-const imgNuevoUsuario = iconoNuevoUsuario
 const sidebarOpen = ref(false)
 
 // Datos de usuarios según la imagen
@@ -409,7 +406,7 @@ const eliminarUsuario = (user) => {
     .dashboard-content {
         max-width: 100%;
     }
-    
+
     .users-table {
         display: block;
         overflow-x: auto;
