@@ -257,7 +257,7 @@ export default {
         },
         totalEmpresas() { return this.clientes.length },
         totalContactos() { return this.clientes.length },
-        totalOfertas() { return this.clientes.reduce((suma, c) => suma + c.ofertas, 0) },
+        totalOfertas() { return this.clientes.reduce((suma, c) => suma + Number(c.ofertas), 0) },
     },
 
     mounted() {
