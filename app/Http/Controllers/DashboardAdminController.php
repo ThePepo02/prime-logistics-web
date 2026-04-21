@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Oferta;
 use App\Models\Client;
-use App\Models\Transportista;
 use App\Models\TrackingStep;
 use App\Models\Notificacio;
 use App\Models\TipusTransport;
-use App\Models\TipusFlux;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
