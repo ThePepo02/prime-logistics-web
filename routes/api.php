@@ -41,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/usuarios/{id}', [UsuariosController::class, 'update']);
     Route::delete('/usuarios/{id}', [UsuariosController::class, 'destroy']);
 
+
     // Dashboard Operador
     Route::get('/dashboard/stats', [DashboardOperadorController::class, 'stats']);
     Route::get('/dashboard/ofertes', [DashboardOperadorController::class, 'ultimes']);

@@ -197,12 +197,15 @@
         </footer>
     </div>
 </template>
-
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import dashboardService from '@/services/dashboardService'
+// Imágenes
+const logoPrimeLogistics = '/images/logo-empresa.png'
+const imgBtnExportarDatos = '/images/iconoExportarDatos.png'
+const imgPerfilUsuarioAdmin = '/images/perfilUsuarioAdmin.png'
+const imgBtnNotificaciones = '/images/notificaciones-logo.png'
+const imgGraficos = '/images/graficos.png'
 
-// ... (mantén los imports de imágenes)
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 
 // Estado
 const sidebarOpen = ref(false)
@@ -229,63 +232,94 @@ const kpiData = reactive({
 // Datos de actividad semanal
 const weeklyData = ref([])
 
+// Ofertas filtradas
+const filteredOffers = computed(() => {
+    return offers.value.filter(offer => {
+        const coincideTexto = !searchTerm.value ||
+            offer.cliente?.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+            offer.empresa?.toLowerCase().includes(searchTerm.value.toLowerCase())
+        const coincideEstado = !statusFilter.value || offer.estado === statusFilter.value
+        return coincideTexto && coincideEstado
+    })
+})
+
+// Formatear número
+const formatNumber = (num) => {
+    return num?.toLocaleString('es-ES') ?? '0'
+}
+
+// Clase del badge de estado
+const getStatusClass = (estado) => {
+    const map = {
+        'EN TRÁNSITO': 'status-transito',
+        'ACEPTADA':    'status-aceptado',
+        'COMPLETADA':  'status-completada',
+        'RECHAZADA':   'status-rechazada',
+    }
+    return map[estado] ?? ''
+}
+
 // Cargar datos desde API
 const loadData = async () => {
     loading.value = true
     try {
-        const params = {
-            search: searchTerm.value,
-            status: statusFilter.value,
+        const token = localStorage.getItem('token')
+        const params = new URLSearchParams({
+            search:   searchTerm.value,
+            status:   statusFilter.value,
             per_page: 10
-        }
-        
-        const response = await dashboardService.getDashboardData(params)
-        
-        if (response.success) {
-            // Actualizar KPI
-            Object.assign(kpiData, response.data.kpi)
-            
-            // Actualizar actividad semanal
-            weeklyData.value = response.data.weekly_activity
-            
-            // Actualizar ofertas
-            offers.value = response.data.offers.data.map(offer => ({
-                id: offer.id,
-                cliente: offer.client ? `${offer.client.nom} ${offer.client.cognoms}` : 'N/A',
-                empresa: offer.empresa || 'N/A',
-                modo: offer.tipus_transport?.nom || 'N/A',
-                ruta: `${offer.origen || 'N/A'}-${offer.desti || 'N/A'}`,
+        })
+
+        const response = await fetch(`/api/dashboard/data?${params}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+            }
+        })
+
+        const data = await response.json()
+
+        if (data.success) {
+            Object.assign(kpiData, data.data.kpi)
+            weeklyData.value = data.data.weekly_activity
+
+            offers.value = data.data.offers.data.map(offer => ({
+                id:        offer.id,
+                cliente:   offer.client ? `${offer.client.nom} ${offer.client.cognoms}` : 'N/A',
+                empresa:   offer.empresa || 'N/A',
+                modo:      offer.tipus_transport?.nom || 'N/A',
+                ruta:      `${offer.origen || 'N/A'}-${offer.desti || 'N/A'}`,
                 distancia: offer.distancia ? `${offer.distancia} Km` : 'N/A',
-                estado: getStatusForFrontend(offer.estat)
+                estado:    getStatusForFrontend(offer.estat)
             }))
-            
-            totalOffers.value = response.data.offers.total
+
+            totalOffers.value = data.data.offers.total
         }
     } catch (error) {
         console.error('Error loading dashboard data:', error)
-        alert('Error al cargar los datos del dashboard')
     } finally {
         loading.value = false
     }
 }
 
-// Helper para convertir estado al formato del frontend
+// Convertir estado BD → frontend
 const getStatusForFrontend = (status) => {
-    const statusMap = {
-        'PENDIENTE': 'PENDIENTE',
-        'ACEPTADA': 'ACEPTADA',
+    const map = {
+        'PENDIENTE':  'PENDIENTE',
+        'ACEPTADA':   'ACEPTADA',
         'EN_TRANSIT': 'EN TRÁNSITO',
         'COMPLETADA': 'COMPLETADA',
-        'RECHAZADA': 'RECHAZADA'
+        'RECHAZADA':  'RECHAZADA',
     }
-    return statusMap[status] || status
+    return map[status] ?? status
 }
 
 // Exportar datos
 const exportData = async () => {
     try {
-        await dashboardService.exportData('offers', 'csv', {
-            status: statusFilter.value
+        const token = localStorage.getItem('token')
+        await fetch('/api/dashboard/export', {
+            headers: { 'Authorization': `Bearer ${token}` }
         })
     } catch (error) {
         console.error('Error exporting data:', error)
@@ -295,38 +329,20 @@ const exportData = async () => {
 
 // Ver oferta
 const viewOffer = (offerId) => {
-    // Aquí puedes redirigir a la página de detalle de la oferta
-    router.push(`/ofertas/${offerId}`)
+    alert(`Ver oferta: ${offerId}`)
 }
 
-// Cargar notificaciones
-const loadNotifications = async () => {
-    try {
-        const response = await dashboardService.getNotifications()
-        if (response.success) {
-            // Procesar notificaciones
-            console.log('Notifications:', response.data)
-        }
-    } catch (error) {
-        console.error('Error loading notifications:', error)
-    }
-}
-
-// Click en notificaciones
+// Click notificaciones
 const clickNotification = () => {
-    loadNotifications()
-    // Aquí podrías abrir un modal o dropdown con las notificaciones
     alert('Notificaciones - Conectando con API')
 }
 
-// Click en perfil
+// Click perfil
 const clickProfile = () => {
-    // Redirigir a perfil de usuario
-    router.push('/perfil')
+    alert('Perfil de usuario')
 }
 
-// Watch para cambios en filtros
-import { watch } from 'vue'
+// Watch filtros
 watch([searchTerm, statusFilter], () => {
     loadData()
 })
