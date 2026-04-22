@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Incoterm;
@@ -18,11 +19,6 @@ class TrackingStep extends Model
         'data_hora',
     ];
 
-    /**
-     * Get the incoterms that owns the TrackingStep
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
     public function incoterms(): BelongsTo
     {
         return $this->belongsTo(Incoterm::class, 'tracking_steps_id', 'id');

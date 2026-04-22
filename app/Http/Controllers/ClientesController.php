@@ -20,7 +20,7 @@ class ClientesController extends Controller
                     'contacto' => $u->nom . ' ' . $u->cognoms,
                     'email'    => $u->correu,
                     'telefono' => $u->telefon ?? '-',
-                    'ofertas'  => $u->ofertes_count,
+                    'ofertas'  => (int) $u->ofertes_count,
                     'activo'   => (bool) $u->actiu,
                 ];
             });
