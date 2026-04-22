@@ -45,22 +45,18 @@
                 <article class="kpi blue">
                     <h3>Pedidos activos</h3>
                     <p>{{ dashboard.kpis.active }}</p>
-                    <small>2 esta semana</small>
                 </article>
                 <article class="kpi green">
                     <h3>Entregados</h3>
                     <p>{{ dashboard.kpis.delivered }}</p>
-                    <small>Sin reclamaciones</small>
                 </article>
                 <article class="kpi red">
                     <h3>Retrasados</h3>
                     <p>{{ dashboard.kpis.delayed }}</p>
-                    <small>1 en ruta critica</small>
                 </article>
                 <article class="kpi orange">
                     <h3>Incidencias</h3>
                     <p>{{ dashboard.kpis.incidents }}</p>
-                    <small>1 nueva hoy</small>
                 </article>
             </section>
 
@@ -68,7 +64,6 @@
                 <article class="panel compact">
                     <h4>Operaciones activas</h4>
                     <p class="big-number">{{ dashboard.kpis.active }}</p>
-                    <small>2 esta semana</small>
                 </article>
 
                 <article class="panel">
