@@ -98,8 +98,9 @@
 
                 <!-- Botones de acción -->
                 <div class="action-buttons">
-                    <button class="btn-nuevo-usuario" @click="mostrarModalNuevoUsuario">
+                    <button class="btn-nuevo-usuario" @click="handleCreateUser">
                         <img :src="imgNuevoUsuario" alt="icono de añadir un nuevo usuario">Nuevo Usuario
+                        <NuevoUsuario @create-user="handleCreateUser" @close="modalOpen = false" />
                     </button>
                     <button class="btn-on" @click="activarTodos">
                         Activar Todos
@@ -147,9 +148,6 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
-// Configuración de API
-const API_BASE_URL = 'http://localhost:8000/api' // Ajusta según tu configuración
-
 const logoPrimeLogistics = '/images/logo-empresa.png'
 const imgNuevoUsuario = '/images/iconoNuevoUsuario.png'
 
@@ -193,6 +191,10 @@ const cargarEstadisticas = async () => {
     } catch (error) {
         console.error('Error al cargar estadísticas:', error)
     }
+}
+
+const handleCreateUser = (userData) => {
+    console.log('Usuario creado:', userData)
 }
 
 const guardarUsuario = async () => {
@@ -264,22 +266,6 @@ const activarTodos = async () => {
             alert('Error al activar los usuarios')
         }
     }
-}
-
-const nuevoUsuario = () => {
-    modoEdicion.value = false
-    formData.value = {
-        nom: '',
-        cognoms: '',
-        correu: '',
-        empresa: '',
-        contrasenya: ''
-    }
-    modalVisible.value = true
-}
-
-const mostrarModalNuevoUsuario = () => {
-    nuevoUsuario()
 }
 
 const cerrarModal = () => {
