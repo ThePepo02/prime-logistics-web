@@ -13,3 +13,4 @@
     <ofertas-activas-admin-component></ofertas-activas-admin-component>
     <datos-maestros-component></datos-maestros-component>
 @endsection
+

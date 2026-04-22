@@ -12,6 +12,10 @@ use App\Http\Controllers\TipusTransportController;
 use App\Http\Controllers\UsuariosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Client\DashboardController;
+use App\Http\Controllers\Client\OrderController;
+use App\Http\Controllers\Client\TrackingController;
+use App\Http\Controllers\Client\NotificationController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');

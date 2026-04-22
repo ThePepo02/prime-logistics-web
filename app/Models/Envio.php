@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Envio extends Model
 {
     protected $table = 'envios';
-<<<<<<< HEAD
+
 
     protected $fillable = [
         'origen',
@@ -36,7 +36,5 @@ class Envio extends Model
     {
         return $this->belongsTo(User::class, 'cliente_id');
     }
-=======
     public $timestamps = false;
->>>>>>> ea23f4298696ad98487a64ea3b4adcb5d0cd246b
 }

@@ -1,21 +1,15 @@
 <?php
-<<<<<<< HEAD
 
-namespace App\Models;
-
-=======
 namespace App\Models;
 
 use App\Models\Envio;
 use App\Models\Usuarios;
 use App\Models\EstatOferta;
 use App\Models\TipusTransport;
->>>>>>> ea23f4298696ad98487a64ea3b4adcb5d0cd246b
 use Illuminate\Database\Eloquent\Model;
 
 class Oferta extends Model
 {
-<<<<<<< HEAD
     protected $table = 'ofertes';
 
     public $timestamps = false;
@@ -37,7 +31,6 @@ class Oferta extends Model
         return $this->belongsTo(User::class, 'client_id');
     }
 
-=======
     protected $table = 'ofertes'; // Tabla en SQL Server
     public $timestamps = false;   // Sin created_at / updated_at
 
@@ -71,7 +64,7 @@ class Oferta extends Model
     // Oferta → pertenece a un Usuario (cliente)
     public function client()
     {
-        return $this->belongsTo(Usuarios::class, 'client_id');
+        return $this->belongsTo(User::class, 'client_id');
     }
 
     // Oferta → tiene un Envio asociado
@@ -81,16 +74,12 @@ class Oferta extends Model
     }
 
     // Oferta → pertenece a un Estado (Enviada, Aceptada...)
->>>>>>> ea23f4298696ad98487a64ea3b4adcb5d0cd246b
     public function estatOferta()
     {
         return $this->belongsTo(EstatOferta::class, 'estat_oferta_id');
     }
 
-<<<<<<< HEAD
-=======
     // Oferta → pertenece a un Tipo de Transporte (Marítimo, Aéreo...)
->>>>>>> ea23f4298696ad98487a64ea3b4adcb5d0cd246b
     public function tipusTransport()
     {
         return $this->belongsTo(TipusTransport::class, 'tipus_transport_id');

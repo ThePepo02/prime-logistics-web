@@ -25,6 +25,8 @@ Route::get('/cliente/tracking', function () {
 Route::get('/cliente/notificaciones', function () {
     return view('client.notifications');
 })->name('client.notifications');
+    return redirect('/login');
+});
 
 Route::get('/admin', function(){
     return view('index');
@@ -36,4 +38,8 @@ Route::get('/dashboard', function() {
 
 Route::get('/operador', function () {
     return view('operador');
+});
+
+Route::get('/clientes', function () {
+    return view('operador');            // usa el mismo blade del operador
 });
