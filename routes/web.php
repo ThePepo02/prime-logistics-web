@@ -25,3 +25,15 @@ Route::get('/cliente/tracking', function () {
 Route::get('/cliente/notificaciones', function () {
     return view('client.notifications');
 })->name('client.notifications');
+
+Route::get('/admin', function(){
+    return view('index');
+});
+
+Route::get('/dashboard', function() {
+    return view('/dashboard');
+});
+
+Route::get('/operador', function () {
+    return view('operador');
+});
