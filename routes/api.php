@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\DatosMaestrosController;
+use App\Http\Controllers\Api\EmpresaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\DashboardAdminController;
@@ -40,6 +42,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/usuarios/{id}', [UsuariosController::class, 'show']);
     Route::put('/usuarios/{id}', [UsuariosController::class, 'update']);
     Route::delete('/usuarios/{id}', [UsuariosController::class, 'destroy']);
+
+    //Datos Maestros Admin
+    // Dashboard datos maestros
+    Route::get('/datos-maestros/dashboard', [DatosMaestrosController::class, 'getDashboardData']);
+    Route::get('/datos-maestros/estadisticas', [DatosMaestrosController::class, 'getEstadisticas']);
+    
+    // CRUDs
+    Route::apiResource('empresas', EmpresaController::class);
 
 
     // Dashboard Operador
