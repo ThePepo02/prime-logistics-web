@@ -95,7 +95,7 @@ export default {
                 const rolId = data.user.rol_id;
 
                 if (rolId == 1) {
-                    window.location.href = '/admin';
+                    window.location.href = '/dashboard';
                 } else if (rolId == 2) {
                     window.location.href = '/operador';
                 } else if (rolId == 3) {
