@@ -100,6 +100,8 @@ export default {
                     window.location.href = '/operador';
                 } else if (rolId == 3) {
                     window.location.href = '/cliente';
+                } else if (rolId === 4) {
+                    window.location.href = '/admin';
                 } else {
                     this.error = 'Rol de usuario desconocido';
                 }
