@@ -10,8 +10,8 @@ Route::get('/login', function() {
     return view('auth.login');
 });
 
-Route::get('/dashboard', function(){
-    return view('dashboard');
+Route::get('/admin', function(){
+    return view('index');
 });
 
 Route::get('/operador', function () {
