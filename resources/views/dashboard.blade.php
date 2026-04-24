@@ -15,7 +15,7 @@
                          #0D1E35;">
 
     <div id="app">
-        <dashboard-admin-component></dashboard-admin-component>
+        
     </div>
 
 </body>
