@@ -11,7 +11,7 @@ Route::get('/login', function() {
 });
 
 Route::get('/dashboard', function(){
-    return view('index');
+    return view('dashboard');
 });
 
 Route::get('/operador', function () {
