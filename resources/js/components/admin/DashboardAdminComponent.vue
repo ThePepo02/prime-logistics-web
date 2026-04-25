@@ -198,187 +198,158 @@
     </div>
 </template>
 <script setup>
-// Importamos los componentes hijos de este componente
-import GestionUsuariosComponent from './GestionUsuariosComponent.vue'
-import DashboardOfertasAdminComponent from './DashboardOfertasAdminComponent.vue'
-import OfertasActivasAdminComponent from './OfertasActivasAdminComponent.vue'
-import DatosMaestrosComponent from './DatosMaestrosComponent.vue'
+// Imágenes
+const logoPrimeLogistics = '/images/logo-empresa.png'
+const imgBtnExportarDatos = '/images/iconoExportarDatos.png'
+const imgPerfilUsuarioAdmin = '/images/perfilUsuarioAdmin.png'
+const imgBtnNotificaciones = '/images/notificaciones-logo.png'
+const imgGraficos = '/images/graficos.png'
 
-export default {
-    name: 'DashboardAdminComponent',
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 
-    // registro de los componentes hijos que usa este componente
-    components: {
-        GestionUsuariosComponent,
-        DashboardOfertasAdminComponent,
-        OfertasActivasAdminComponent,
-        DatosMaestrosComponent,
-    },
+// Estado
+const sidebarOpen = ref(false)
+const searchTerm = ref('')
+const statusFilter = ref('')
+const loading = ref(false)
+const offers = ref([])
+const totalOffers = ref(0)
 
-    data() {
-        return {
-            // Variable para mostrar la página correspondiente
-            paginaActual: 'index',
+// Datos KPI
+const kpiData = reactive({
+    totalOfertas: 0,
+    tasaOfertasTrend: 0,
+    aceptadas: 0,
+    porcentajeAceptacion: 0,
+    aceptadasTrend: 0,
+    enFavor: 0,
+    enFavorTrend: 0,
+    incidencias: 0,
+    incidenciasTrend: 0,
+    activas: 0
+})
 
-            logoPrimeLogistics: '/images/logo-empresa.png',
+// Datos de actividad semanal
+const weeklyData = ref([])
 
-            // Datos del Dashboard del administrador
-            kpis: [
-                { value: 0, label: 'Total Ofertas', sub: '↑ 12% vs mes anterior', border: 'border-orange-400', iconColor: 'text-orange-400', subColor: 'text-orange-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>' },
-                { value: 0, label: 'Aceptadas', sub: '74% tasa global', border: 'border-green-500', iconColor: 'text-green-500', subColor: 'text-green-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>' },
-                { value: 0, label: 'En Tránsito', sub: '↑ 5 esta semana', border: 'border-blue-500', iconColor: 'text-blue-500', subColor: 'text-blue-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>' },
-                { value: 0, label: 'Incidentes', sub: '↓ 2 vs semana pasada', border: 'border-red-400', iconColor: 'text-red-400', subColor: 'text-red-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>' },
-            ],
+// Ofertas filtradas
+const filteredOffers = computed(() => {
+    return offers.value.filter(offer => {
+        const coincideTexto = !searchTerm.value ||
+            offer.cliente?.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+            offer.empresa?.toLowerCase().includes(searchTerm.value.toLowerCase())
+        const coincideEstado = !statusFilter.value || offer.estado === statusFilter.value
+        return coincideTexto && coincideEstado
+    })
+})
 
-            offers: [],
-            alerts: [],
+// Formatear número
+const formatNumber = (num) => {
+    return num?.toLocaleString('es-ES') ?? '0'
+}
 
-            // Estado UI
-            sidebarOpen: false,
-            searchTerm: '',
-            statusFilter: '',
-            loading: false,
-            totalOffers: 0,
+// Clase del badge de estado
+const getStatusClass = (estado) => {
+    const map = {
+        'EN TRÁNSITO': 'status-transito',
+        'ACEPTADA': 'status-aceptado',
+        'COMPLETADA': 'status-completada',
+        'RECHAZADA': 'status-rechazada',
+    }
+    return map[estado] ?? ''
+}
 
-            // Datos KPI extendidos
-            kpiData: {
-                totalOfertas: 0,
-                tasaOfertasTrend: 0,
-                aceptadas: 0,
-                porcentajeAceptacion: 0,
-                aceptadasTrend: 0,
-                enFavor: 0,
-                enFavorTrend: 0,
-                incidencias: 0,
-                incidenciasTrend: 0,
-                activas: 0
-            },
+// Cargar datos desde API
+const loadData = async () => {
+    loading.value = true
+    try {
+        const token = localStorage.getItem('token')
+        const params = new URLSearchParams({
+            search: searchTerm.value,
+            status: statusFilter.value,
+            per_page: 10
+        })
 
-            // Datos de actividad semanal
-            weeklyData: [],
-        }
-    },
-
-    computed: {
-        filteredOffers() {
-            return this.offers.filter(offer => {
-                const coincideTexto = !this.searchTerm ||
-                    offer.cliente?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                    offer.empresa?.toLowerCase().includes(this.searchTerm.toLowerCase())
-
-                const coincideEstado = !this.statusFilter || offer.estado === this.statusFilter
-
-                return coincideTexto && coincideEstado
-            })
-        }
-    },
-
-    mounted() {
-        this.loadData()
-    },
-
-    methods: {
-        formatNumber(num) {
-            return num?.toLocaleString('es-ES') ?? '0'
-        },
-
-        getStatusClass(estado) {
-            const map = {
-                'EN TRÁNSITO': 'status-transito',
-                'ACEPTADA': 'status-aceptado',
-                'COMPLETADA': 'status-completada',
-                'RECHAZADA': 'status-rechazada',
+        const response = await fetch(`/api/dashboard/data?${params}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
             }
-            return map[estado] ?? ''
-        },
+        })
 
-        getStatusForFrontend(status) {
-            const map = {
-                'PENDIENTE': 'PENDIENTE',
-                'ACEPTADA': 'ACEPTADA',
-                'EN_TRANSIT': 'EN TRÁNSITO',
-                'COMPLETADA': 'COMPLETADA',
-                'RECHAZADA': 'RECHAZADA',
-            }
-            return map[status] ?? status
-        },
+        const data = await response.json()
 
-        async loadData() {
-            this.loading = true
-            try {
-                const token = localStorage.getItem('token')
-                const params = new URLSearchParams({
-                    search: this.searchTerm,
-                    status: this.statusFilter,
-                    per_page: 10
-                })
+        if (data.success) {
+            Object.assign(kpiData, data.data.kpi)
+            weeklyData.value = data.data.weekly_activity
 
-                const response = await fetch(`/api/dashboard/data?${params}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json',
-                    }
-                })
+            offers.value = data.data.offers.data.map(offer => ({
+                id: offer.id,
+                cliente: offer.client ? `${offer.client.nom} ${offer.client.cognoms}` : 'N/A',
+                empresa: offer.empresa || 'N/A',
+                modo: offer.tipus_transport?.nom || 'N/A',
+                ruta: `${offer.origen || 'N/A'}-${offer.desti || 'N/A'}`,
+                distancia: offer.distancia ? `${offer.distancia} Km` : 'N/A',
+                estado: getStatusForFrontend(offer.estat)
+            }))
 
-                const data = await response.json()
-
-                if (data.success) {
-                    Object.assign(this.kpiData, data.data.kpi)
-                    this.weeklyData = data.data.weekly_activity
-
-                    this.offers = data.data.offers.data.map(offer => ({
-                        id: offer.id,
-                        cliente: offer.client ? `${offer.client.nom} ${offer.client.cognoms}` : 'N/A',
-                        empresa: offer.empresa || 'N/A',
-                        modo: offer.tipus_transport?.nom || 'N/A',
-                        ruta: `${offer.origen || 'N/A'}-${offer.desti || 'N/A'}`,
-                        distancia: offer.distancia ? `${offer.distancia} Km` : 'N/A',
-                        estado: this.getStatusForFrontend(offer.estat)
-                    }))
-
-                    this.totalOffers = data.data.offers.total
-                }
-            } catch (error) {
-                console.error('Error loading dashboard data:', error)
-            } finally {
-                this.loading = false
-            }
-        },
-
-        async exportData() {
-            try {
-                const token = localStorage.getItem('token')
-                await fetch('/api/dashboard/export', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-            } catch (error) {
-                console.error('Error exporting data:', error)
-                alert('Error al exportar los datos')
-            }
-        },
-
-        viewOffer(offerId) {
-            alert(`Ver oferta: ${offerId}`)
-        },
-
-        clickNotification() {
-            alert('Notificaciones - Conectando con API')
-        },
-
-        clickProfile() {
-            alert('Perfil de usuario')
+            totalOffers.value = data.data.offers.total
         }
-    },
-
-    watch: {
-        searchTerm() {
-            this.loadData()
-        },
-        statusFilter() {
-            this.loadData()
-        }
+    } catch (error) {
+        console.error('Error loading dashboard data:', error)
+    } finally {
+        loading.value = false
     }
 }
+
+// Convertir estado BD → frontend
+const getStatusForFrontend = (status) => {
+    const map = {
+        'PENDIENTE': 'PENDIENTE',
+        'ACEPTADA': 'ACEPTADA',
+        'EN_TRANSIT': 'EN TRÁNSITO',
+        'COMPLETADA': 'COMPLETADA',
+        'RECHAZADA': 'RECHAZADA',
+    }
+    return map[status] ?? status
+}
+
+// Exportar datos
+const exportData = async () => {
+    try {
+        const token = localStorage.getItem('token')
+        await fetch('/api/dashboard/export', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+    } catch (error) {
+        console.error('Error exporting data:', error)
+        alert('Error al exportar los datos')
+    }
+}
+
+// Ver oferta
+const viewOffer = (offerId) => {
+    alert(`Ver oferta: ${offerId}`)
+}
+
+// Click notificaciones
+const clickNotification = () => {
+    alert('Notificaciones - Conectando con API')
+}
+
+// Click perfil
+const clickProfile = () => {
+    alert('Perfil de usuario')
+}
+
+// Watch filtros
+watch([searchTerm, statusFilter], () => {
+    loadData()
+})
+
+onMounted(() => {
+    loadData()
+})
 </script>
 
 <style lang="scss" scoped>
