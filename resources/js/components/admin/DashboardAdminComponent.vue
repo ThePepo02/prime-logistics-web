@@ -54,84 +54,90 @@
                             <li><a href="#" class="nav-link" :class="{ active: activeSection === 'datos-maestros' }"
                                     @click.prevent="activeSection = 'datos-maestros'">Datos Maestros</a></li>
                             <li><a href="#" class="nav-link" :class="{ active: activeSection === 'configuracion' }"
-                                    @click.prevent>Configuración</a></li>
+                                    @click.prevent="activeSection = 'configuracion'">Configuración</a></li>
                         </ul>
                     </div>
                 </nav>
             </aside>
-        </div>
-        <!-- Contenido principal -->
-        <main class="main-content">
-            <!-- Header -->
-            <header class="top-header">
-                <button class="btn-mobile-menu" @click="toggleSidebar">
-                    ☰
-                </button>
-                <img :src="logoPrimeLogistics" alt="Logo" class="logo" />
-                <div class="header-actions">
-                    <button class="btn-notificaciones" @click="clickNotification">
-                        <img :src="imgBtnNotificaciones" alt="Notificaciones" />
-                    </button>
-                    <button class="btn-perfil" @click="clickProfile">
-                        <img :src="imgPerfilUsuarioAdmin" alt="Perfil" />
-                    </button>
-                </div>
-            </header>
 
-            <!-- Vista Dashboard -->
-            <div v-if="activeSection === 'dashboard'" class="dashboard-content">
-                <!-- KPIs -->
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <h3>Total Ofertas</h3>
-                        <p class="kpi-value">{{ formatNumber(kpiData.totalOfertas) }}</p>
-                        <span :class="['trend', kpiData.tasaOfertasTrend >= 0 ? 'positive' : 'negative']">
-                            {{ kpiData.tasaOfertasTrend }}%
-                        </span>
-                    </div>
-                    <div class="kpi-card">
-                        <h3>Aceptadas</h3>
-                        <p class="kpi-value">{{ formatNumber(kpiData.aceptadas) }}</p>
-                        <span :class="['trend', kpiData.aceptadasTrend >= 0 ? 'positive' : 'negative']">
-                            {{ kpiData.aceptadasTrend }}%
-                        </span>
-                    </div>
-                    <div class="kpi-card">
-                        <h3>En Favor</h3>
-                        <p class="kpi-value">{{ formatNumber(kpiData.enFavor) }}</p>
-                        <span :class="['trend', kpiData.enFavorTrend >= 0 ? 'positive' : 'negative']">
-                            {{ kpiData.enFavorTrend }}%
-                        </span>
-                    </div>
-                    <div class="kpi-card">
-                        <h3>Incidencias</h3>
-                        <p class="kpi-value">{{ formatNumber(kpiData.incidencias) }}</p>
-                        <span :class="['trend', kpiData.incidenciasTrend >= 0 ? 'positive' : 'negative']">
-                            {{ kpiData.incidenciasTrend }}%
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Filtros -->
-                <div class="filters-bar">
-                    <input v-model="searchTerm" type="text" placeholder="Buscar cliente o empresa..."
-                        class="search-input" />
-                    <select v-model="statusFilter" class="status-filter">
-                        <option value="">Todos los estados</option>
-                        <option value="PENDIENTE">Pendiente</option>
-                        <option value="ACEPTADA">Aceptada</option>
-                        <option value="EN TRÁNSITO">En Tránsito</option>
-                        <option value="COMPLETADA">Completada</option>
-                        <option value="RECHAZADA">Rechazada</option>
-                    </select>
-                    <button @click="exportData" class="btn-exportar">
-                        <img :src="imgBtnExportarDatos" alt="Exportar" />
-                        Exportar
+            <!-- Contenido principal -->
+            <main class="main-content">
+                <!-- Header móvil -->
+                <header class="top-header">
+                    <button class="btn-mobile-menu" @click="toggleSidebar">
+                        ☰
                     </button>
-                </div>
+                    <img :src="logoPrimeLogistics" alt="Logo" class="logo-mobile" />
+                    <div class="header-actions">
+                        <button class="btn-notificaciones" @click="clickNotification">
+                            <img :src="imgBtnNotificaciones" alt="Notificaciones" />
+                        </button>
+                        <button class="btn-perfil" @click="clickProfile">
+                            <img :src="imgPerfilUsuarioAdmin" alt="Perfil" />
+                        </button>
+                    </div>
+                </header>
 
-                    <div class="offers_table">
-                        <table class="offers">
+                <!-- Vista Dashboard -->
+                <div v-if="activeSection === 'dashboard'" class="dashboard-content">
+                    <!-- KPIs -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <h3>Total Ofertas</h3>
+                            <p class="kpi-value">{{ formatNumber(kpiData.totalOfertas) }}</p>
+                            <span :class="['trend', kpiData.tasaOfertasTrend >= 0 ? 'positive' : 'negative']">
+                                {{ kpiData.tasaOfertasTrend }}%
+                            </span>
+                        </div>
+                        <div class="kpi-card">
+                            <h3>Aceptadas</h3>
+                            <p class="kpi-value">{{ formatNumber(kpiData.aceptadas) }}</p>
+                            <span :class="['trend', kpiData.aceptadasTrend >= 0 ? 'positive' : 'negative']">
+                                {{ kpiData.aceptadasTrend }}%
+                            </span>
+                        </div>
+                        <div class="kpi-card">
+                            <h3>En Favor</h3>
+                            <p class="kpi-value">{{ formatNumber(kpiData.enFavor) }}</p>
+                            <span :class="['trend', kpiData.enFavorTrend >= 0 ? 'positive' : 'negative']">
+                                {{ kpiData.enFavorTrend }}%
+                            </span>
+                        </div>
+                        <div class="kpi-card">
+                            <h3>Incidencias</h3>
+                            <p class="kpi-value">{{ formatNumber(kpiData.incidencias) }}</p>
+                            <span :class="['trend', kpiData.incidenciasTrend >= 0 ? 'positive' : 'negative']">
+                                {{ kpiData.incidenciasTrend }}%
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="filters-bar">
+                        <input v-model="searchTerm" type="text" placeholder="Buscar cliente o empresa..."
+                            class="search-input" />
+                        <select v-model="statusFilter" class="status-filter">
+                            <option value="">Todos los estados</option>
+                            <option value="PENDIENTE">Pendiente</option>
+                            <option value="ACEPTADA">Aceptada</option>
+                            <option value="EN TRÁNSITO">En Tránsito</option>
+                            <option value="COMPLETADA">Completada</option>
+                            <option value="RECHAZADA">Rechazada</option>
+                        </select>
+                        <button @click="exportData" class="btn-exportar">
+                            <img :src="imgBtnExportarDatos" alt="Exportar" />
+                            Exportar
+                        </button>
+                    </div>
+
+                    <!-- Loading spinner -->
+                    <div v-if="loading" class="loading-spinner">
+                        Cargando datos...
+                    </div>
+
+                    <!-- Tabla de ofertas -->
+                    <div v-else class="offers-table-container">
+                        <table class="offers-table">
                             <thead>
                                 <tr>
                                     <th>ID de la oferta</th>
@@ -152,11 +158,14 @@
                                     <td>{{ offer.modo }}</td>
                                     <td>{{ offer.ruta }}</td>
                                     <td>{{ offer.distancia }}</td>
-                                    <td><span :class="['status-badge', getStatusClass(offer.estado)]">{{ offer.estado
-                                            }}</span></td>
+                                    <td>
+                                        <span :class="['status-badge', getStatusClass(offer.estado)]">
+                                            {{ offer.estado }}
+                                        </span>
+                                    </td>
                                     <td>
                                         <button class="action-btn" @click="viewOffer(offer.id)">
-                                            <i class="bi bi-eye"></i> Ver
+                                            👁️ Ver
                                         </button>
                                     </td>
                                 </tr>
@@ -165,46 +174,47 @@
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
 
-                    <div class="table-footer">
-                        <p>Total: {{ totalOffers }} ofertas</p>
+                        <div class="table-footer">
+                            <p>Total: {{ totalOffers }} ofertas</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Vista Gestión de Usuarios -->
-            <div v-else-if="activeSection === 'usuarios'" class="section-content">
-                <h2>Gestión de Usuarios</h2>
-                <p>Contenido de gestión de usuarios aquí...</p>
-            </div>
+                <!-- Vista Gestión de Usuarios -->
+                <div v-else-if="activeSection === 'usuarios'" class="section-content">
+                    <h2>Gestión de Usuarios</h2>
+                    <p>Contenido de gestión de usuarios aquí...</p>
+                </div>
 
-            <!-- Vista Todas las Ofertas -->
-            <div v-else-if="activeSection === 'ofertas'" class="section-content">
-                <h2>Todas las Ofertas</h2>
-                <p>Contenido de todas las ofertas aquí...</p>
-            </div>
+                <!-- Vista Todas las Ofertas -->
+                <div v-else-if="activeSection === 'ofertas'" class="section-content">
+                    <h2>Todas las Ofertas</h2>
+                    <p>Contenido de todas las ofertas aquí...</p>
+                </div>
 
-            <!-- Vista Operaciones Activas -->
-            <div v-else-if="activeSection === 'activas'" class="section-content">
-                <h2>Operaciones Activas</h2>
-                <p>Contenido de operaciones activas aquí...</p>
-            </div>
+                <!-- Vista Operaciones Activas -->
+                <div v-else-if="activeSection === 'activas'" class="section-content">
+                    <h2>Operaciones Activas</h2>
+                    <p>Contenido de operaciones activas aquí...</p>
+                </div>
 
-            <!-- Vista Datos Maestros -->
-            <div v-else-if="activeSection === 'datos-maestros'" class="section-content">
-                <h2>Datos Maestros</h2>
-                <p>Contenido de datos maestros aquí...</p>
-            </div>
+                <!-- Vista Datos Maestros -->
+                <div v-else-if="activeSection === 'datos-maestros'" class="section-content">
+                    <h2>Datos Maestros</h2>
+                    <p>Contenido de datos maestros aquí...</p>
+                </div>
 
-            <!-- Vista Configuración -->
-            <div v-else-if="activeSection === 'configuracion'" class="section-content">
-                <h2>Configuración</h2>
-                <p>Contenido de configuración aquí...</p>
-            </div>
-        </main>
+                <!-- Vista Configuración -->
+                <div v-else-if="activeSection === 'configuracion'" class="section-content">
+                    <h2>Configuración</h2>
+                    <p>Contenido de configuración aquí...</p>
+                </div>
+            </main>
+        </div>
     </div>
 </template>
+
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 
@@ -216,6 +226,7 @@ const imgBtnNotificaciones = '/images/notificaciones-logo.png'
 const imgGraficos = '/images/graficos.png'
 
 // Estado
+const activeSection = ref('dashboard')
 const sidebarOpen = ref(false)
 const searchTerm = ref('')
 const statusFilter = ref('')
@@ -268,8 +279,21 @@ const getStatusClass = (estado) => {
         'ACEPTADA': 'status-aceptado',
         'COMPLETADA': 'status-completada',
         'RECHAZADA': 'status-rechazada',
+        'PENDIENTE': 'status-pendiente'
     }
     return map[estado] ?? 'status-default'
+}
+
+// Convertir estado BD → frontend
+const getStatusForFrontend = (status) => {
+    const map = {
+        'PENDIENTE': 'PENDIENTE',
+        'ACEPTADA': 'ACEPTADA',
+        'EN_TRANSIT': 'EN TRÁNSITO',
+        'COMPLETADA': 'COMPLETADA',
+        'RECHAZADA': 'RECHAZADA',
+    }
+    return map[status] ?? status
 }
 
 // Cargar datos desde API
@@ -315,25 +339,18 @@ const loadData = async () => {
     }
 }
 
-// Convertir estado BD → frontend
-const getStatusForFrontend = (status) => {
-    const map = {
-        'PENDIENTE': 'PENDIENTE',
-        'ACEPTADA': 'ACEPTADA',
-        'EN_TRANSIT': 'EN TRÁNSITO',
-        'COMPLETADA': 'COMPLETADA',
-        'RECHAZADA': 'RECHAZADA',
-    }
-    return map[status] ?? status
-}
-
 // Exportar datos
 const exportData = async () => {
     try {
         const token = localStorage.getItem('token')
-        await fetch('/api/dashboard/export', {
+        const response = await fetch('/api/dashboard/export', {
             headers: { 'Authorization': `Bearer ${token}` }
         })
+        if (response.ok) {
+            alert('Datos exportados correctamente')
+        } else {
+            alert('Error al exportar los datos')
+        }
     } catch (error) {
         console.error('Error exporting data:', error)
         alert('Error al exportar los datos')
@@ -367,9 +384,15 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 /* Estilos del layout */
-.dashboard-wrapper {
+.dashboard-container {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
+}
+
+.dashboard-layout {
+    display: flex;
+    flex: 1;
 }
 
 /* Sidebar */
@@ -446,13 +469,35 @@ onMounted(() => {
 }
 
 /* Header */
-.top-header {
+.dashboard-header {
     background-color: white;
-    padding: 1rem;
+    padding: 1rem 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+.top-header {
+    background-color: white;
+    padding: 1rem;
+    display: none;
+    align-items: center;
+    gap: 1rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .top-header {
+        display: flex;
+    }
+    
+    .dashboard-header {
+        display: none;
+    }
 }
 
 .btn-mobile-menu {
@@ -469,13 +514,20 @@ onMounted(() => {
     }
 }
 
-.logo {
+.logo-mobile {
     height: 40px;
 }
 
 .header-actions {
     margin-left: auto;
     display: flex;
+    gap: 1rem;
+}
+
+.actions-bar {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
     gap: 1rem;
 }
 
@@ -498,6 +550,12 @@ onMounted(() => {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.kpi-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
 .kpi-value {
     font-size: 2rem;
     font-weight: bold;
@@ -506,14 +564,19 @@ onMounted(() => {
 
 .trend {
     font-size: 0.875rem;
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
 }
 
 .trend.positive {
     color: #10b981;
+    background-color: #d1fae5;
 }
 
 .trend.negative {
     color: #ef4444;
+    background-color: #fee2e2;
 }
 
 /* Filtros */
@@ -521,19 +584,23 @@ onMounted(() => {
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
 }
 
 .search-input {
     flex: 1;
+    min-width: 200px;
     padding: 0.5rem;
     border: 1px solid #cbd5e1;
     border-radius: 0.25rem;
+    font-size: 0.875rem;
 }
 
 .status-filter {
     padding: 0.5rem;
     border: 1px solid #cbd5e1;
     border-radius: 0.25rem;
+    font-size: 0.875rem;
 }
 
 .btn-exportar {
@@ -543,6 +610,15 @@ onMounted(() => {
     border: none;
     border-radius: 0.25rem;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-exportar img {
+    width: 16px;
+    height: 16px;
 }
 
 /* Tabla */
@@ -550,11 +626,13 @@ onMounted(() => {
     background-color: white;
     border-radius: 0.5rem;
     overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .offers-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 800px;
 }
 
 .offers-table th {
@@ -562,17 +640,22 @@ onMounted(() => {
     padding: 1rem;
     background-color: #f8fafc;
     border-bottom: 1px solid #e2e8f0;
+    font-weight: 600;
+    font-size: 0.875rem;
 }
 
 .offers-table td {
     padding: 1rem;
     border-bottom: 1px solid #e2e8f0;
+    font-size: 0.875rem;
 }
 
 .status-badge {
-    padding: 0.25rem 0.5rem;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
     border-radius: 9999px;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
+    font-weight: 500;
 }
 
 .status-transito {
@@ -595,27 +678,61 @@ onMounted(() => {
     color: #991b1b;
 }
 
-.btn-view {
+.status-pendiente {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+.action-btn {
     padding: 0.25rem 0.75rem;
     background-color: #3b82f6;
     color: white;
     border: none;
     border-radius: 0.25rem;
     cursor: pointer;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.action-btn:hover {
+    background-color: #2563eb;
 }
 
 .loading-spinner {
     text-align: center;
-    padding: 2rem;
+    padding: 3rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    color: #64748b;
 }
 
 .table-footer {
     padding: 1rem;
     text-align: right;
     border-top: 1px solid #e2e8f0;
+    background-color: white;
+    border-radius: 0 0 0.5rem 0.5rem;
 }
 
 .section-content {
     padding: 2rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.title-sub {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: normal;
+    margin-left: 0.5rem;
 }
 </style>
