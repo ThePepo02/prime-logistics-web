@@ -130,43 +130,43 @@
                     </button>
                 </div>
 
-                <!-- Tabla de ofertas -->
-                <div class="offers-table-container">
-                    <div v-if="loading" class="loading-spinner">Cargando...</div>
-                    <table v-else class="offers-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Cliente</th>
-                                <th>Empresa</th>
-                                <th>Modo</th>
-                                <th>Ruta</th>
-                                <th>Distancia</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="offer in filteredOffers" :key="offer.id">
-                                <td>{{ offer.id }}</td>
-                                <td>{{ offer.cliente }}</td>
-                                <td>{{ offer.empresa }}</td>
-                                <td>{{ offer.modo }}</td>
-                                <td>{{ offer.ruta }}</td>
-                                <td>{{ offer.distancia }}</td>
-                                <td>
-                                    <span :class="['status-badge', getStatusClass(offer.estado)]">
-                                        {{ offer.estado }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button @click="viewOffer(offer.id)" class="btn-view">
-                                        Ver
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="offers_table">
+                        <table class="offers">
+                            <thead>
+                                <tr>
+                                    <th>ID de la oferta</th>
+                                    <th>Cliente</th>
+                                    <th>Empresa</th>
+                                    <th>Modo</th>
+                                    <th>Ruta</th>
+                                    <th>Distancia</th>
+                                    <th>Estatus</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="offer in filteredOffers" :key="offer.id">
+                                    <td>{{ offer.id }}</td>
+                                    <td>{{ offer.cliente }}</td>
+                                    <td>{{ offer.empresa }}</td>
+                                    <td>{{ offer.modo }}</td>
+                                    <td>{{ offer.ruta }}</td>
+                                    <td>{{ offer.distancia }}</td>
+                                    <td><span :class="['status-badge', getStatusClass(offer.estado)]">{{ offer.estado
+                                            }}</span></td>
+                                    <td>
+                                        <button class="action-btn" @click="viewOffer(offer.id)">
+                                            <i class="bi bi-eye"></i> Ver
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr v-if="filteredOffers.length === 0">
+                                    <td colspan="8" class="text-center">No se encontraron ofertas</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
                     <div class="table-footer">
                         <p>Total: {{ totalOffers }} ofertas</p>
                     </div>
