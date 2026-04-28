@@ -34,4 +34,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Filtros
     Route::get('/estats-ofertes', [EstatOfertaController::class, 'index']);
     Route::get('/tipus-transports', [TipusTransportController::class, 'index']);
+
+    // Rutas nuevas para NuevoPedido
+    Route::get('/clientes-rol', [OfertaController::class, 'clientes']);
+    Route::post('/ofertes', [OfertaController::class, 'store']);
 });
