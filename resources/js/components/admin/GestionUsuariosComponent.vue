@@ -1,54 +1,28 @@
 <template>
     <div class="dashboard-container">
-        <!-- encabezado -->
+        <!-- Header simplificado -->
         <header class="dashboard-header">
             <div class="logo">
                 <div class="logo-icon">
                     <img :src="logoPrimeLogistics" alt="logo Prime Logistics">
                 </div>
-                <span class="logo-text">Prime Logistics</span>
-                <h1 class="page-title">Gestión de Usuarios
-                    <span class="title-sub">Crear, adquirir roles y gestionar acciones</span>
-                </h1>
-                <!-- Botones de acción -->
-                <div class="actions-bar">
-                    <button type="button" class="btn_exportarDatos" @click="">
-                        <img :src="iconoBtnNuevoUsuario" alt="Icono exportarDatos">
-                        Nuevo Usuario
-                        <nuevo-usuario-component></nuevo-usuario-component>
-                    </button>
-                    <a href="#" class="btn_notificaciones" @click.prevent="clickNotification">
-                        <img :src="imgBtnNotificaciones" alt="Icono notificaciones">
-                    </a>
-                    <div class="perfil-icon" @click="clickProfile">
-                        <img :src="imgPerfilUsuarioAdmin" alt="Imagen Perfil Usuario admin">
-                    </div>
-                </div>
+                <span class="logo-text">Prime</span>
             </div>
+            <h1 class="page-title">Gestión de Usuarios admin</h1>
         </header>
 
         <div class="dashboard-layout">
             <!-- Menú lateral -->
             <aside :class="['sidebar', { 'sidebar-mobile-open': sidebarOpen }]">
                 <nav class="side-nav">
+                    <div class="logo-prime">Prime</div>
                     <div class="nav-section-administracion">
                         <h2 class="nav-section-title">Administración</h2>
                         <ul class="nav-list">
-                            <li><a href="#" class="nav-link active" @click.prevent>Dashboard</a></li>
-                            <li><a href="#" class="nav-link" @click.prevent>Gestión de Usuarios</a></li>
-                        </ul>
-                    </div>
-                    <div class="nav-section-operaciones">
-                        <h2 class="nav-section-title">Operaciones</h2>
-                        <ul class="nav-list">
-                            <li><a href="#" class="nav-link" @click.prevent>Todas las Ofertas</a></li>
-                            <li><a href="#" class="nav-link" @click.prevent>Operaciones Activas</a></li>
-                        </ul>
-                    </div>
-                    <div class="nav-section-sistema">
-                        <h2 class="nav-section-title">Sistema</h2>
-                        <ul class="nav-list">
-                            <li><a href="#" class="nav-link" @click.prevent>Datos Maestros</a></li>
+                            <li><a href="#" class="nav-link" @click.prevent>Desafío</a></li>
+                            <li><a href="#" class="nav-link" @click.prevent>Contratos</a></li>
+                            <li><a href="#" class="nav-link active" @click.prevent>Operaciones Activas</a></li>
+                            <li><a href="#" class="nav-link" @click.prevent>Servicios</a></li>
                             <li><a href="#" class="nav-link" @click.prevent>Configuración</a></li>
                         </ul>
                     </div>
@@ -60,27 +34,18 @@
                 <!-- KPI usuarios -->
                 <div class="users-kpi-grid">
                     <div class="user-kpi-card">
-                        <div class="icon blue">👥</div>
-                        <div>
-                            <h2>14</h2>
-                            <p>Usuarios Totales</p>
-                        </div>
+                        <div class="kpi-number">{{ stats.total }}</div>
+                        <div class="kpi-label">Usuarios Totales</div>
                     </div>
 
                     <div class="user-kpi-card">
-                        <div class="icon green">✔</div>
-                        <div>
-                            <h2>11</h2>
-                            <p>Usuarios Activos</p>
-                        </div>
+                        <div class="kpi-number">{{ stats.activos }}</div>
+                        <div class="kpi-label">Usuarios Activos</div>
                     </div>
 
                     <div class="user-kpi-card">
-                        <div class="icon red">✖</div>
-                        <div>
-                            <h2>3</h2>
-                            <p>Desactivados</p>
-                        </div>
+                        <div class="kpi-number">{{ stats.desactivados }}</div>
+                        <div class="kpi-label">Desactivados</div>
                     </div>
                 </div>
 
@@ -88,480 +53,327 @@
                 <div class="users-table-container">
                     <div class="table-header">
                         <h3>Usuarios del sistema</h3>
-
-                        <div class="filters">
-                            <input v-model="userSearch" placeholder="Buscar usuario..." />
-                            <select v-model="roleFilter">
-                                <option value="">Todos los roles</option>
-                                <option value="ADMIN">Admin</option>
-                                <option value="CLIENTE">Cliente</option>
-                                <option value="OPERADOR">Operador</option>
-                            </select>
-                        </div>
+                        <span class="table-subtitle">Todos los activos registrados</span>
                     </div>
 
-                    <table class="users-table">
+                    <div v-if="cargando" class="loading-spinner">
+                        Cargando usuarios...
+                    </div>
+
+                    <table v-else class="users-table">
                         <thead>
                             <tr>
-                                <th>Usuario</th>
+                                <th>Nombre</th>
                                 <th>Correo</th>
                                 <th>Empresa</th>
-                                <th>Rol</th>
-                                <th>Último acceso</th>
+                                <th>Último Acceso</th>
                                 <th>Estado</th>
-                                <th></th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
-
                         <tbody>
-                            <tr v-for="user in filteredUsers" :key="user.id">
-                                <td class="user-cell">
-                                    <div class="avatar">{{ user.iniciales }}</div>
-                                    {{ user.nombre }}
-                                </td>
-                                <td>{{ user.email }}</td>
+                            <tr v-for="user in usuarios" :key="user.id">
+                                <td class="user-cell">{{ user.nom }} {{ user.cognoms }}</td>
+                                <td>{{ user.correu }}</td>
                                 <td>{{ user.empresa }}</td>
-
+                                <td>{{ formatFecha(user.ultimo_acceso) }}</td>
                                 <td>
-                                    <span :class="['role-badge', user.rol.toLowerCase()]">
-                                        {{ user.rol }}
-                                    </span>
+                                    <div :class="['status-indicator', user.activo ? 'active' : 'inactive']"></div>
                                 </td>
-
-                                <td>{{ user.ultimo }}</td>
-
-                                <td>
-                                    <div class="toggle" :class="{ active: user.activo }"></div>
-                                </td>
-
                                 <td class="actions">
-                                    ✏️ 🗑️
+                                    <button class="action-btn edit-btn" @click="editarUsuario(user)" title="Editar">✏️</button>
+                                    <button class="action-btn delete-btn" @click="eliminarUsuario(user)" title="Eliminar">🗑️</button>
+                                    <button class="action-btn toggle-btn" @click="toggleEstadoUsuario(user)" :title="user.activo ? 'Desactivar' : 'Activar'">
+                                        {{ user.activo ? '🔴' : '🟢' }}
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+
+                    <div class="table-footer">
+                        <span class="pagination-note">Mostrando {{ usuarios.length }} de {{ stats.total }} usuarios</span>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="action-buttons">
+                    <button class="btn-nuevo-usuario" @click="handleCreateUser">
+                        <img :src="imgNuevoUsuario" alt="icono de añadir un nuevo usuario">Nuevo Usuario
+                        <NuevoUsuario @create-user="handleCreateUser" @close="modalOpen = false" />
+                    </button>
+                    <button class="btn-on" @click="activarTodos">
+                        Activar Todos
+                    </button>
+                </div>
+
+                <!-- Modal para nuevo/editar usuario -->
+                <div v-if="modalVisible" class="modal-overlay" @click.self="cerrarModal">
+                    <div class="modal-content">
+                        <h3>{{ modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}</h3>
+                        <form @submit.prevent="guardarUsuario">
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input v-model="formData.nom" type="text" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Apellidos</label>
+                                <input v-model="formData.cognoms" type="text" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input v-model="formData.correu" type="email" required :disabled="modoEdicion">
+                            </div>
+                            <div class="form-group">
+                                <label>Empresa</label>
+                                <input v-model="formData.empresa" type="text" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Contraseña</label>
+                                <input v-model="formData.contrasenya" type="password" :required="!modoEdicion">
+                            </div>
+                            <div class="modal-buttons">
+                                <button type="button" @click="cerrarModal" class="btn-cancelar">Cancelar</button>
+                                <button type="submit" class="btn-guardar">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </main>
         </div>
-
-        <footer class="dashboard-footer">
-            <span>Carlos Martinez</span>
-            <span class="rol_user">Administrador</span>
-        </footer>
     </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import logotipo from '@/img/logo-empresa.png'
-import iconoBtnNuevoUsuario from '@/img/iconoNuevoUsuario.png'
-import fotoPerfil from '@/img/perfilUsuarioAdmin.png'
-import iconoNotificaciones from '@/img/notificaciones-logo.png'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-const logoPrimeLogistics = logotipo
-const imgPerfilUsuarioAdmin = fotoPerfil
-const imgBtnNotificaciones = iconoNotificaciones
-const userSearch = ref('')
-const roleFilter = ref('')
+const logoPrimeLogistics = '/images/logo-empresa.png'
+const imgNuevoUsuario = '/images/iconoNuevoUsuario.png'
 
-const users = ref([
-    { id: 1, nombre: 'Carlos Martínez', iniciales: 'CM', email: 'carlos@prime.com', empresa: 'Prime Logistics', rol: 'ADMIN', ultimo: 'Hoy 09:42', activo: true },
-    { id: 2, nombre: 'María García', iniciales: 'MG', email: 'maria@textil.com', empresa: 'Textil SA', rol: 'CLIENTE', ultimo: 'Hoy 08:15', activo: true },
-    { id: 3, nombre: 'Ana López', iniciales: 'AL', email: 'ana@prime.com', empresa: 'Prime Logistics', rol: 'OPERADOR', ultimo: 'Ayer', activo: true },
-    { id: 4, nombre: 'Sara Ruiz', iniciales: 'SR', email: 'sara@import.com', empresa: 'Import Global', rol: 'CLIENTE', ultimo: 'Hace 8 días', activo: false }
-])
+// Estado
+const sidebarOpen = ref(false)
+const usuarios = ref([])
+const stats = ref({ total: 0, activos: 0, desactivados: 0 })
+const cargando = ref(false)
+const modalVisible = ref(false)
+const modoEdicion = ref(false)
+const usuarioEditando = ref(null)
 
-const filteredUsers = computed(() => {
-    return users.value.filter(u => {
-        const matchSearch =
-            u.nombre.toLowerCase().includes(userSearch.value.toLowerCase()) ||
-            u.email.toLowerCase().includes(userSearch.value.toLowerCase())
+// Formulario
+const formData = ref({
+    nom: '',
+    cognoms: '',
+    correu: '',
+    empresa: '',
+    contrasenya: ''
+})
 
-        const matchRole = roleFilter.value ? u.rol === roleFilter.value : true
+// Métodos
+const cargarUsuarios = async () => {
+    cargando.value = true
+    try {
+        const response = await axios.get(`${API_BASE_URL}/usuarios`)
+        usuarios.value = response.data.data
+        await cargarEstadisticas()
+    } catch (error) {
+        console.error('Error al cargar usuarios:', error)
+        alert('Error al cargar los usuarios')
+    } finally {
+        cargando.value = false
+    }
+}
 
-        return matchSearch && matchRole
-    })
+const cargarEstadisticas = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/usuarios/stats`)
+        stats.value = response.data
+    } catch (error) {
+        console.error('Error al cargar estadísticas:', error)
+    }
+}
+
+const handleCreateUser = (userData) => {
+    console.log('Usuario creado:', userData)
+}
+
+const guardarUsuario = async () => {
+    try {
+        if (modoEdicion.value) {
+            await axios.put(`${API_BASE_URL}/usuarios/${usuarioEditando.value.id}`, formData.value)
+            alert('Usuario actualizado correctamente')
+        } else {
+            await axios.post(`${API_BASE_URL}/usuarios`, formData.value)
+            alert('Usuario creado correctamente')
+        }
+        cerrarModal()
+        await cargarUsuarios()
+    } catch (error) {
+        console.error('Error al guardar usuario:', error)
+        alert(error.response?.data?.message || 'Error al guardar el usuario')
+    }
+}
+
+const editarUsuario = (user) => {
+    modoEdicion.value = true
+    usuarioEditando.value = user
+    formData.value = {
+        nom: user.nom,
+        cognoms: user.cognoms,
+        correu: user.correu,
+        empresa: user.empresa,
+        contrasenya: ''
+    }
+    modalVisible.value = true
+}
+
+const eliminarUsuario = async (user) => {
+    if (confirm(`¿Estás seguro de eliminar a ${user.nom} ${user.cognoms}?`)) {
+        try {
+            await axios.delete(`${API_BASE_URL}/usuarios/${user.id}`)
+            alert('Usuario eliminado correctamente')
+            await cargarUsuarios()
+        } catch (error) {
+            console.error('Error al eliminar usuario:', error)
+            alert('Error al eliminar el usuario')
+        }
+    }
+}
+
+const toggleEstadoUsuario = async (user) => {
+    try {
+        await axios.put(`${API_BASE_URL}/usuarios/${user.id}`, {
+            activo: !user.activo
+        })
+        await cargarUsuarios()
+    } catch (error) {
+        console.error('Error al cambiar estado:', error)
+        alert('Error al cambiar el estado del usuario')
+    }
+}
+
+const activarTodos = async () => {
+    if (confirm('¿Activar todos los usuarios?')) {
+        try {
+            const promesas = usuarios.value.map(user => 
+                axios.put(`${API_BASE_URL}/usuarios/${user.id}`, { activo: true })
+            )
+            await Promise.all(promesas)
+            await cargarUsuarios()
+            alert('Todos los usuarios han sido activados')
+        } catch (error) {
+            console.error('Error al activar usuarios:', error)
+            alert('Error al activar los usuarios')
+        }
+    }
+}
+
+const cerrarModal = () => {
+    modalVisible.value = false
+    modoEdicion.value = false
+    usuarioEditando.value = null
+}
+
+const formatFecha = (fecha) => {
+    if (!fecha) return 'Nunca'
+    const date = new Date(fecha)
+    return date.toLocaleString()
+}
+
+// Cargar datos al montar el componente
+onMounted(() => {
+    cargarUsuarios()
 })
 </script>
 
-<style lang="scss" scoped>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+<style scoped>
+/* Mantén todos los estilos existentes y añade estos nuevos */
+
+.loading-spinner {
+    text-align: center;
+    padding: 2rem;
+    color: #7f8c8d;
 }
 
-$primary-color: #1a5d8c;
-$primary-dark: #0e3d5c;
-$success-color: #2a9d8f;
-$danger-color: #e76f51;
-$gray-light: #f8f9fa;
-$gray-border: #e9ecef;
-$text-dark: #2c3e50;
-$text-muted: #6c757d;
-
-.dashboard-container {
-    font-family: 'Inter', sans-serif;
-    background-color: #f4f7fc;
-    min-height: 100vh;
-}
-
-.dashboard-header {
-    background: white;
-    padding: 1rem 2rem;
-    border-bottom: 1px solid $gray-border;
-    display: grid;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.logo-icon {
-    width: 200px;
-    height: 100px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    color: white;
+    align-items: center;
+    z-index: 1000;
 }
 
-i {
-    font-size: 1.3rem;
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
 }
 
-.logo-text {
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: $primary-dark;
-}
-
-.dashboard-layout {
-    display: flex;
-    flex: 1;
-}
-
-.sidebar {
-    width: 260px;
-    background: #0a2b3e;
-    min-height: calc(100vh - 73px);
-    padding: 1.5rem;
-    transition: transform 0.3s ease;
-
-    @media (max-width: 992px) {
-        position: fixed;
-        top: 73px;
-        left: 0;
-        z-index: 1000;
-        transform: translateX(-100%);
-
-        &.sidebar-mobile-open {
-            transform: translateX(0);
-        }
-    }
-
-    .sidebar-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        color: white;
-
-        h3 {
-            margin: 0;
-            font-size: 1rem;
-        }
-
-        .btn-close-sidebar {
-            background: none;
-            border: none;
-            color: white;
-        }
-    }
-}
-
-.side-nav {
-    .nav-section-title {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        color: #80a6c2;
-        margin-bottom: 0.75rem;
-    }
-
-    .nav-list {
-        list-style: none;
-        padding: 0;
-        margin-bottom: 1.5rem;
-
-        .nav-link {
-            display: block;
-            padding: 0.5rem 0;
-            color: #cfdfed;
-            text-decoration: none;
-            font-size: 0.9rem;
-
-            &:hover,
-            &.active {
-                color: white;
-            }
-        }
-    }
-}
-
-.dashboard-content {
-    flex: 1;
-    padding: 1.5rem 2rem;
-    max-width: calc(100% - 260px);
-
-    @media (max-width: 992px) {
-        max-width: 100%;
-    }
-}
-
-.page-title {
-    margin-top: 34px;
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: $text-dark;
-
-    .title-sub {
-        display: flex;
-        flex-direction: row;
-        align-items: baseline;
-        gap: 0.5rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: $primary-color;
-        letter-spacing: 0.5px;
-    }
-}
-
-.actions-bar {
-    display: flex;
-    margin-left: 900px;
-    gap: 1rem;
-
-    .btn_exportarDatos {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 1.25rem;
-        background: white;
-        border: 1px solid $gray-border;
-        border-radius: 40px;
-        height: 50px;
-        width: 180px;
-
-        &:hover {
-            background: $gray-light;
-            border-color: $primary-color;
-        }
-    }
-
-    .btn_notificaciones {
-        width: 60px;
-        height: 50px;
-        background: white;
-        border-radius: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        &:hover {
-            background: $gray-light;
-        }
-    }
-
-    .perfil-icon {
-        width: 60px;
-        height: 50px;
-        background: white;
-        border-radius: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        &:hover {
-            background: $gray-light;
-        }
-    }
-}
-
-/* KPI usuarios */
-.users-kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+.modal-content h3 {
     margin-bottom: 1.5rem;
+    color: #2c3e50;
 }
 
-.user-kpi-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+.form-group {
+    margin-bottom: 1rem;
 }
 
-.icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-
-    &.blue {
-        background: #e0f2fe;
-    }
-
-    &.green {
-        background: #dcfce7;
-    }
-
-    &.red {
-        background: #fee2e2;
-    }
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
 }
 
-/* Tabla */
-.users-table-container {
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-}
-
-.users-table {
+.form-group input {
     width: 100%;
-    border-collapse: collapse;
-
-    th,
-    td {
-        padding: 12px;
-        border-bottom: 1px solid #eee;
-    }
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
 }
 
-/* Usuario */
-.user-cell {
+.form-group input:focus {
+    outline: none;
+    border-color: #1a5d8c;
+}
+
+.modal-buttons {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    justify-content: flex-end;
 }
 
-.avatar {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    background: #2563eb;
+.btn-cancelar,
+.btn-guardar {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-cancelar {
+    background: #e74c3c;
     color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-/* Roles */
-.role-badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-
-    &.admin {
-        background: #fde68a;
-    }
-
-    &.cliente {
-        background: #bfdbfe;
-    }
-
-    &.operador {
-        background: #bbf7d0;
-    }
+.btn-guardar {
+    background: #2a9d8f;
+    color: white;
 }
 
-/* Toggle */
-.toggle {
-    width: 40px;
-    height: 20px;
-    background: #ccc;
-    border-radius: 20px;
-    position: relative;
-
-    &::after {
-        content: '';
-        width: 16px;
-        height: 16px;
-        background: white;
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        border-radius: 50%;
-        transition: 0.3s;
-    }
-
-    &.active {
-        background: #22c55e;
-    }
-
-    &.active::after {
-        transform: translateX(20px);
-    }
-}
-
-/* Filtros */
-.filters {
-    display: flex;
-    gap: 10px;
-
-    input,
-    select {
-        padding: 6px;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-    }
-}
-
-.dashboard-footer {
-    background: white;
-    border-top: 1px solid $gray-border;
-    padding: 1rem 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-
-    .user-name {
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: $text-dark;
-
-        @media (max-width: 768px) {
-            font-size: 0.75rem;
-        }
-    }
-
-    .rol_user {
-        background: $primary-color;
-        color: white;
-        padding: 0.15rem 0.5rem;
-        border-radius: 20px;
-        font-size: 0.6rem;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-
-        @media (max-width: 768px) {
-            padding: 0.1rem 0.4rem;
-            font-size: 0.55rem;
-            border-radius: 16px;
-        }
-    }
+.toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
 }
 </style>
