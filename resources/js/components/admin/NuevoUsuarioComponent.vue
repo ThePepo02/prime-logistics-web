@@ -10,55 +10,61 @@
 
             <form @submit.prevent="onSubmit">
                 <div class="grid">
-                    <!-- Nombre del usuario -->
-                     <div>
-                        <label>Nombre completo*</label>
-                        <input v-model="form.name" placeholder="Ej: Ana López" required/>
-                     </div>
+                    <!-- Nombre completo -->
+                    <div class="full-width">
+                        <label>Nombre completo *</label>
+                        <input v-model="form.name" placeholder="Ej: Ana López" required />
+                    </div>
 
-                     <!-- Email del usuario -->
-                      <div>
-                        <label>Correo electrónico*</label>
-                        <input v-model="form.email" type="email" placeholder="ana@empresa.com" required />
-                      </div>
-
-                      <!-- Empresa -->
-                       <div>
-                        <label>Empresa*</label>
-                        <select v-model="form.company">
-                            <option disabled value="">--Selecciona--</option>
-                            <option value="1">Empresa 1</option>
-                            <option value="2">Empresa 2</option>
+                    <!-- Empresa -->
+                    <div class="full-width">
+                        <label>Empresa *</label>
+                        <select v-model="form.company" required>
+                            <option disabled value="">-- Selecciona --</option>
+                            <option value="empresa1">Empresa 1</option>
+                            <option value="empresa2">Empresa 2</option>
                         </select>
-                       </div>
+                    </div>
 
-                       <!-- Password -->
-                        <div>
-                            <label>Contraseña inicial</label>
-                            <input v-model="form.password" placeholder="Vacío = auto-generar" />
-                        </div>
-
-                        <!-- Roles -->
-                         <div class="roles">
-                            <label>Rol del usuario*</label>
-                            <div class="role-options">
-                                <div class="role" :class="{ active: form.role === 'admin' }" @click="form.role = 'admin'">Administrador</div>
-                                <div class="role" :class=" { active: form.role === 'operador' } " @click="form.role = 'operador'">Operador</div>
-                                <div class="role" :class=" { active: form.role === 'cliente' } " @click="form.role = 'cliente'">Cliente</div>
+                    <!-- Rol del usuario -->
+                    <div class="full-width">
+                        <label>Rol del usuario *</label>
+                        <div class="role-options">
+                            <div class="role" :class="{ active: form.role === 'admin' }" @click="form.role = 'admin'">
+                                Administrador
                             </div>
-                         </div>
+                            <div class="role" :class="{ active: form.role === 'operador' }" @click="form.role = 'operador'">
+                                Operador
+                            </div>
+                            <div class="role" :class="{ active: form.role === 'cliente' }" @click="form.role = 'cliente'">
+                                Cliente
+                            </div>
+                        </div>
+                    </div>
 
-                        <!-- Enviar credenciales por correo electrónico al crear el usuario -->
-                         <div class="checkbox">
+                    <!-- Operador (Electivo-agrícola) - según diseño -->
+                    <div class="full-width">
+                        <label>Operador</label>
+                        <select v-model="form.operador">
+                            <option value="">Selecciona un operador</option>
+                            <option value="electivo-agricola">Electivo-agrícola</option>
+                        </select>
+                        <small class="help-text">Sólo se puede cerrar</small>
+                    </div>
+
+                    <!-- Enviar credenciales -->
+                    <div class="full-width checkbox">
+                        <label class="checkbox-label">
                             <input type="checkbox" v-model="form.sendEmail" />
-                            <label>Enviar credenciales por email</label>
-                         </div>
+                            <span>Enviar credenciales de acceso por email al crear</span>
+                        </label>
+                    </div>
 
-                        <!-- Botones crear usuario y cancelar -->
-                        <footer class="footer">
-                            <button type="button" class="cancel" @click="$emit('close')">Cancelar</button>
-                            <button type="submit" class="submit">Crear Usuario</button>
-                        </footer>
+                    <!-- Botones -->
+                    <div class="full-width footer">
+                        <button type="button" class="cancel" @click="$emit('close')">Cancelar</button>
+                        <button type="submit" class="submit">Crear Usuario</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -72,106 +78,192 @@ const emit = defineEmits(['create-user', 'close'])
 
 const form = reactive({
     name: '',
-    email: '',
     company: '',
-    password: '',
     role: '',
+    operador: '',
     sendEmail: true
 })
 
 const onSubmit = () => {
-    if (form.name === '' ||form.email == '' || form.company === '' || form.role === '') {
-        alert('Formulario incompleto')
-    } else {
-        emit('create-user', { ...form })
+    if (!form.name || !form.company || !form.role) {
+        alert('Por favor completa todos los campos obligatorios (*)')
+        return
     }
+    
+    emit('create-user', { ...form })
+    
+    // Opcional: resetear formulario después de crear
+    // Object.assign(form, { name: '', company: '', role: '', operador: '', sendEmail: true })
 }
 </script>
 
 <style lang="scss" scoped>
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .modal {
-  width: 600px;
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
+    width: 550px;
+    max-width: 90%;
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    h3 {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: #999;
+        
+        &:hover {
+            color: #333;
+        }
+    }
 }
 
 .subtitle {
-  font-size: 13px;
-  color: #777;
-  margin-bottom: 15px;
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 20px;
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
-input,
-select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+.full-width {
+    width: 100%;
 }
 
-.roles {
-  margin-top: 15px;
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+
+    &:focus {
+        outline: none;
+        border-color: orange;
+    }
 }
 
 .role-options {
-  display: flex;
-  gap: 10px;
+    display: flex;
+    gap: 12px;
 }
 
 .role {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  text-align: center;
-  border-radius: 6px;
-  cursor: pointer;
-}
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
 
-.role.active {
-  border: 2px solid orange;
-  background: #fff3e8;
+    &:hover {
+        border-color: orange;
+    }
+
+    &.active {
+        border: 2px solid orange;
+        background: #fff3e8;
+        font-weight: 500;
+    }
 }
 
 .checkbox {
-  margin-top: 10px;
+    margin: 8px 0;
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-weight: normal;
+
+        input {
+            width: auto;
+            cursor: pointer;
+        }
+
+        span {
+            cursor: pointer;
+        }
+    }
+}
+
+.help-text {
+    display: block;
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
 }
 
 .footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
 }
 
 .cancel {
-  background: #eee;
-  padding: 8px 12px;
+    background: #f0f0f0;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+
+    &:hover {
+        background: #e0e0e0;
+    }
 }
 
 .submit {
-  background: orange;
-  color: white;
-  padding: 8px 12px;
+    background: orange;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+
+    &:hover {
+        background: #e69500;
+    }
 }
 </style>

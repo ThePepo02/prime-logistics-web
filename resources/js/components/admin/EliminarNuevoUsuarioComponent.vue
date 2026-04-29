@@ -27,7 +27,6 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
