@@ -36,6 +36,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev \
     && pecl install sqlsrv pdo_sqlsrv \
     && docker-php-ext-enable sqlsrv pdo_sqlsrv
+    # activa las extensiones SQL Server
 
 RUN docker-php-ext-install pdo mbstring bcmath pcntl
 
