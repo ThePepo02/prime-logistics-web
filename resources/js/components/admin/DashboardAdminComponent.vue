@@ -494,7 +494,7 @@ onMounted(() => {
     .top-header {
         display: flex;
     }
-    
+
     .dashboard-header {
         display: none;
     }
