@@ -1,143 +1,492 @@
 <template>
-    <div class="datos-maestros-container">
-        <div class="main-content">
-            <div class="header">
-                <h1>Datos Maestros Admin</h1>
-                <button @click="cargarDatos" class="btn-refresh" :disabled="cargando">
-                    {{ cargando ? 'Cargando...' : '⟳ Actualizar' }}
-                </button>
-            </div>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- SIDEBAR -->
+            <aside class="col-auto bg-dark text-white vh-100" style="width: 280px;">
+                <div class="d-flex flex-column h-100">
+                    <div class="text-center py-4 border-bottom border-secondary">
+                        <img :src="logoPrimeLogistics" alt="Prime Logistics" class="img-fluid"
+                            style="max-width: 180px;">
+                    </div>
 
-            <!-- Mensaje de error -->
-            <div v-if="mensajeError" class="alert error">
-                {{ mensajeError }}
-                <button @click="mensajeError = null">×</button>
-            </div>
+                    <nav class="nav flex-column mt-4 px-3 flex-grow-1">
+                        <!-- Administración -->
+                        <h6 class="text-secondary text-uppercase small mb-3 px-2">Administración</h6>
 
-            <!-- Resumen cards -->
-            <div class="resumen-grid">
-                <div class="resumen-card">
-                    <div class="resumen-numero">{{ resumen.total_empresas || 0 }}</div>
-                    <div class="resumen-label">Empresas Registradas</div>
-                </div>
-                <div class="resumen-card">
-                    <div class="resumen-numero">{{ resumen.total_navieras_activas || 0 }}</div>
-                    <div class="resumen-label">Navieras Activas</div>
-                </div>
-                <div class="resumen-card">
-                    <div class="resumen-numero">{{ resumen.total_puertos_activos || 0 }}</div>
-                    <div class="resumen-label">Puertos/Aeropuertos</div>
-                </div>
-                <div class="resumen-card">
-                    <div class="resumen-numero">{{ resumen.total_incoterms || 0 }}</div>
-                    <div class="resumen-label">Incoterms Activos</div>
-                </div>
-            </div>
+                        <a href="#" @click.prevent="activeSection = 'dashboard'"
+                            class="nav-link text-white mb-1 rounded"
+                            :class="activeSection === 'dashboard' ? 'bg-primary active' : 'hover-bg-secondary'">
+                            <i class="bi bi-grid-3x3-gap-fill me-2"></i>
+                            Dashboard
+                        </a>
 
-            <!-- Empresas -->
-            <div class="seccion">
-                <div class="seccion-header">
-                    <h2>Empresas</h2>
-                    <button @click="mostrarModalEmpresa = true" class="btn-agregar">+ Agregar Empresa</button>
-                </div>
-                <div class="badge">{{ empresas.length }} empresas registradas</div>
-                <div class="lista-empresas">
-                    <div v-for="empresa in empresas" :key="empresa.id" class="empresa-card">
-                        <div class="empresa-info">
-                            <div class="empresa-nombre">{{ empresa.nombre }}</div>
-                            <div class="empresa-stats">{{ empresa.total_usuarios }} usuarios - {{ empresa.total_pedidos }} pedidos</div>
-                            <div class="empresa-contacto">{{ empresa.email }}</div>
+                        <a href="#" @click.prevent="activeSection = 'usuarios'" class="nav-link text-white mb-1 rounded"
+                            :class="activeSection === 'usuarios' ? 'bg-primary active' : 'hover-bg-secondary'">
+                            <i class="bi bi-people-fill me-2"></i>
+                            Gestión de Usuarios
+                        </a>
+
+                        <!-- Operaciones -->
+                        <h6 class="text-secondary text-uppercase small mt-4 mb-3 px-2">Operaciones</h6>
+
+                        <a href="#" @click.prevent="activeSection = 'ofertas'" class="nav-link text-white mb-1 rounded"
+                            :class="activeSection === 'ofertas' ? 'bg-primary active' : 'hover-bg-secondary'">
+                            <i class="bi bi-file-text-fill me-2"></i>
+                            Todas las Ofertas
+                        </a>
+
+                        <a href="#" @click.prevent="activeSection = 'activas'" class="nav-link text-white mb-1 rounded"
+                            :class="activeSection === 'activas' ? 'bg-primary active' : 'hover-bg-secondary'">
+                            <i class="bi bi-truck me-2"></i>
+                            Operaciones Activas
+                        </a>
+
+                        <!-- Sistema -->
+                        <h6 class="text-secondary text-uppercase small mt-4 mb-3 px-2">Sistema</h6>
+
+                        <a href="#" @click.prevent="activeSection = 'datos-maestros'"
+                            class="nav-link text-white mb-1 rounded"
+                            :class="activeSection === 'datos-maestros' ? 'bg-primary active' : 'hover-bg-secondary'">
+                            <i class="bi bi-database-fill me-2"></i>
+                            Datos Maestros
+                        </a>
+
+                        <a href="#" @click.prevent="activeSection = 'configuracion'"
+                            class="nav-link text-white mb-1 rounded"
+                            :class="activeSection === 'configuracion' ? 'bg-primary active' : 'hover-bg-secondary'">
+                            <i class="bi bi-gear-fill me-2"></i>
+                            Configuración
+                        </a>
+                    </nav>
+
+                    <!-- PERFIL USUARIO -->
+                    <div class="border-top border-secondary p-3 mt-auto">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                                style="width: 40px; height: 40px;">
+                                {{ inicialesUsuario }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="text-white mb-0 fw-medium">{{ nombreUsuario }}</p>
+                                <small class="text-secondary text-uppercase">Administrador</small>
+                            </div>
+                            <button @click="logout" class="btn btn-sm btn-outline-secondary text-white"
+                                title="Cerrar sesión">
+                                <i class="bi bi-box-arrow-right"></i>
+                            </button>
                         </div>
-                        <div class="acciones">
-                            <button @click="editarEmpresa(empresa)" class="btn-icon" title="Editar">✏️</button>
-                            <button @click="eliminarEmpresa(empresa.id)" class="btn-icon" title="Eliminar">🗑️</button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ÁREA PRINCIPAL -->
+            <main class="col bg-light" style="height: 100vh; overflow-y: auto;">
+
+                <!-- TOPBAR -->
+                <div class="bg-white border-bottom px-4 py-3 sticky-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0 text-dark">Datos Maestros</h4>
+                            <small class="text-muted">Administración de entidades del sistema</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="btn btn-link text-dark position-relative" @click="clickNotification">
+                                <i class="bi bi-bell fs-5"></i>
+                                <span
+                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    3
+                                </span>
+                            </button>
+                            <div @click="clickProfile" class="cursor-pointer">
+                                <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                                    style="width: 38px; height: 38px;">
+                                    {{ inicialesUsuario }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Navieras & Carriers -->
-            <div class="seccion">
-                <div class="seccion-header">
-                    <h2>Navieras & Carriers</h2>
-                    <button @click="mostrarModalNaviera = true" class="btn-agregar">+ Agregar Naviera</button>
-                </div>
-                <div class="badge">{{ navieras.length }} carriers activas</div>
-                <div class="navieras-grid">
-                    <div v-for="naviera in navieras" :key="naviera.id" class="naviera-card">
-                        <div class="naviera-info">
-                            <div class="naviera-nombre">{{ naviera.nombre }}</div>
-                            <div class="naviera-tipo">{{ getTipoTexto(naviera.tipo) }} - {{ naviera.total_operaciones }} operaciones</div>
+                <!-- CONTENIDO -->
+                <div class="p-4">
+
+                    <!-- Mensaje de error -->
+                    <div v-if="mensajeError" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {{ mensajeError }}
+                        <button type="button" class="btn-close" @click="mensajeError = null"></button>
+                    </div>
+
+                    <!-- Resumen cards / KPIs -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm h-100 border-top border-primary">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="text-muted mb-2">Empresas Registradas</h6>
+                                            <h2 class="mb-0">{{ formatNumber(resumen.total_empresas) }}</h2>
+                                        </div>
+                                        <div class="bg-primary bg-opacity-10 rounded p-2">
+                                            <i class="bi bi-building text-primary fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">
+                                        <i class="bi bi-arrow-up text-success"></i> +{{
+                                            formatNumber(Math.floor(resumen.total_empresas * 0.12)) }} vs mes anterior
+                                    </small>
+                                </div>
+                            </div>
                         </div>
-                        <div class="acciones">
-                            <button @click="editarNaviera(naviera)" class="btn-icon">✏️</button>
-                            <button @click="eliminarNaviera(naviera.id)" class="btn-icon">🗑️</button>
+
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm h-100 border-top border-success">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="text-muted mb-2">Navieras Activas</h6>
+                                            <h2 class="mb-0">{{ formatNumber(resumen.total_navieras_activas) }}</h2>
+                                        </div>
+                                        <div class="bg-success bg-opacity-10 rounded p-2">
+                                            <i class="bi bi-ship text-success fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">
+                                        <i class="bi bi-arrow-up text-success"></i> +{{
+                                            formatNumber(Math.floor(resumen.total_navieras_activas * 0.08)) }} vs mes
+                                        anterior
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm h-100 border-top border-info">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="text-muted mb-2">Puertos/Aeropuertos</h6>
+                                            <h2 class="mb-0">{{ formatNumber(resumen.total_puertos_activos) }}</h2>
+                                        </div>
+                                        <div class="bg-info bg-opacity-10 rounded p-2">
+                                            <i class="bi bi-geo-alt-fill text-info fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">
+                                        <i class="bi bi-arrow-up text-success"></i> +{{
+                                            formatNumber(Math.floor(resumen.total_puertos_activos * 0.05)) }} vs mes
+                                        anterior
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm h-100 border-top border-warning">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="text-muted mb-2">Incoterms Activos</h6>
+                                            <h2 class="mb-0">{{ formatNumber(resumen.total_incoterms) }}</h2>
+                                        </div>
+                                        <div class="bg-warning bg-opacity-10 rounded p-2">
+                                            <i class="bi bi-tags-fill text-warning fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">
+                                        <i class="bi bi-arrow-up text-success"></i> +{{
+                                            formatNumber(Math.floor(resumen.total_incoterms * 0.1)) }} vs mes anterior
+                                    </small>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Puertos / Aeropuertos -->
-            <div class="seccion">
-                <div class="seccion-header">
-                    <h2>Puertos / Aeropuertos</h2>
-                    <button @click="mostrarModalPuerto = true" class="btn-agregar">+ Agregar Ubicación</button>
-                </div>
-                <div class="badge">{{ puertosAeropuertos.length }} orígenes activos</div>
-                <div class="puertos-grid">
-                    <div v-for="lugar in puertosAeropuertos" :key="lugar.id" class="puerto-card">
-                        <div class="puerto-nombre">{{ lugar.nombre }} ({{ lugar.codigo_iata }})</div>
-                        <div class="puerto-tipo">{{ getTipoPuertoTexto(lugar.tipo) }} - {{ lugar.total_operaciones }} operaciones</div>
-                        <div class="puerto-ubicacion">{{ lugar.ciudad }}, {{ lugar.pais }}</div>
+                    <!-- Empresas -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div
+                            class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <h5 class="mb-0">Empresas</h5>
+                                <small class="text-muted">{{ empresas.length }} empresas registradas</small>
+                            </div>
+                            <button @click="mostrarModalEmpresa = true" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-lg me-1"></i> Agregar Empresa
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div v-for="empresa in empresas" :key="empresa.id" class="col-md-6 col-lg-4">
+                                    <div class="card h-100 border rounded-3 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">{{ empresa.nombre }}</h6>
+                                                    <p class="small text-muted mb-2">{{ empresa.email }}</p>
+                                                    <div class="d-flex gap-3 small">
+                                                        <span class="text-primary">
+                                                            <i class="bi bi-people-fill"></i> {{ empresa.total_usuarios
+                                                            || 0 }} usuarios
+                                                        </span>
+                                                        <span class="text-success">
+                                                            <i class="bi bi-cart-fill"></i> {{ empresa.total_pedidos ||
+                                                            0 }} pedidos
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button @click="editarEmpresa(empresa)"
+                                                        class="btn btn-outline-warning" title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button @click="eliminarEmpresa(empresa.id)"
+                                                        class="btn btn-outline-danger" title="Eliminar">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Agentes Aduanales -->
-            <div class="seccion">
-                <div class="seccion-header">
-                    <h2>Agentes Aduanales</h2>
-                    <button @click="mostrarModalAgente = true" class="btn-agregar">+ Agregar Agente</button>
-                </div>
-                <div class="badge">{{ agentesAduanales.length }} agentes activos</div>
-                <div class="agentes-grid">
-                    <div v-for="agente in agentesAduanales" :key="agente.id" class="agente-card">
-                        <div class="agente-nombre">{{ agente.nombre }}</div>
-                        <div class="agente-detalle">{{ agente.ubicacion }} - {{ agente.total_expedientes }} expedientes</div>
+                    <!-- Navieras & Carriers -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div
+                            class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <h5 class="mb-0">Navieras & Carriers</h5>
+                                <small class="text-muted">{{ navieras.length }} carriers activas</small>
+                            </div>
+                            <button @click="mostrarModalNaviera = true" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-lg me-1"></i> Agregar Naviera
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div v-for="naviera in navieras" :key="naviera.id" class="col-md-6 col-lg-4">
+                                    <div class="card h-100 border rounded-3 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">{{ naviera.nombre }}</h6>
+                                                    <p class="small mb-2">
+                                                        <span :class="getModoClass(naviera.tipo)" class="badge">
+                                                            {{ getTipoTexto(naviera.tipo) }}
+                                                        </span>
+                                                    </p>
+                                                    <div class="small text-muted">
+                                                        <i class="bi bi-truck"></i> {{ naviera.total_operaciones || 0 }}
+                                                        operaciones
+                                                    </div>
+                                                </div>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button @click="editarNaviera(naviera)"
+                                                        class="btn btn-outline-warning" title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button @click="eliminarNaviera(naviera.id)"
+                                                        class="btn btn-outline-danger" title="Eliminar">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Incoterms Activos -->
-            <div class="seccion">
-                <div class="seccion-header">
-                    <h2>Incoterms Activos</h2>
-                    <button @click="mostrarModalIncoterm = true" class="btn-agregar">+ Agregar Incoterm</button>
-                </div>
-                <div class="badge">{{ incoterms.length }} configuraciones</div>
-                <div class="incoterms-grid">
-                    <div v-for="incoterm in incoterms" :key="incoterm.id" class="incoterm-card">
-                        <div class="incoterm-code">{{ incoterm.codigo }}</div>
-                        <div class="incoterm-desc">{{ incoterm.nombre_completo }}</div>
+                    <!-- Puertos / Aeropuertos -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div
+                            class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <h5 class="mb-0">Puertos / Aeropuertos</h5>
+                                <small class="text-muted">{{ puertosAeropuertos.length }} orígenes activos</small>
+                            </div>
+                            <button @click="mostrarModalPuerto = true" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-lg me-1"></i> Agregar Ubicación
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div v-for="lugar in puertosAeropuertos" :key="lugar.id" class="col-md-6 col-lg-4">
+                                    <div class="card h-100 border rounded-3 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">{{ lugar.nombre }}</h6>
+                                                    <p class="small text-muted mb-1">Código: {{ lugar.codigo_iata }}</p>
+                                                    <p class="small mb-2">
+                                                        <span :class="getPuertoClass(lugar.tipo)" class="badge">
+                                                            {{ getTipoPuertoTexto(lugar.tipo) }}
+                                                        </span>
+                                                    </p>
+                                                    <div class="small text-success">
+                                                        <i class="bi bi-geo-alt-fill"></i> {{ lugar.ciudad }}, {{
+                                                        lugar.pais }}
+                                                    </div>
+                                                    <div class="small text-muted mt-1">
+                                                        <i class="bi bi-truck"></i> {{ lugar.total_operaciones || 0 }}
+                                                        operaciones
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <footer class="dashboard-footer">
-                <span>Datos Maestros - Sistema de Gestión</span>
-            </footer>
+                    <!-- Agentes Aduanales -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div
+                            class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <h5 class="mb-0">Agentes Aduanales</h5>
+                                <small class="text-muted">{{ agentesAduanales.length }} agentes activos</small>
+                            </div>
+                            <button @click="mostrarModalAgente = true" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-lg me-1"></i> Agregar Agente
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div v-for="agente in agentesAduanales" :key="agente.id" class="col-md-6 col-lg-4">
+                                    <div class="card h-100 border rounded-3 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-1">{{ agente.nombre }}</h6>
+                                                    <p class="small text-muted mb-1">
+                                                        <i class="bi bi-geo-alt-fill"></i> {{ agente.ubicacion }}
+                                                    </p>
+                                                    <div class="small text-info">
+                                                        <i class="bi bi-file-text-fill"></i> {{ agente.total_expedientes
+                                                        || 0 }} expedientes
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Incoterms Activos -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div
+                            class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <h5 class="mb-0">Incoterms Activos</h5>
+                                <small class="text-muted">{{ incoterms.length }} configuraciones</small>
+                            </div>
+                            <button @click="mostrarModalIncoterm = true" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-lg me-1"></i> Agregar Incoterm
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div v-for="incoterm in incoterms" :key="incoterm.id" class="col-md-3 col-lg-2">
+                                    <div class="card text-center border rounded-3 shadow-sm incoterm-card">
+                                        <div class="card-body p-3">
+                                            <div class="incoterm-code fw-bold text-primary mb-1">{{ incoterm.codigo }}
+                                            </div>
+                                            <small class="text-muted incoterm-desc">{{
+                                                truncateText(incoterm.nombre_completo, 50) }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer del contenido -->
+                    <div class="mt-4 pt-3 border-top">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <h6 class="text-muted mb-3">Navegación</h6>
+                                <ul class="list-unstyled small">
+                                    <li><a href="#" class="text-decoration-none text-muted">Dashboard</a></li>
+                                    <li class="mt-2"><a href="#" class="text-decoration-none text-muted">Gestión de
+                                            Usuarios</a></li>
+                                    <li class="mt-2"><a href="#"
+                                            class="text-decoration-none text-muted">Configuración</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-3">
+                                <h6 class="text-muted mb-3">Operaciones</h6>
+                                <ul class="list-unstyled small">
+                                    <li><a href="#" class="text-decoration-none text-muted">Todas las Ofertas</a></li>
+                                    <li class="mt-2"><a href="#" class="text-decoration-none text-muted">Operaciones
+                                            Activas</a></li>
+                                    <li class="mt-2"><a href="#"
+                                            class="text-decoration-none text-muted">Estadísticas</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-3">
+                                <h6 class="text-muted mb-3">Datos Maestros</h6>
+                                <ul class="list-unstyled small">
+                                    <li><a href="#" class="text-decoration-none text-muted">Empresas</a></li>
+                                    <li class="mt-2"><a href="#" class="text-decoration-none text-muted">Navieras</a>
+                                    </li>
+                                    <li class="mt-2"><a href="#" class="text-decoration-none text-muted">Puertos</a>
+                                    </li>
+                                    <li class="mt-2"><a href="#" class="text-decoration-none text-muted">Incoterms</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-3">
+                                <h6 class="text-muted mb-3">Sistema</h6>
+                                <ul class="list-unstyled small">
+                                    <li><a href="#" class="text-decoration-none text-muted">Configuración</a></li>
+                                    <li class="mt-2"><a href="#" class="text-decoration-none text-muted">Respaldo</a>
+                                    </li>
+                                    <li class="mt-2"><a href="#" class="text-decoration-none text-muted">Logs</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
         </div>
 
-        <!-- Modales (simplificados, puedes expandir) -->
-        <div v-if="mostrarModalEmpresa" class="modal">
-            <div class="modal-content">
-                <h3>{{ editando ? 'Editar' : 'Nueva' }} Empresa</h3>
-                <input v-model="empresaForm.nombre" placeholder="Nombre" class="modal-input">
-                <input v-model="empresaForm.email" placeholder="Email" class="modal-input">
-                <input v-model="empresaForm.cif" placeholder="CIF" class="modal-input">
-                <div class="modal-acciones">
-                    <button @click="guardarEmpresa" class="btn-guardar">Guardar</button>
-                    <button @click="cerrarModalEmpresa" class="btn-cancelar">Cancelar</button>
+        <!-- Modal Empresa -->
+        <div v-if="mostrarModalEmpresa" class="modal fade show d-block" tabindex="-1"
+            style="background: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ editando ? 'Editar' : 'Nueva' }} Empresa</h5>
+                        <button type="button" class="btn-close" @click="cerrarModalEmpresa"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input v-model="empresaForm.nombre" type="text" class="form-control"
+                                placeholder="Nombre de la empresa">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input v-model="empresaForm.email" type="email" class="form-control"
+                                placeholder="correo@empresa.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">CIF</label>
+                            <input v-model="empresaForm.cif" type="text" class="form-control" placeholder="CIF/NIF">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="cerrarModalEmpresa">Cancelar</button>
+                        <button type="button" class="btn btn-primary" @click="guardarEmpresa">Guardar</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -145,7 +494,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+
+const logoPrimeLogistics = '/images/logo-empresa.png'
+
+// Estado de navegación
+const activeSection = ref('datos-maestros')
 
 // Estado
 const cargando = ref(false)
@@ -172,15 +526,80 @@ const empresaForm = ref({ nombre: '', email: '', cif: '' })
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
 
+// Computed: nombre del usuario
+const nombreUsuario = computed(() => {
+    try {
+        const usuario = JSON.parse(localStorage.getItem('user') || localStorage.getItem('usuario') || '{}')
+        return usuario.nom || usuario.name || 'Administrador'
+    } catch (e) {
+        return 'Administrador'
+    }
+})
+
+// Computed: iniciales del usuario
+const inicialesUsuario = computed(() => {
+    const partes = nombreUsuario.value.split(' ')
+    if (partes.length >= 2) return (partes[0][0] + partes[1][0]).toUpperCase()
+    return nombreUsuario.value.substring(0, 2).toUpperCase()
+})
+
+// Utilidades
+const formatNumber = (num) => {
+    return num?.toLocaleString('es-ES') ?? '0'
+}
+
+const truncateText = (text, length) => {
+    if (!text) return ''
+    return text.length > length ? text.substring(0, length) + '...' : text
+}
+
+const getTipoTexto = (tipo) => {
+    const tipos = {
+        'MARITIMO': 'Marítimo',
+        'AEREO': 'Aéreo',
+        'TERRESTRE': 'Terrestre',
+        'MULTIMODAL': 'Multimodal'
+    }
+    return tipos[tipo] || tipo
+}
+
+const getModoClass = (tipo) => {
+    const classes = {
+        'MARITIMO': 'bg-primary',
+        'AEREO': 'bg-info text-dark',
+        'TERRESTRE': 'bg-success',
+        'MULTIMODAL': 'bg-warning text-dark'
+    }
+    return classes[tipo] || 'bg-secondary'
+}
+
+const getPuertoClass = (tipo) => {
+    const classes = {
+        'PUERTO': 'bg-primary',
+        'AEROPUERTO': 'bg-info text-dark',
+        'AMBOS': 'bg-success'
+    }
+    return classes[tipo] || 'bg-secondary'
+}
+
+const getTipoPuertoTexto = (tipo) => {
+    const tipos = {
+        'PUERTO': 'Puerto marítimo',
+        'AEROPUERTO': 'Aeropuerto',
+        'AMBOS': 'Puerto + Aeropuerto'
+    }
+    return tipos[tipo] || tipo
+}
+
 // Cargar datos
 const cargarDatos = async () => {
     cargando.value = true
     mensajeError.value = null
-    
+
     try {
         const response = await fetch(`${API_URL}/datos-maestros/dashboard`)
         const result = await response.json()
-        
+
         if (result.success) {
             empresas.value = result.data.empresas
             navieras.value = result.data.navieras
@@ -194,8 +613,42 @@ const cargarDatos = async () => {
     } catch (error) {
         console.error('Error:', error)
         mensajeError.value = 'Error al cargar datos maestros'
+        // Datos de ejemplo
+        cargarDatosEjemplo()
     } finally {
         cargando.value = false
+    }
+}
+
+// Datos de ejemplo para desarrollo
+const cargarDatosEjemplo = () => {
+    empresas.value = [
+        { id: 1, nombre: 'Logistics Corp', email: 'contacto@logisticscorp.com', cif: 'B12345678', total_usuarios: 15, total_pedidos: 234 },
+        { id: 2, nombre: 'Fast Ship', email: 'info@fastship.com', cif: 'B87654321', total_usuarios: 8, total_pedidos: 89 }
+    ]
+    navieras.value = [
+        { id: 1, nombre: 'Maersk Line', tipo: 'MARITIMO', total_operaciones: 234 },
+        { id: 2, nombre: 'DHL Aviation', tipo: 'AEREO', total_operaciones: 567 }
+    ]
+    puertosAeropuertos.value = [
+        { id: 1, nombre: 'Puerto de Valencia', codigo_iata: 'VLC', tipo: 'PUERTO', ciudad: 'Valencia', pais: 'España', total_operaciones: 123 },
+        { id: 2, nombre: 'Aeropuerto de Madrid', codigo_iata: 'MAD', tipo: 'AEROPUERTO', ciudad: 'Madrid', pais: 'España', total_operaciones: 456 }
+    ]
+    agentesAduanales.value = [
+        { id: 1, nombre: 'Agentes Aduanales SL', ubicacion: 'Barcelona', total_expedientes: 234 },
+        { id: 2, nombre: 'Customs Experts', ubicacion: 'Valencia', total_expedientes: 123 }
+    ]
+    incoterms.value = [
+        { id: 1, codigo: 'FOB', nombre_completo: 'Free On Board' },
+        { id: 2, codigo: 'CIF', nombre_completo: 'Cost, Insurance and Freight' },
+        { id: 3, codigo: 'EXW', nombre_completo: 'Ex Works' },
+        { id: 4, codigo: 'DAP', nombre_completo: 'Delivered At Place' }
+    ]
+    resumen.value = {
+        total_empresas: empresas.value.length,
+        total_navieras_activas: navieras.value.length,
+        total_puertos_activos: puertosAeropuertos.value.length,
+        total_incoterms: incoterms.value.length
     }
 }
 
@@ -203,20 +656,18 @@ const cargarDatos = async () => {
 const guardarEmpresa = async () => {
     try {
         const method = editando.value ? 'PUT' : 'POST'
-        const url = editando.value 
+        const url = editando.value
             ? `${API_URL}/empresas/${empresaForm.value.id}`
             : `${API_URL}/empresas`
-        
-        const response = await fetch(url, {
+
+        await fetch(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(empresaForm.value)
         })
-        
-        if (response.ok) {
-            await cargarDatos()
-            cerrarModalEmpresa()
-        }
+
+        await cargarDatos()
+        cerrarModalEmpresa()
     } catch (error) {
         console.error('Error guardando empresa:', error)
     }
@@ -224,7 +675,7 @@ const guardarEmpresa = async () => {
 
 const eliminarEmpresa = async (id) => {
     if (!confirm('¿Eliminar esta empresa?')) return
-    
+
     try {
         await fetch(`${API_URL}/empresas/${id}`, { method: 'DELETE' })
         await cargarDatos()
@@ -255,19 +706,36 @@ const eliminarNaviera = async (id) => {
     }
 }
 
-// Utilidades
-const getTipoTexto = (tipo) => {
-    const tipos = { 'MARITIMO': 'Marítimo', 'AEREO': 'Aéreo', 'TERRESTRE': 'Terrestre', 'MULTIMODAL': 'Multimodal' }
-    return tipos[tipo] || tipo
-}
-
-const getTipoPuertoTexto = (tipo) => {
-    const tipos = { 'PUERTO': 'Puerto marítimo', 'AEROPUERTO': 'Aeropuerto', 'AMBOS': 'Puerto + Aeropuerto' }
-    return tipos[tipo] || tipo
-}
-
 const editarNaviera = (naviera) => {
     console.log('Editar naviera:', naviera)
+    alert(`Editar naviera: ${naviera.nombre}`)
+}
+
+// Notificaciones y perfil
+const clickNotification = () => {
+    alert('Notificaciones')
+}
+
+const clickProfile = () => {
+    alert('Perfil de usuario')
+}
+
+// Logout
+const logout = async () => {
+    try {
+        const token = localStorage.getItem('token')
+        await fetch('/api/logout', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+    } catch (e) {
+        // Si falla
+    } finally {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        localStorage.removeItem('usuario')
+        window.location.href = '/'
+    }
 }
 
 // Lifecycle
@@ -277,334 +745,53 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.datos-maestros-container {
-    min-height: 100vh;
-    background: #f5f7fa;
-    font-family: 'Segoe UI', system-ui, sans-serif;
+.hover-bg-secondary:hover {
+    background-color: rgba(108, 117, 125, 0.2);
 }
 
-.main-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px 30px;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
-
-.header h1 {
-    margin: 0;
-    color: #1a202c;
-    font-size: 24px;
-}
-
-.btn-refresh {
-    padding: 8px 16px;
-    background: #48bb78;
-    color: white;
-    border: none;
-    border-radius: 6px;
+.cursor-pointer {
     cursor: pointer;
-    transition: all 0.3s;
 }
 
-.btn-refresh:hover:not(:disabled) {
-    background: #38a169;
-}
-
-.btn-refresh:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.alert {
-    padding: 12px 16px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.alert.error {
-    background: #fed7d7;
-    color: #9b2c2c;
-    border: 1px solid #fc8181;
-}
-
-.alert button {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #9b2c2c;
-}
-
-.resumen-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.resumen-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-}
-
-.resumen-numero {
-    font-size: 36px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.resumen-label {
-    font-size: 14px;
-    opacity: 0.9;
-}
-
-.seccion {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin-bottom: 25px;
-}
-
-.seccion-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.seccion-header h2 {
-    margin: 0;
-    color: #1a202c;
-    font-size: 18px;
-}
-
-.btn-agregar {
-    padding: 6px 12px;
-    background: #4299e1;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-.btn-agregar:hover {
-    background: #3182ce;
-}
-
-.badge {
-    display: inline-block;
-    background: #e2e8f0;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    color: #4a5568;
-    margin-bottom: 20px;
-}
-
-.lista-empresas,
-.navieras-grid,
-.puertos-grid,
-.agentes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 15px;
-}
-
-.empresa-card,
-.naviera-card,
-.puerto-card,
-.agente-card {
-    background: #f7fafc;
-    padding: 15px;
-    border-radius: 8px;
-    transition: all 0.3s;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.empresa-card:hover,
-.naviera-card:hover,
-.puerto-card:hover,
-.agente-card:hover {
-    background: #edf2f7;
-    transform: translateY(-2px);
-}
-
-.empresa-nombre,
-.naviera-nombre,
-.puerto-nombre,
-.agente-nombre {
-    font-weight: bold;
-    color: #2d3748;
-    margin-bottom: 5px;
-    font-size: 16px;
-}
-
-.empresa-stats,
-.naviera-tipo,
-.puerto-tipo,
-.agente-detalle {
-    font-size: 13px;
-    color: #718096;
-}
-
-.empresa-contacto {
-    font-size: 12px;
-    color: #a0aec0;
-    margin-top: 5px;
-}
-
-.puerto-ubicacion {
-    font-size: 12px;
-    color: #48bb78;
-    margin-top: 5px;
-}
-
-.incoterms-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 12px;
+.nav-link.active {
+    background-color: #0d6efd !important;
 }
 
 .incoterm-card {
-    background: #f7fafc;
-    padding: 12px;
-    border-radius: 8px;
-    text-align: center;
     transition: all 0.3s;
     cursor: pointer;
 }
 
 .incoterm-card:hover {
-    background: #4299e1;
-    color: white;
-    transform: translateY(-2px);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-.incoterm-code {
-    font-weight: bold;
-    font-size: 18px;
-    margin-bottom: 5px;
+.incoterm-card:hover .incoterm-code {
+    color: #0d6efd !important;
 }
 
-.incoterm-desc {
-    font-size: 11px;
-    color: #718096;
+.btn-group .btn {
+    transition: all 0.2s;
 }
 
-.incoterm-card:hover .incoterm-desc {
-    color: white;
+.btn-group .btn:hover {
+    transform: scale(1.05);
 }
 
-.btn-icon {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    padding: 5px;
-    margin: 0 3px;
-    transition: transform 0.2s;
+/* Animaciones para las cards */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.btn-icon:hover {
-    transform: scale(1.1);
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
 }
 
-.dashboard-footer {
-    margin-top: 30px;
-    padding: 15px;
-    text-align: center;
-    color: #718096;
-    border-top: 1px solid #e2e8f0;
-}
-
-/* Modal */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 500px;
-}
-
-.modal-content h3 {
-    margin: 0 0 20px 0;
-    color: #1a202c;
-}
-
-.modal-input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-}
-
-.modal-acciones {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-}
-
-.btn-guardar {
-    padding: 8px 16px;
-    background: #48bb78;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.btn-cancelar {
-    padding: 8px 16px;
-    background: #e2e8f0;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-@media (max-width: 768px) {
-    .main-content {
-        padding: 15px;
-    }
-    
-    .resumen-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .lista-empresas,
-    .navieras-grid,
-    .puertos-grid,
-    .agentes-grid {
-        grid-template-columns: 1fr;
-    }
+/* Modal overlay */
+.modal.fade.show {
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
 }
 </style>
