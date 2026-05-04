@@ -1,174 +1,176 @@
 <template>
-    <div class="operaciones-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo">
-                <div class="logo-icon">
-                    <img :src="logoPrimeLogistics" alt="logo Prime Logistics">
-                </div>
-            </div>
-            <nav class="nav-menu">
-                <div class="nav-section">
-                    <div class="nav-title">Administración</div>
-                    <ul>
-                        <li><a href="#">Dashboard</a></li>
-                        <li><a href="#">Gestión de Usuarios</a></li>
-                    </ul>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-title">Comunicaciones</div>
-                    <ul>
-                        <li><a href="#">Todas las Oficinas</a></li>
-                        <li><a href="#" class="active">Operaciones Activas</a></li>
-                    </ul>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-title">Sistema</div>
-                    <ul>
-                        <li><a href="#">Datos Maestros</a></li>
-                        <li><a href="#">Configuración</a></li>
-                    </ul>
-                </div>
-            </nav>
+    <div class="todas-ofertas-container">
+        <!-- HEADER con título -->
+        <div class="page-header">
+            <h1>Todas las ofertas admin</h1>
         </div>
 
-        <!-- Contenido principal -->
-        <div class="main-content">
-            <div class="header">
-                <h1>Operaciones Activas</h1>
-                <button @click="refreshData" class="refresh-btn" :disabled="loading">
-                    <span v-if="loading">Cargando...</span>
-                    <span v-else>⟳ Actualizar</span>
+        <!-- TABS horizontales (exactamente como en la imagen) -->
+        <div class="tabs-container">
+            <div class="tabs-wrapper">
+                <button v-for="tab in tabs" :key="tab" class="tab-button" :class="{ active: activeTab === tab }"
+                    @click="activeTab = tab">
+                    {{ tab }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div v-if="mensajeError" class="alert error">
+            {{ mensajeError }}
+            <button @click="mensajeError = null">×</button>
+        </div>
+
+        <!-- TARJETAS DE ESTADÍSTICAS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ formatNumber(stats.total_ofertas) }}</div>
+                <div class="stat-label">Total de ofertas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ formatNumber(stats.todas_ofertas) }}</div>
+                <div class="stat-label">Todas las ofertas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ formatNumber(stats.completadas) }}</div>
+                <div class="stat-label">Todas las ofertas completadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ formatNumber(stats.pendientes) }}</div>
+                <div class="stat-label">Todas las ofertas pendientes</div>
+            </div>
+        </div>
+
+        <!-- TABLA DE OFERTAS -->
+        <div class="table-container">
+            <div class="table-header">
+                <h2>Ofertas</h2>
+                <button @click="cargarOfertas" class="btn-refresh" :disabled="cargando">
+                    {{ cargando ? 'Cargando...' : '⟳ Actualizar' }}
                 </button>
             </div>
 
-            <!-- Loading y Error -->
-            <div v-if="error" class="error-message">
-                {{ error }}
-                <button @click="refreshData">Reintentar</button>
-            </div>
-
-            <!-- Distribución por Modo de Transporte -->
-            <div class="distribucion-section" v-if="!loading || distribucionModos.length">
-                <h3>Distribución por Modo de Transporte</h3>
-                <p class="subtitulo">Operaciones activas en curso</p>
-                <div class="modos-grid">
-                    <div class="modo-item" v-for="modo in distribucionModos" :key="modo.nombre">
-                        <div class="modo-nombre">{{ modo.nombre }}</div>
-                        <div class="modo-stats">
-                            <span class="modo-cantidad">{{ modo.cantidad }} envíos</span>
-                            <span class="modo-porcentaje">{{ modo.porcentaje }}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" :style="{ width: modo.porcentaje + '%', backgroundColor: modo.color }"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Resumen operaciones -->
-            <div class="operaciones-resumen">
-                <h3>Operaciones en Curso</h3>
-                <div class="total-envios">{{ totalEnviosActivos }} envíos activos</div>
-            </div>
-
-<!-- Filtros -->
-            <div class="filters-bar">
-                <input 
-                    v-model="filters.search" 
-                    type="text" 
-                    placeholder="Buscar operación:" 
-                    class="search-input" 
-                    @input="handleSearch"
-                />
-                <select v-model="filters.modo" class="filter-select" @change="handleFilterChange">
-                    <option value="">Todos los modos</option>
-                    <option value="Marítimo">Marítimo</option>
-                    <option value="Aéreo">Aéreo</option>
-                    <option value="Terrestre">Terrestre</option>
-                    <option value="Multimodal">Multimodal</option>
-                </select>
-                <select v-model="filters.ruta" class="filter-select" @change="handleFilterChange">
-                    <option value="">Todas las rutas</option>
-                    <option v-for="ruta in rutasDisponibles" :key="ruta" :value="ruta">
-                        {{ ruta }}
-                    </option>
-                </select>
+            <!-- Loading -->
+            <div v-if="cargando && !ofertas.length" class="loading-state">
+                <div class="spinner"></div>
+                <p>Cargando ofertas...</p>
             </div>
 
             <!-- Tabla -->
-            <div class="table-wrapper">
-                <table class="operaciones-table">
+            <div v-else class="table-responsive">
+                <table class="ofertas-table">
                     <thead>
                         <tr>
-                            <th>ID Origen</th>
-                            <th>Cliente</th>
-                            <th>Empresa</th>
-                            <th>Modo</th>
-                            <th>Ruta</th>
-                            <th>ETD</th>
-                            <th>ETA</th>
-                            <th>Fase Actual</th>
-                            <th>Estado</th>
-                            <th v-if="isAdmin">Acciones</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Valor unitario</th>
+                            <th>Valor total</th>
+                            <th>Acciones</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th><input v-model="filters.nombre" placeholder="Filtrar nombre..." class="filter-input"
+                                    @input="handleFilter"></th>
+                            <th><input v-model="filters.descripcion" placeholder="Filtrar descripción..."
+                                    class="filter-input" @input="handleFilter"></th>
+                            <th><input v-model="filters.valor_unitario" placeholder="Filtrar valor..."
+                                    class="filter-input" @input="handleFilter"></th>
+                            <th><input v-model="filters.valor_total" placeholder="Filtrar valor..." class="filter-input"
+                                    @input="handleFilter"></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-if="loading && !operaciones.length">
-                            <td colspan="10" class="loading-cell">
-                                <div class="spinner"></div>
-                                Cargando operaciones...
+                        <tr v-for="oferta in ofertasFiltradas" :key="oferta.id">
+                            <td data-label="Nombre">{{ oferta.nombre }}</td>
+                            <td data-label="Descripción">{{ oferta.descripcion }}</td>
+                            <td data-label="Valor unitario">{{ formatMoney(oferta.valor_unitario) }}</td>
+                            <td data-label="Valor total">{{ formatMoney(oferta.valor_total) }}</td>
+                            <td data-label="Acciones" class="acciones-cell">
+                                <button @click="verDetalles(oferta)" class="btn-accion btn-ver" title="Ver detalles">
+                                    👁️ Ver detalles
+                                </button>
+                                <button @click="editarOferta(oferta)" class="btn-accion btn-editar" title="Editar">
+                                    ✏️ Editar
+                                </button>
+                                <button @click="eliminarOferta(oferta.id)" class="btn-accion btn-eliminar"
+                                    title="Eliminar">
+                                    🗑️ Eliminar
+                                </button>
                             </td>
                         </tr>
-                        <tr v-else-if="!loading && !operaciones.length">
-                            <td colspan="10" class="empty-cell">
-                                No se encontraron operaciones
-                            </td>
-                        </tr>
-                        <tr v-for="operacion in paginatedOperaciones" :key="operacion.id">
-                            <td class="id-cell">{{ operacion.codigo }}</td>
-                            <td>{{ operacion.cliente }}</td>
-                            <td>{{ operacion.empresa }}</td>
-                            <td><span class="modo-badge">{{ operacion.modo }}</span></td>
-                            <td>{{ operacion.ruta }}</td>
-                            <td>{{ formatDate(operacion.etd) }}</td>
-                            <td>{{ formatDate(operacion.eta) }}</td>
-                            <td>{{ operacion.fase_actual }}</td>
-                            <td>
-                                <span :class="['estado-badge', getEstadoClass(operacion.estado)]">
-                                    {{ operacion.estado }}
-                                </span>
-                            </td>
-                            <td v-if="isAdmin">
-                                <button @click="editOperacion(operacion)" class="action-btn edit">✏️</button>
-                                <button @click="deleteOperacion(operacion.id)" class="action-btn delete">🗑️</button>
+                        <tr v-if="ofertasFiltradas.length === 0 && !cargando">
+                            <td colspan="5" class="empty-state">
+                                No se encontraron ofertas
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            <!-- Paginación -->
-            <div class="pagination-info" v-if="totalItems > 0">
-                Mostrando {{ paginationInfo.from }} - {{ paginationInfo.to }} de {{ totalItems }} operaciones
+        <!-- FOOTER (exactamente como en la imagen) -->
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="#">Navegación</a>
+                <a href="#">Inicio</a>
+                <a href="#">Contacto</a>
+                <a href="#">Sobre nosotros</a>
+                <a href="#">Página principal</a>
             </div>
+            <div class="footer-copy">
+                © {{ currentYear }} - Sistema de Gestión de Ofertas
+            </div>
+        </footer>
 
-            <div class="pagination" v-if="totalPages > 1">
-                <button class="page-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">
-                    Anterior
-                </button>
-                <button 
-                    v-for="page in visiblePages" 
-                    :key="page" 
-                    :class="['page-btn', { active: page === currentPage }]"
-                    @click="goToPage(page)"
-                    :disabled="page === '...'"
-                >
-                    {{ page }}
-                </button>
-                <button class="page-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">
-                    Siguiente
-                </button>
+        <!-- MODAL DETALLES -->
+        <div v-if="modalDetallesVisible" class="modal" @click.self="modalDetallesVisible = false">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Detalles de la oferta</h3>
+                    <button class="modal-close" @click="modalDetallesVisible = false">×</button>
+                </div>
+                <div class="modal-body" v-if="ofertaSeleccionada">
+                    <p><strong>Nombre:</strong> {{ ofertaSeleccionada.nombre }}</p>
+                    <p><strong>Descripción:</strong> {{ ofertaSeleccionada.descripcion }}</p>
+                    <p><strong>Valor unitario:</strong> {{ formatMoney(ofertaSeleccionada.valor_unitario) }}</p>
+                    <p><strong>Valor total:</strong> {{ formatMoney(ofertaSeleccionada.valor_total) }}</p>
+                    <p><strong>Estado:</strong> {{ ofertaSeleccionada.estado || 'Activa' }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button @click="modalDetallesVisible = false" class="btn-cerrar">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL EDITAR -->
+        <div v-if="modalEditarVisible" class="modal" @click.self="modalEditarVisible = false">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Editar oferta</h3>
+                    <button class="modal-close" @click="modalEditarVisible = false">×</button>
+                </div>
+                <div class="modal-body" v-if="ofertaEditando">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input v-model="ofertaEditando.nombre" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea v-model="ofertaEditando.descripcion" class="form-input" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor unitario</label>
+                        <input type="number" v-model="ofertaEditando.valor_unitario" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Valor total</label>
+                        <input type="number" v-model="ofertaEditando.valor_total" class="form-input">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button @click="guardarEdicion" class="btn-guardar">Guardar cambios</button>
+                    <button @click="modalEditarVisible = false" class="btn-cancelar">Cancelar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -177,310 +179,674 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 
-const logoPrimeLogistics = '/images/logo-empresa.png'
-
 // Estado
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
-const totalItems = ref(0)
-const loading = ref(false)
-const error = ref(null)
-const isAdmin = ref(true) // Cambiar según roles de usuario
+const cargando = ref(false)
+const mensajeError = ref(null)
+const ofertas = ref([])
 
-// Filtros
-const filters = ref({
-    search: '',
-    modo: '',
-    ruta: ''
+// Tabs (exactamente como en la imagen)
+const tabs = ref([
+    'Administración', 'Servicios', 'Contratación', 'Recursos Humanos',
+    'Finanzas', 'Marketing', 'Tecnología', 'Gestión de Proyectos',
+    'Informática', 'Comunicaciones', 'Contabilidad', 'Seguridad y Salud',
+    'Medio Ambiente', 'Desarrollo Sostenible', 'Empresarial', 'Pymes', 'Otros'
+])
+const activeTab = ref('Administración')
+
+// Estadísticas
+const stats = ref({
+    total_ofertas: 4200,
+    todas_ofertas: 3308,
+    completadas: 35,
+    pendientes: 284
 })
 
-// Datos desde backend
-const distribucionModos = ref([])
-const totalEnviosActivos = ref(0)
-const operaciones = ref([])
-const rutasDisponibles = ref([])
+// Filtros para la tabla
+const filters = ref({
+    nombre: '',
+    descripcion: '',
+    valor_unitario: '',
+    valor_total: ''
+})
 
-// URL base de la API
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
+// Modales
+const modalDetallesVisible = ref(false)
+const modalEditarVisible = ref(false)
+const ofertaSeleccionada = ref(null)
+const ofertaEditando = ref(null)
 
-// Funciones API
-const fetchDistribucionModos = async () => {
+// URL de la API
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+
+// Año actual para el footer
+const currentYear = ref(new Date().getFullYear())
+
+// Ofertas filtradas
+const ofertasFiltradas = computed(() => {
+    if (!ofertas.value.length) return []
+
+    return ofertas.value.filter(oferta => {
+        const matchNombre = oferta.nombre?.toLowerCase().includes(filters.value.nombre.toLowerCase())
+        const matchDescripcion = oferta.descripcion?.toLowerCase().includes(filters.value.descripcion.toLowerCase())
+        const matchValorUnitario = filters.value.valor_unitario === '' ||
+            oferta.valor_unitario?.toString().includes(filters.value.valor_unitario)
+        const matchValorTotal = filters.value.valor_total === '' ||
+            oferta.valor_total?.toString().includes(filters.value.valor_total)
+
+        return matchNombre && matchDescripcion && matchValorUnitario && matchValorTotal
+    })
+})
+
+// Cargar ofertas desde la API
+const cargarOfertas = async () => {
+    cargando.value = true
+    mensajeError.value = null
+
     try {
-        const response = await fetch(`${API_BASE_URL}/operaciones/distribucion-modos`)
-        if (!response.ok) throw new Error('Error al cargar distribución de modos')
-        const data = await response.json()
-        distribucionModos.value = data
-    } catch (err) {
-        console.error('Error fetching distribucion modos:', err)
-    }
-}
+        const response = await fetch(`${API_URL}/ofertas`)
+        const result = await response.json()
 
-const fetchTotalEnviosActivos = async () => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/operaciones/total-activos`)
-        if (!response.ok) throw new Error('Error al cargar total de envíos')
-        const data = await response.json()
-        totalEnviosActivos.value = data.total
-    } catch (err) {
-        console.error('Error fetching total envios:', err)
-    }
-}
+        if (result.success || Array.isArray(result)) {
+            ofertas.value = Array.isArray(result) ? result : result.data || []
 
-const fetchOperaciones = async () => {
-    loading.value = true
-    error.value = null
-    
-    try {
-        const params = new URLSearchParams({
-            page: currentPage.value,
-            limit: itemsPerPage.value,
-            ...(filters.value.search && { search: filters.value.search }),
-            ...(filters.value.modo && { modo: filters.value.modo }),
-            ...(filters.value.ruta && { ruta: filters.value.ruta })
-        })
-        
-        const response = await fetch(`${API_BASE_URL}/operaciones?${params}`)
-        if (!response.ok) throw new Error('Error al cargar operaciones')
-        
-        const data = await response.json()
-        operaciones.value = data.operaciones
-        totalItems.value = data.total
-    } catch (err) {
-        console.error('Error fetching operaciones:', err)
-        error.value = 'Error al cargar las operaciones'
-        operaciones.value = []
-        totalItems.value = 0
+            // Actualizar estadísticas basadas en los datos reales
+            if (ofertas.value.length) {
+                stats.value.total_ofertas = ofertas.value.length
+                stats.value.todas_ofertas = ofertas.value.length
+                stats.value.completadas = ofertas.value.filter(o => o.estado === 'completada' || o.completada).length
+                stats.value.pendientes = ofertas.value.filter(o => o.estado === 'pendiente' || !o.completada).length
+            }
+        } else {
+            throw new Error(result.message || 'Error al cargar ofertas')
+        }
+    } catch (error) {
+        console.error('Error:', error)
+        mensajeError.value = 'Error al cargar las ofertas'
+        // Datos de ejemplo para demostración
+        ofertas.value = [
+            { id: 1, nombre: 'Oferta Premium', descripcion: 'Servicio de primera clase', valor_unitario: 1500, valor_total: 15000, estado: 'activa' },
+            { id: 2, nombre: 'Oferta Básica', descripcion: 'Servicio estándar', valor_unitario: 500, valor_total: 5000, estado: 'pendiente' },
+            { id: 3, nombre: 'Oferta Express', descripcion: 'Entrega rápida 24h', valor_unitario: 2500, valor_total: 25000, estado: 'completada' },
+            { id: 4, nombre: 'Oferta Corporativa', descripcion: 'Para empresas grandes', valor_unitario: 5000, valor_total: 50000, estado: 'activa' },
+        ]
     } finally {
-        loading.value = false
+        cargando.value = false
     }
 }
 
-const fetchRutasDisponibles = async () => {
+// CRUD de ofertas
+const verDetalles = (oferta) => {
+    ofertaSeleccionada.value = oferta
+    modalDetallesVisible.value = true
+}
+
+const editarOferta = (oferta) => {
+    ofertaEditando.value = { ...oferta }
+    modalEditarVisible.value = true
+}
+
+const guardarEdicion = async () => {
+    if (!ofertaEditando.value) return
+
     try {
-        const response = await fetch(`${API_BASE_URL}/operaciones/rutas`)
-        if (!response.ok) throw new Error('Error al cargar rutas')
-        const data = await response.json()
-        rutasDisponibles.value = data
-    } catch (err) {
-        console.error('Error fetching rutas:', err)
+        const response = await fetch(`${API_URL}/ofertas/${ofertaEditando.value.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(ofertaEditando.value)
+        })
+
+        if (response.ok) {
+            await cargarOfertas()
+            modalEditarVisible.value = false
+        }
+    } catch (error) {
+        console.error('Error al guardar:', error)
+        mensajeError.value = 'Error al guardar los cambios'
     }
 }
 
-// Handlers
-let searchTimeout
-const handleSearch = () => {
-    clearTimeout(searchTimeout)
-    searchTimeout = setTimeout(() => {
-        currentPage.value = 1
-        fetchOperaciones()
-    }, 500)
-}
+const eliminarOferta = async (id) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta oferta?')) return
 
-const handleFilterChange = () => {
-    currentPage.value = 1
-    fetchOperaciones()
-}
-
-const refreshData = async () => {
-    await Promise.all([
-        fetchDistribucionModos(),
-        fetchTotalEnviosActivos(),
-        fetchOperaciones(),
-        fetchRutasDisponibles()
-    ])
-}
-
-const editOperacion = (operacion) => {
-    console.log('Editar operación:', operacion)
-    // Implementar modal de edición
-}
-
-const deleteOperacion = async (id) => {
-    if (!confirm('¿Estás seguro de eliminar esta operación?')) return
-    
     try {
-        const response = await fetch(`${API_BASE_URL}/operaciones/${id}`, {
+        const response = await fetch(`${API_URL}/ofertas/${id}`, {
             method: 'DELETE'
         })
-        
-        if (!response.ok) throw new Error('Error al eliminar')
-        
-        await refreshData()
-    } catch (err) {
-        console.error('Error deleting operacion:', err)
-        error.value = 'Error al eliminar la operación'
-    }
-}
 
-// Computed
-const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
-
-const paginatedOperaciones = computed(() => operaciones.value)
-
-const paginationInfo = computed(() => {
-    const start = totalItems.value === 0 ? 0 : (currentPage.value - 1) * itemsPerPage.value + 1
-    const end = Math.min(currentPage.value * itemsPerPage.value, totalItems.value)
-    return { from: start, to: end }
-})
-
-const visiblePages = computed(() => {
-    const maxVisible = 5
-    const pages = []
-    
-    if (totalPages.value <= maxVisible) {
-        for (let i = 1; i <= totalPages.value; i++) pages.push(i)
-    } else {
-        if (currentPage.value <= 3) {
-            pages.push(1, 2, 3, 4, '...', totalPages.value)
-        } else if (currentPage.value >= totalPages.value - 2) {
-            pages.push(1, '...', totalPages.value - 3, totalPages.value - 2, totalPages.value - 1, totalPages.value)
+        if (response.ok) {
+            await cargarOfertas()
         } else {
-            pages.push(1, '...', currentPage.value - 1, currentPage.value, currentPage.value + 1, '...', totalPages.value)
+            throw new Error('Error al eliminar')
         }
+    } catch (error) {
+        console.error('Error al eliminar:', error)
+        mensajeError.value = 'Error al eliminar la oferta'
     }
-    
-    return pages
-})
-
-// Utils
-const formatDate = (date) => {
-    if (!date) return '-'
-    const d = new Date(date)
-    return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
 }
 
-const getEstadoClass = (estado) => {
-    const classes = {
-        'EN TRANSITO': 'estado-transito',
-        'COMPLETADO': 'estado-completado',
-        'CANCELADO': 'estado-cancelado'
-    }
-    return classes[estado] || 'estado-transito'
+// Filtros con debounce
+let filterTimeout
+const handleFilter = () => {
+    clearTimeout(filterTimeout)
+    // No necesita debounce para filtros locales, pero lo dejo por si acaso
 }
 
-const goToPage = (page) => {
-    if (page === '...' || page < 1 || page > totalPages.value) return
-    currentPage.value = page
-    fetchOperaciones()
+// Utilitarios
+const formatNumber = (num) => {
+    return num?.toLocaleString('es-ES') ?? '0'
 }
 
-// Watch para cambios de página
-watch(currentPage, () => {
-    fetchOperaciones()
+const formatMoney = (value) => {
+    if (value === undefined || value === null) return '€0'
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value)
+}
+
+// Watchers
+watch(activeTab, (newTab) => {
+    console.log('Tab seleccionada:', newTab)
+    // Aquí se podría cargar ofertas diferentes según la pestaña
+    cargarOfertas()
 })
 
 // Lifecycle
 onMounted(() => {
-    refreshData()
+    cargarOfertas()
 })
 </script>
 
 <style scoped>
-/* Mantén tus estilos existentes y añade: */
-
-.refresh-btn {
-    padding: 8px 16px;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-left: auto;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.refresh-btn:disabled {
+.todas-ofertas-container {
+    min-height: 100vh;
+    background: #f5f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* HEADER */
+.page-header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    padding: 24px 32px;
+    border-bottom: 3px solid #3b82f6;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: white;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+/* TABS */
+.tabs-container {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    overflow-x: auto;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tabs-wrapper {
+    display: inline-flex;
+    padding: 0 20px;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 16px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.tab-button:hover {
+    color: #3b82f6;
+    background: #f8fafc;
+}
+
+.tab-button.active {
+    color: #3b82f6;
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #3b82f6;
+}
+
+/* Mensaje de error */
+.alert {
+    margin: 20px 32px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.alert.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.alert button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #991b1b;
+}
+
+/* TARJETAS DE ESTADÍSTICAS */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    padding: 32px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-number {
+    font-size: 42px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* TABLA */
+.table-container {
+    background: white;
+    margin: 0 32px 32px 32px;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #1e293b;
+}
+
+.btn-refresh {
+    background: #3b82f6;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-refresh:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.btn-refresh:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.error-message {
-    background: #f8d7da;
-    color: #721c24;
-    padding: 12px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.error-message button {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.loading-cell, .empty-cell {
+.loading-state {
     text-align: center;
-    padding: 40px !important;
+    padding: 60px;
 }
 
 .spinner {
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #3498db;
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #3b82f6;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 10px;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-.estado-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
+.table-responsive {
+    overflow-x: auto;
+}
+
+.ofertas-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ofertas-table th,
+.ofertas-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.ofertas-table th {
+    background: #f8fafc;
     font-weight: 600;
+    color: #1e293b;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.estado-transito {
-    background: #fff3cd;
-    color: #856404;
+.filter-row th {
+    background: #ffffff;
+    padding: 8px 16px;
 }
 
-.estado-completado {
-    background: #d4edda;
-    color: #155724;
+.filter-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    transition: border-color 0.2s;
 }
 
-.estado-cancelado {
-    background: #f8d7da;
-    color: #721c24;
+.filter-input:focus {
+    outline: none;
+    border-color: #3b82f6;
 }
 
-.action-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    margin: 0 5px;
-    padding: 5px;
+.ofertas-table tbody tr:hover {
+    background: #f8fafc;
 }
 
-.action-btn.edit:hover {
-    transform: scale(1.1);
+.ofertas-table td {
+    color: #334155;
+    font-size: 14px;
 }
 
-.action-btn.delete:hover {
-    transform: scale(1.1);
-}
-
-.header {
+.acciones-cell {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-accion {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.btn-ver {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.btn-ver:hover {
+    background: #c7d2fe;
+}
+
+.btn-editar {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.btn-editar:hover {
+    background: #fde68a;
+}
+
+.btn-eliminar {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.btn-eliminar:hover {
+    background: #fecaca;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 48px !important;
+    color: #94a3b8;
+}
+
+/* FOOTER */
+.footer {
+    background: #1e293b;
+    color: #cbd5e1;
+    padding: 32px;
+    text-align: center;
+    margin-top: 32px;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
     margin-bottom: 20px;
 }
 
-.header h1 {
+.footer-links a {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: white;
+}
+
+.footer-copy {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* MODALES */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h3 {
     margin: 0;
+    color: #1e293b;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #94a3b8;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: #1e293b;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-body p {
+    margin: 12px 0;
+    line-height: 1.5;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #334155;
+    font-size: 13px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-guardar {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-guardar:hover {
+    background: #059669;
+}
+
+.btn-cancelar,
+.btn-cerrar {
+    background: #e2e8f0;
+    color: #334155;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-cancelar:hover,
+.btn-cerrar:hover {
+    background: #cbd5e1;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .table-container {
+        margin: 0 20px 20px 20px;
+    }
+
+    .footer-links {
+        gap: 20px;
+    }
+
+    .acciones-cell {
+        flex-direction: column;
+    }
+
+    .btn-accion {
+        width: 100%;
+        text-align: center;
+    }
+
+    .ofertas-table th,
+    .ofertas-table td {
+        padding: 10px 12px;
+    }
 }
 </style>

@@ -346,6 +346,9 @@
 
             </main>
         </div>
+
+        <!-- Chatbot flotante de análisis -->
+        <chatbot-flotante />
     </div>
 </template>
 
@@ -356,6 +359,7 @@ import ClientesComponent from './ClientesComponent.vue'
 import OfertasComerciales from './OfertasComerciales.vue'
 import OperacionesComponent from './OperacionesComponent.vue'
 import NotificacionsComponent from './NotificacionsComponent.vue';
+import ChatbotFlotante from './Chatbot/ChatbotFlotante.vue'
 
 export default {
     name: 'DashboardOperador',
@@ -367,6 +371,7 @@ export default {
         OfertasComerciales,
         OperacionesComponent,
         NotificacionsComponent,
+        ChatbotFlotante,
     },
 
     data() {
