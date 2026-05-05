@@ -3,6 +3,25 @@
         <div class="modal">
             <!-- Header -->
             <div class="modal-header">
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+                <h3>Editar usuario — {{ form.name || 'Usuario' }}</h3>
+                <button class="close-btn" @click="$emit('close')">×</button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button 
+                    v-for="tab in tabs" 
+                    :key="tab.key" 
+                    :class="{ active: activeTab === tab.key }" 
+                    @click="activeTab = tab.key"
+                >
+                    {{ tab.label }}
+                </button>
+=======
+>>>>>>> origin
                 <h3>Editar Usuario admin</h3>
                 <button class="close-btn" @click="$emit('close')">×</button>
             </div>
@@ -22,10 +41,56 @@
                         {{ tab }}
                     </button>
                 </div>
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
             </div>
 
             <!-- Contenido del modal -->
             <div class="modal-body">
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+                <!-- TAB: Datos personales -->
+                <div v-if="activeTab === 'personal'" class="personal-data">
+                    <div class="two-columns">
+                        <!-- Columna izquierda: Avatar -->
+                        <div class="avatar-section">
+                            <div class="avatar-circle">
+                                {{ initials }}
+                            </div>
+                            <button type="button" class="btn-change-photo">Cambiar foto</button>
+                        </div>
+
+                        <!-- Columna derecha: Campos -->
+                        <div class="fields-section">
+                            <div class="field">
+                                <label>Nombre completo</label>
+                                <input v-model="form.name" type="text" placeholder="María García" />
+                            </div>
+
+                            <div class="field">
+                                <label>Teléfono</label>
+                                <input v-model="form.phone" type="tel" placeholder="+34 961 234 567" />
+                            </div>
+
+                            <div class="field">
+                                <label>Email</label>
+                                <input v-model="form.email" type="email" placeholder="email@example.com" />
+                            </div>
+
+                            <div class="field">
+                                <label>Correo electrónico</label>
+                                <input v-model="form.email2" type="email" placeholder="maría@textil.com" />
+                            </div>
+
+                            <div class="field">
+                                <label>Cargo</label>
+                                <input v-model="form.position" type="text" placeholder="Responsable de Compras" />
+                            </div>
+=======
+>>>>>>> origin
                 <!-- Para el tab Administrador: mostrar el formulario de edición -->
                 <div v-if="activeMainTab === 'administrador'" class="admin-content">
                     <!-- Información del usuario -->
@@ -116,10 +181,74 @@
                                 <input type="checkbox" v-model="form.permissions.editSettings" />
                                 Editar configuración
                             </label>
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
                         </div>
                     </div>
                 </div>
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+                <!-- TAB: Acceso y rol -->
+                <div v-if="activeTab === 'access'" class="tab-content">
+                    <div class="field">
+                        <label>Rol de usuario</label>
+                        <select v-model="form.role">
+                            <option value="admin">Administrador</option>
+                            <option value="operator">Operador</option>
+                            <option value="client">Cliente</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Estado de cuenta</label>
+                        <select v-model="form.status">
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
+                            <option value="suspended">Suspendido</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- TAB: Empresa -->
+                <div v-if="activeTab === 'company'" class="tab-content">
+                    <div class="field">
+                        <label>Nombre de empresa</label>
+                        <input v-model="form.companyName" type="text" />
+                    </div>
+                    <div class="field">
+                        <label>NIF/CIF</label>
+                        <input v-model="form.cif" type="text" />
+                    </div>
+                    <div class="field">
+                        <label>Dirección</label>
+                        <input v-model="form.address" type="text" />
+                    </div>
+                </div>
+
+                <!-- TAB: Permisos -->
+                <div v-if="activeTab === 'permissions'" class="tab-content">
+                    <div class="permissions-list">
+                        <label class="checkbox-label">
+                            <input type="checkbox" v-model="form.permissions.manageUsers" />
+                            Gestionar usuarios
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" v-model="form.permissions.manageRoles" />
+                            Gestionar roles
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" v-model="form.permissions.viewReports" />
+                            Ver reportes
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" v-model="form.permissions.editSettings" />
+                            Editar configuración
+                        </label>
+=======
+>>>>>>> origin
                 <!-- Para los tabs de Contas: mostrar configuración de cuentas -->
                 <div v-else class="contas-content">
                     <div class="contas-config">
@@ -138,6 +267,10 @@
                                 <input type="number" v-model="contasPaymentDays[activeMainTab]" placeholder="30" />
                             </div>
                         </div>
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
                     </div>
                 </div>
             </div>
@@ -164,6 +297,21 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved', 'deleted'])
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+const tabs = [
+    { key: 'personal', label: 'Datos personales' },
+    { key: 'access', label: 'Acceso y rol' },
+    { key: 'company', label: 'Empresa' },
+    { key: 'permissions', label: 'Permisos' }
+]
+
+const activeTab = ref('personal')
+
+// Estructura completa del formulario
+=======
+>>>>>>> origin
 // Tabs principales (Administrador + todas las opciones de Contas)
 const activeMainTab = ref('administrador')
 
@@ -212,6 +360,10 @@ contasTabs.value.forEach(tab => {
 })
 
 // Estructura del formulario
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
 const form = ref({
     id: null,
     name: '',
@@ -271,11 +423,34 @@ const initials = computed(() => {
 // Guardar cambios
 const save = async () => {
     try {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        // Validación básica
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
         if (!form.value.name) {
             alert('El nombre completo es requerido')
             return
         }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        // Ejemplo con axios a Laravel
+        // if (form.value.id) {
+        //     await axios.put(`/api/users/${form.value.id}`, form.value)
+        // } else {
+        //     await axios.post('/api/users', form.value)
+        // }
+
+        emit('saved', { ...form.value })
+        
+        // Opcional: cerrar modal después de guardar
+        // emit('close')
+=======
+>>>>>>> origin
         // Preparar datos completos incluyendo configuración de cuentas
         const fullData = {
             ...form.value,
@@ -285,6 +460,10 @@ const save = async () => {
         }
 
         emit('saved', fullData)
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
     } catch (error) {
         console.error('Error al guardar:', error)
         alert('Error al guardar los cambios')
@@ -298,8 +477,21 @@ const deleteUser = async () => {
     }
 
     try {
+<<<<<<< HEAD
         emit('deleted', form.value.id)
         emit('close')
+=======
+<<<<<<< HEAD
+        // Ejemplo con axios
+        // await axios.delete(`/api/users/${form.value.id}`)
+
+        emit('deleted', form.value.id)
+        emit('close') // Cerrar modal después de eliminar
+=======
+        emit('deleted', form.value.id)
+        emit('close')
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
     } catch (error) {
         console.error('Error al eliminar:', error)
         alert('Error al eliminar el usuario')
@@ -319,14 +511,32 @@ const deleteUser = async () => {
 }
 
 .modal {
+<<<<<<< HEAD
     width: 900px;
     max-width: 90vw;
+=======
+<<<<<<< HEAD
+    width: 750px;
+    max-width: 90%;
+=======
+    width: 900px;
+    max-width: 90vw;
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
     background: white;
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
+<<<<<<< HEAD
     max-height: 85vh;
+=======
+<<<<<<< HEAD
+    max-height: 90vh;
+=======
+    max-height: 85vh;
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
 }
 
 .modal-header {
@@ -338,7 +548,15 @@ const deleteUser = async () => {
 
     h3 {
         margin: 0;
+<<<<<<< HEAD
         font-size: 1.25rem;
+=======
+<<<<<<< HEAD
+        font-size: 1.1rem;
+=======
+        font-size: 1.25rem;
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
         font-weight: 600;
         color: #212529;
     }
@@ -365,6 +583,38 @@ const deleteUser = async () => {
     }
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+.tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0 24px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+
+    button {
+        padding: 12px 20px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #6c757d;
+        transition: all 0.2s;
+        border-bottom: 2px solid transparent;
+
+        &:hover {
+            color: #fd7e14;
+        }
+
+        &.active {
+            color: #fd7e14;
+            border-bottom-color: #fd7e14;
+            background: white;
+        }
+=======
+>>>>>>> origin
 /* Tabs con scroll horizontal (como en la imagen) */
 .tabs-container {
     border-bottom: 1px solid #e9ecef;
@@ -411,6 +661,10 @@ const deleteUser = async () => {
         color: #fd7e14;
         border-bottom-color: #fd7e14;
         background: white;
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
     }
 }
 
@@ -420,6 +674,27 @@ const deleteUser = async () => {
     flex: 1;
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+.two-columns {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 24px;
+}
+
+.avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar-circle {
+    width: 100px;
+    height: 100px;
+=======
+>>>>>>> origin
 /* Contenido del Administrador */
 .admin-content {
     display: flex;
@@ -441,35 +716,87 @@ const deleteUser = async () => {
 .avatar-circle {
     width: 80px;
     height: 80px;
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
     border-radius: 50%;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    font-size: 32px;
+    font-weight: 600;
+}
+
+.btn-change-photo {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #495057;
+
+    &:hover {
+        background: #e9ecef;
+    }
+}
+
+.fields-section {
+=======
+>>>>>>> origin
     font-size: 28px;
     font-weight: 600;
 }
 
 .user-fields {
     flex: 1;
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> origin
 .field-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
 }
 
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
 .field {
     display: flex;
     flex-direction: column;
     gap: 6px;
 
     label {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        font-size: 13px;
+        font-weight: 500;
+        color: #495057;
+    }
+
+    input, select {
+=======
+>>>>>>> origin
         font-size: 12px;
         font-weight: 500;
         color: #495057;
@@ -479,6 +806,10 @@ const deleteUser = async () => {
 
     input,
     select {
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
         padding: 8px 12px;
         border: 1px solid #dee2e6;
         border-radius: 6px;
@@ -493,6 +824,12 @@ const deleteUser = async () => {
     }
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+.tab-content {
+=======
+>>>>>>> origin
 .company-section,
 .permissions-section {
     h4 {
@@ -524,11 +861,40 @@ const deleteUser = async () => {
 }
 
 .config-options {
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+.permissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 14px;
+
+        input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+    }
+}
+
+=======
+>>>>>>> origin
 .checkbox-label {
     display: flex;
     align-items: center;
@@ -544,6 +910,10 @@ const deleteUser = async () => {
 }
 
 /* Modal Footer */
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
 .modal-footer {
     display: flex;
     justify-content: space-between;
@@ -605,6 +975,11 @@ const deleteUser = async () => {
         color: white;
     }
 }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> origin
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -640,4 +1015,8 @@ const deleteUser = async () => {
         }
     }
 }
+<<<<<<< HEAD
+=======
+>>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
+>>>>>>> origin
 </style>
