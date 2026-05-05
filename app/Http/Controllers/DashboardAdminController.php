@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class DashboardController extends Controller
+class DashboardAdminController extends Controller
 {
     /**
      * Obtener todos los datos necesarios para el dashboard
