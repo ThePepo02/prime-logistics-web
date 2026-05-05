@@ -233,7 +233,7 @@
                                 <div v-for="alert in alerts" :key="alert.id"
                                     class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                                     <span class="text-sm font-medium text-gray-700 w-32 flex-shrink-0">{{ alert.id
-                                    }}</span>
+                                        }}</span>
                                     <span class="text-sm text-gray-500 flex-1">{{ alert.issue }}</span>
                                     <button
                                         class="text-xs border border-gray-300 text-gray-600 hover:bg-gray-50 px-3 py-1 rounded-lg transition ml-2">Ver</button>
@@ -251,7 +251,7 @@
                                             :style="{ width: op.percent + '%' }"></div>
                                     </div>
                                     <span class="text-xs text-gray-500 w-8 text-right flex-shrink-0">{{ op.percent
-                                    }}%</span>
+                                        }}%</span>
                                 </div>
                             </div>
                         </div>
@@ -352,180 +352,143 @@
     </div>
 </template>
 
-<script>
-// Importamos ClientesComponent igual que importamos LoginComponent en app.js
-// La diferencia es que aquí lo registramos LOCALMENTE solo para este componente
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import ClientesComponent from './ClientesComponent.vue'
 import OfertasComerciales from './OfertasComerciales.vue'
 import OperacionesComponent from './OperacionesComponent.vue'
-import NotificacionsComponent from './NotificacionsComponent.vue';
+import NotificacionsComponent from './NotificacionsComponent.vue'
 import ChatbotFlotante from './Chatbot/ChatbotFlotante.vue'
 
-export default {
-    name: 'DashboardOperador',
+const paginaActual = ref('dashboard')
+const logoUrl = '/logo-empresa.png'
 
-    // components: → registra los componentes hijos que usa este componente
-    // Así Vue sabe que <clientes-component> existe cuando lo usa en el template
-    components: {
-        ClientesComponent,
-        OfertasComerciales,
-        OperacionesComponent,
-        NotificacionsComponent,
-        ChatbotFlotante,
-    },
+const kpis = ref([
+    { value: 0, label: 'Ofertas pendientes', sub: 'Por responder al cliente', border: 'border-orange-400', iconColor: 'text-orange-400', subColor: 'text-orange-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>' },
+    { value: 0, label: 'Aceptadas este mes', sub: '↑ vs mes anterior', border: 'border-green-500', iconColor: 'text-green-500', subColor: 'text-green-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>' },
+    { value: 0, label: 'Operaciones en curso', sub: 'Total registradas', border: 'border-blue-500', iconColor: 'text-blue-500', subColor: 'text-blue-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>' },
+    { value: 0, label: 'Con incidencias', sub: 'Requieren atención', border: 'border-red-400', iconColor: 'text-red-400', subColor: 'text-red-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>' },
+])
 
-    data() {
-        return {
-            // Variable que controla qué página se muestra
-            // Igual que en LoginComponent teníamos loading: false para controlar el estado
-            paginaActual: 'dashboard',
+const offers = ref([])
+const alerts = ref([])
+const operations = ref([])
 
-            logoUrl: '/logo-empresa.png',
+const weeklyData = ref([
+    { label: 'Sem45', sent: 70, accepted: 50, incidents: 15 },
+    { label: 'Sem46', sent: 55, accepted: 65, incidents: 10 },
+    { label: 'Sem47', sent: 80, accepted: 45, incidents: 20 },
+    { label: 'Sem48', sent: 60, accepted: 70, incidents: 8 },
+    { label: 'Sem49', sent: 90, accepted: 60, incidents: 12 },
+    { label: 'Sem50', sent: 75, accepted: 80, incidents: 18 },
+    { label: 'Sem51', sent: 85, accepted: 55, incidents: 10 },
+    { label: 'Sem52', sent: 65, accepted: 75, incidents: 5 },
+])
 
+const pendingRequests = ref([
+    { id: 1, initials: 'MG', name: 'María García — Textil SA', route: 'Valencia→Shanghai', type: 'FCL', weight: '12.400kg', time: 'Hace 1h' },
+    { id: 2, initials: 'PL', name: 'Pedro López — Moda Express', route: 'Madrid→París', type: 'Terrestre', weight: '2.100kg', time: 'Hace 3h' },
+])
 
-            // Datos del dashboard
-            kpis: [
-                { value: 0, label: 'Ofertas pendientes', sub: 'Por responder al cliente', border: 'border-orange-400', iconColor: 'text-orange-400', subColor: 'text-orange-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>' },
-                { value: 0, label: 'Aceptadas este mes', sub: '↑ vs mes anterior', border: 'border-green-500', iconColor: 'text-green-500', subColor: 'text-green-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>' },
-                { value: 0, label: 'Operaciones en curso', sub: 'Total registradas', border: 'border-blue-500', iconColor: 'text-blue-500', subColor: 'text-blue-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>' },
-                { value: 0, label: 'Con incidencias', sub: 'Requieren atención', border: 'border-red-400', iconColor: 'text-red-400', subColor: 'text-red-500', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>' },
-            ],
-            offers: [],
-            alerts: [],
-            operations: [],
+const nombreUsuario = computed(() => {
+    try {
+        const usuario = JSON.parse(localStorage.getItem('user') || localStorage.getItem('usuario') || '{}')
+        return usuario.nom || usuario.name || 'Operador'
+    } catch (e) {
+        return 'Operador'
+    }
+})
 
-            weeklyData: [
-                { label: 'Sem45', sent: 70, accepted: 50, incidents: 15 },
-                { label: 'Sem46', sent: 55, accepted: 65, incidents: 10 },
-                { label: 'Sem47', sent: 80, accepted: 45, incidents: 20 },
-                { label: 'Sem48', sent: 60, accepted: 70, incidents: 8 },
-                { label: 'Sem49', sent: 90, accepted: 60, incidents: 12 },
-                { label: 'Sem50', sent: 75, accepted: 80, incidents: 18 },
-                { label: 'Sem51', sent: 85, accepted: 55, incidents: 10 },
-                { label: 'Sem52', sent: 65, accepted: 75, incidents: 5 },
-            ],
+const inicialesUsuario = computed(() => {
+    const partes = nombreUsuario.value.split(' ')
+    if (partes.length >= 2) return (partes[0][0] + partes[1][0]).toUpperCase()
+    return nombreUsuario.value.substring(0, 2).toUpperCase()
+})
 
-            pendingRequests: [
-                { id: 1, initials: 'MG', name: 'María García — Textil SA', route: 'Valencia→Shanghai', type: 'FCL', weight: '12.400kg', time: 'Hace 1h' },
-                { id: 2, initials: 'PL', name: 'Pedro López — Moda Express', route: 'Madrid→París', type: 'Terrestre', weight: '2.100kg', time: 'Hace 3h' },
-            ],
+const tituloActual = computed(() => {
+    const titulos = {
+        dashboard: 'Dashboard',
+        clientes: 'Clientes',
+        ofertas: 'Ofertas Comerciales',
+        operaciones: 'Operaciones',
+        notificaciones: 'Notificaciones',
+        seguimiento: 'Seguimiento',
+        documentacion: 'Documentación',
+        configuracion: 'Configuración',
+    }
+    return titulos[paginaActual.value] || 'Dashboard'
+})
+
+const subtituloActual = computed(() => {
+    const subs = {
+        dashboard: 'Buenos días, ' + nombreUsuario.value + ' — Prime Logistics',
+        clientes: 'Gestión de empresas y contactos',
+        ofertas: 'Gestión de ofertas comerciales',
+        operaciones: 'Estado de operaciones activas',
+    }
+    return subs[paginaActual.value] || ''
+})
+
+const cargarDatosDashboard = async () => {
+    try {
+        const token = localStorage.getItem('token')
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
         }
-    },
 
-    computed: {
-        // Calcula el nombre del usuario desde localStorage (guardado en el login)
-        nombreUsuario() {
-            try {
-                const usuario = JSON.parse(localStorage.getItem('user') || localStorage.getItem('usuario') || '{}')
-                return usuario.nom || usuario.name || 'Operador'
-            } catch (e) {
-                return 'Operador'
-            }
-        },
+        const [statsRes, ofertesRes, alertesRes, distribucioRes] = await Promise.all([
+            fetch('/api/dashboard/stats', { headers }),
+            fetch('/api/dashboard/ofertes', { headers }),
+            fetch('/api/dashboard/alertes', { headers }),
+            fetch('/api/dashboard/distribucio', { headers }),
+        ])
 
-        // Genera las iniciales del nombre para el avatar
-        inicialesUsuario() {
-            const partes = this.nombreUsuario.split(' ')
-            if (partes.length >= 2) return (partes[0][0] + partes[1][0]).toUpperCase()
-            return this.nombreUsuario.substring(0, 2).toUpperCase()
-        },
+        const stats = await statsRes.json()
+        const ofertes = await ofertesRes.json()
+        const alertesData = await alertesRes.json()
+        const distribucio = await distribucioRes.json()
 
-        // Título dinámico del topbar según la página activa
-        tituloActual() {
-            const titulos = {
-                dashboard: 'Dashboard',
-                clientes: 'Clientes',
-                ofertas: 'Ofertas Comerciales',
-                operaciones: 'Operaciones',
-                notificaciones: 'Notificaciones',
-                seguimiento: 'Seguimiento',
-                documentacion: 'Documentación',
-                configuracion: 'Configuración',
-            }
-            return titulos[this.paginaActual] || 'Dashboard'
-        },
+        kpis.value[0].value = stats.pendents
+        kpis.value[1].value = stats.acceptades
+        kpis.value[2].value = stats.en_curs
+        kpis.value[3].value = stats.incidencies
 
-        // Subtítulo dinámico del topbar
-        subtituloActual() {
-            const subs = {
-                dashboard: 'Buenos días, ' + this.nombreUsuario + ' — Prime Logistics',
-                clientes: 'Gestión de empresas y contactos',
-                ofertas: 'Gestión de ofertas comerciales',
-                operaciones: 'Estado de operaciones activas',
-            }
-            return subs[this.paginaActual] || ''
-        },
-    },
+        offers.value = ofertes
+        alerts.value = alertesData
+        operations.value = distribucio
 
-    // mounted() → se ejecuta automáticamente cuando el componente se carga en la página
-    // Igual que teníamos handleLogin que se ejecutaba al hacer click, mounted se ejecuta al cargar
-    mounted() {
-        this.cargarDatosDashboard()
-    },
-
-    methods: {
-        // Llama a las 4 APIs del dashboard en paralelo
-        async cargarDatosDashboard() {
-            try {
-                const token = localStorage.getItem('token');
-                const headers = {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json',
-                };
-
-                const [statsRes, ofertesRes, alertesRes, distribucioRes] = await Promise.all([
-                    fetch('/api/dashboard/stats', { headers }),
-                    fetch('/api/dashboard/ofertes', { headers }),
-                    fetch('/api/dashboard/alertes', { headers }),
-                    fetch('/api/dashboard/distribucio', { headers }),
-                ]);
-
-                const stats = await statsRes.json();
-                const ofertes = await ofertesRes.json();
-                const alertesData = await alertesRes.json();
-                const distribucio = await distribucioRes.json();
-
-                this.kpis[0].value = stats.pendents;
-                this.kpis[1].value = stats.acceptades;
-                this.kpis[2].value = stats.en_curs;
-                this.kpis[3].value = stats.incidencies;
-
-                this.offers = ofertes;
-                this.alerts = alertesData;
-                this.operations = distribucio;
-
-            } catch (e) {
-                console.error('Error cargando datos del dashboard:', e);
-            }
-        },
-
-        // Devuelve la clase CSS del badge según el estado de la oferta
-        estadoClase(status) {
-            if (status === 'ENVIADA') return 'bg-blue-100 text-blue-600'
-            if (status === 'BORRADOR') return 'bg-gray-100 text-gray-500'
-            if (status === 'ACEPTADA') return 'bg-green-100 text-green-600'
-            if (status === 'PENDIENTE') return 'bg-yellow-100 text-yellow-600'
-            return 'bg-gray-100 text-gray-400'
-        },
-
-        // Cierra sesión: borra el token del localStorage y redirige al login
-        // Igual que en LoginComponent guardábamos el token, aquí lo eliminamos
-        async logout() {
-            try {
-                const token = localStorage.getItem('token')
-                await fetch('/api/logout', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-            } catch (e) {
-                // Si falla la llamada al servidor, borramos igualmente
-            } finally {
-                localStorage.removeItem('token')
-                localStorage.removeItem('user')
-                localStorage.removeItem('usuario')
-                window.location.href = '/'
-            }
-        },
-    },
+    } catch (e) {
+        console.error('Error cargando datos del dashboard:', e)
+    }
 }
+
+const estadoClase = (status) => {
+    if (status === 'ENVIADA') return 'bg-blue-100 text-blue-600'
+    if (status === 'BORRADOR') return 'bg-gray-100 text-gray-500'
+    if (status === 'ACEPTADA') return 'bg-green-100 text-green-600'
+    if (status === 'PENDIENTE') return 'bg-yellow-100 text-yellow-600'
+    return 'bg-gray-100 text-gray-400'
+}
+
+const logout = async () => {
+    try {
+        const token = localStorage.getItem('token')
+        await fetch('/api/logout', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+    } catch (e) {
+        // Si falla la llamada al servidor, borramos igualmente
+    } finally {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        localStorage.removeItem('usuario')
+        window.location.href = '/'
+    }
+}
+
+onMounted(() => {
+    cargarDatosDashboard()
+})
 </script>

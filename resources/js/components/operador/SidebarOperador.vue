@@ -143,62 +143,55 @@
     </aside>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 import axios from 'axios'
 
-export default {
-    name: 'SidebarOperador',
-
-    props: {
-        activeRoute: {
-            type: String,
-            default: 'dashboard'
-        },
-        notificacionesCount: {
-            type: Number,
-            default: 0
-        }
+defineProps({
+    activeRoute: {
+        type: String,
+        default: 'dashboard'
     },
+    notificacionesCount: {
+        type: Number,
+        default: 0
+    }
+})
 
-    data() {
-        return {
-            logoSrc: window.location.origin + '/images/Prime-Logistics.png'
-        }
-    },
+const emit = defineEmits(['navigate'])
 
-    computed: {
-        nombreUsuario() {
-            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}')
-            return usuario.nom || 'Operador'
-        },
-        inicialesUsuario() {
-            const nombre = this.nombreUsuario
-            const partes = nombre.split(' ')
-            if (partes.length >= 2) {
-                return (partes[0][0] + partes[1][0]).toUpperCase()
-            }
-            return nombre.substring(0, 2).toUpperCase()
-        }
-    },
+const logoSrc = window.location.origin + '/images/Prime-Logistics.png'
 
-    methods: {
-        navigate(ruta) {
-            this.$emit('navigate', ruta)
-        },
-        async logout() {
-            try {
-                const token = localStorage.getItem('token')
-                await axios.post('/api/logout', {}, {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
-            } catch (e) {
-                // Si falla la llamada, borramos igualmente
-            } finally {
-                localStorage.removeItem('token')
-                localStorage.removeItem('usuario')
-                window.location.href = '/'
-            }
-        }
+const nombreUsuario = computed(() => {
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}')
+    return usuario.nom || 'Operador'
+})
+
+const inicialesUsuario = computed(() => {
+    const nombre = nombreUsuario.value
+    const partes = nombre.split(' ')
+    if (partes.length >= 2) {
+        return (partes[0][0] + partes[1][0]).toUpperCase()
+    }
+    return nombre.substring(0, 2).toUpperCase()
+})
+
+const navigate = (ruta) => {
+    emit('navigate', ruta)
+}
+
+const logout = async () => {
+    try {
+        const token = localStorage.getItem('token')
+        await axios.post('/api/logout', {}, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+    } catch (e) {
+        // Si falla la llamada, borramos igualmente
+    } finally {
+        localStorage.removeItem('token')
+        localStorage.removeItem('usuario')
+        window.location.href = '/'
     }
 }
 </script>

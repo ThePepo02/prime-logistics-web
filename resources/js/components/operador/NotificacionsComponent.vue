@@ -149,147 +149,138 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'NotificacionsComponent',
+<script setup>
+import { ref, onMounted } from 'vue'
 
-  data() {
-    return {
-      notificacions: [],
-      total:         0,
-      totalPagines:  1,
-      noLlegides:    0,
-      paginaActual:  1,
-      filtreActual:  'totes',
-      carregant:     true,
-      tabs: [
-        { label: 'Todas',       value: 'totes'      },
-        { label: 'No leídas',   value: 'no_llegides' },
-        { label: 'Solicitudes', value: 'ofertes'     },
-        { label: 'Sistema',     value: 'sistema'     },
-      ],
-    };
-  },
+const notificacions = ref([])
+const total = ref(0)
+const totalPagines = ref(1)
+const noLlegides = ref(0)
+const paginaActual = ref(1)
+const filtreActual = ref('totes')
+const carregant = ref(true)
 
-  mounted() {
-    this.carregarNotificacions();
-  },
+const tabs = [
+  { label: 'Todas', value: 'totes' },
+  { label: 'No leídas', value: 'no_llegides' },
+  { label: 'Solicitudes', value: 'ofertes' },
+  { label: 'Sistema', value: 'sistema' },
+]
 
-  methods: {
+onMounted(() => {
+  carregarNotificacions()
+})
 
-    async carregarNotificacions() {
-      this.carregant = true;
-      const token = localStorage.getItem('token');
-      try {
-        const res = await fetch(
-          `/api/notificacions?filtre=${this.filtreActual}&pagina=${this.paginaActual}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const data = await res.json();
-        this.notificacions = data.notificacions;
-        this.total         = data.total;
-        this.totalPagines  = data.total_pagines;
-        this.noLlegides    = data.no_llegides;
-      } catch (e) {
-        console.error('Error cargando notificaciones:', e);
-      } finally {
-        this.carregant = false;
-      }
-    },
+const carregarNotificacions = async () => {
+  carregant.value = true
+  const token = localStorage.getItem('token')
+  try {
+    const res = await fetch(
+      `/api/notificacions?filtre=${filtreActual.value}&pagina=${paginaActual.value}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    const data = await res.json()
+    notificacions.value = data.notificacions
+    total.value = data.total
+    totalPagines.value = data.total_pagines
+    noLlegides.value = data.no_llegides
+  } catch (e) {
+    console.error('Error cargando notificaciones:', e)
+  } finally {
+    carregant.value = false
+  }
+}
 
-    canviarTab(valor) {
-      this.filtreActual = valor;
-      this.paginaActual = 1;
-      this.carregarNotificacions();
-    },
+const canviarTab = (valor) => {
+  filtreActual.value = valor
+  paginaActual.value = 1
+  carregarNotificacions()
+}
 
-    canviarPagina(p) {
-      if (p < 1 || p > this.totalPagines) return;
-      this.paginaActual = p;
-      this.carregarNotificacions();
-    },
+const canviarPagina = (p) => {
+  if (p < 1 || p > totalPagines.value) return
+  paginaActual.value = p
+  carregarNotificacions()
+}
 
-    async marcarLlegida(notif) {
-      if (notif.llegida) return;
-      const token = localStorage.getItem('token');
-      await fetch(`/api/notificacions/${notif.id}/llegir`, {
-        method:  'PUT',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      notif.llegida   = true;
-      this.noLlegides = Math.max(0, this.noLlegides - 1);
-    },
+const marcarLlegida = async (notif) => {
+  if (notif.llegida) return
+  const token = localStorage.getItem('token')
+  await fetch(`/api/notificacions/${notif.id}/llegir`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  notif.llegida = true
+  noLlegides.value = Math.max(0, noLlegides.value - 1)
+}
 
-    async marcarTotes() {
-      const token = localStorage.getItem('token');
-      await fetch('/api/notificacions/marcar-totes', {
-        method:  'PUT',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      this.notificacions.forEach(n => (n.llegida = true));
-      this.noLlegides = 0;
-    },
+const marcarTotes = async () => {
+  const token = localStorage.getItem('token')
+  await fetch('/api/notificacions/marcar-totes', {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  notificacions.value.forEach(n => (n.llegida = true))
+  noLlegides.value = 0
+}
 
-    accioNotificacio(notif) {
-      // Navegación futura hacia la página correspondiente
-      console.log('Acción:', notif.tipus, notif.entitat_id);
-    },
+const accioNotificacio = (notif) => {
+  console.log('Acción:', notif.tipus, notif.entitat_id)
+}
 
-    entitatLabel(notif) {
-      const prefix = notif.entitat_tipus === 'oferta' ? 'OFR' : 'OC';
-      return `${prefix}-${String(notif.entitat_id).padStart(4, '0')}`;
-    },
+const entitatLabel = (notif) => {
+  const prefix = notif.entitat_tipus === 'oferta' ? 'OFR' : 'OC'
+  return `${prefix}-${String(notif.entitat_id).padStart(4, '0')}`
+}
 
-    badgeLabel(tipus) {
-      const map = {
-        nova_solicitud:    '🔵 Nueva solicitud',
-        oferta_acceptada:  '✅ Aceptada',
-        oferta_rebutjada:  '✖️ Rechazada',
-        document_revisio:  '📄 Revisión',
-        alerta_operacio:   '⚠️ Alerta',
-        fase_actualitzada: '🔄 Seguimiento',
-      };
-      return map[tipus] ?? tipus;
-    },
+const badgeLabel = (tipus) => {
+  const map = {
+    nova_solicitud: '🔵 Nueva solicitud',
+    oferta_acceptada: '✅ Aceptada',
+    oferta_rebutjada: '✖️ Rechazada',
+    document_revisio: '📄 Revisión',
+    alerta_operacio: '⚠️ Alerta',
+    fase_actualitzada: '🔄 Seguimiento',
+  }
+  return map[tipus] ?? tipus
+}
 
-    badgeClass(tipus) {
-      const map = {
-        nova_solicitud:    'bg-blue-50 text-blue-700 border border-blue-200',
-        oferta_acceptada:  'bg-green-50 text-green-700 border border-green-200',
-        oferta_rebutjada:  'bg-red-50 text-red-700 border border-red-200',
-        document_revisio:  'bg-yellow-50 text-yellow-700 border border-yellow-200',
-        alerta_operacio:   'bg-red-50 text-red-700 border border-red-200',
-        fase_actualitzada: 'bg-blue-50 text-blue-600 border border-blue-200',
-      };
-      return map[tipus] ?? 'bg-gray-100 text-gray-600';
-    },
+const badgeClass = (tipus) => {
+  const map = {
+    nova_solicitud: 'bg-blue-50 text-blue-700 border border-blue-200',
+    oferta_acceptada: 'bg-green-50 text-green-700 border border-green-200',
+    oferta_rebutjada: 'bg-red-50 text-red-700 border border-red-200',
+    document_revisio: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+    alerta_operacio: 'bg-red-50 text-red-700 border border-red-200',
+    fase_actualitzada: 'bg-blue-50 text-blue-600 border border-blue-200',
+  }
+  return map[tipus] ?? 'bg-gray-100 text-gray-600'
+}
 
-    botoLabel(tipus) {
-      const map = {
-        nova_solicitud:    'Crear Oferta →',
-        oferta_acceptada:  'Ver Operación →',
-        oferta_rebutjada:  'Ver Oferta →',
-        document_revisio:  'Revisar documento →',
-        alerta_operacio:   'Ver Operación →',
-        fase_actualitzada: 'Ver Operación →',
-      };
-      return map[tipus] ?? 'Ver →';
-    },
+const botoLabel = (tipus) => {
+  const map = {
+    nova_solicitud: 'Crear Oferta →',
+    oferta_acceptada: 'Ver Operación →',
+    oferta_rebutjada: 'Ver Oferta →',
+    document_revisio: 'Revisar documento →',
+    alerta_operacio: 'Ver Operación →',
+    fase_actualitzada: 'Ver Operación →',
+  }
+  return map[tipus] ?? 'Ver →'
+}
 
-    botoClass(tipus) {
-      if (tipus === 'nova_solicitud') {
-        return 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600';
-      }
-      return 'text-gray-700 border-gray-200 hover:bg-gray-50';
-    },
+const botoClass = (tipus) => {
+  if (tipus === 'nova_solicitud') {
+    return 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'
+  }
+  return 'text-gray-700 border-gray-200 hover:bg-gray-50'
+}
 
-    tempsRelatiu(dataCreacio) {
-      const diff = Math.floor((new Date() - new Date(dataCreacio)) / 60000);
-      if (diff < 60)   return `Hace ${diff} min`;
-      if (diff < 1440) return `Hace ${Math.floor(diff / 60)} horas`;
-      if (diff < 2880) return 'Ayer';
-      return `Hace ${Math.floor(diff / 1440)} días`;
-    },
-  },
-};
+const tempsRelatiu = (dataCreacio) => {
+  const diff = Math.floor((new Date() - new Date(dataCreacio)) / 60000)
+  if (diff < 60) return `Hace ${diff} min`
+  if (diff < 1440) return `Hace ${Math.floor(diff / 60)} horas`
+  if (diff < 2880) return 'Ayer'
+  return `Hace ${Math.floor(diff / 1440)} días`
+}
 </script>
