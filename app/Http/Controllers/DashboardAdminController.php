@@ -1,61 +1,32 @@
 <?php
-namespace App\Services;
 
+namespace App\Http\Controllers;
+
+use App\Http\Resources\OfertaResource;
+use App\Http\Resources\UsuariosResource;
 use App\Models\Oferta;
-use Carbon\Carbon;
+use App\Models\Usuarios;
+use Illuminate\Http\Request;
 
-class DashboardService
+class DashboardAdminController extends Controller
 {
-    public function getKPI()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
     {
-        $currentMonth = Carbon::now()->startOfMonth();
-        $lastMonth = Carbon::now()->subMonth()->startOfMonth();
+        $oferta = Oferta::all();
+        $client = Usuarios::all();
 
-        $current = Oferta::whereMonth('created_at', $currentMonth->month)->count();
-        $last = Oferta::whereMonth('created_at', $lastMonth->month)->count();
-
-        return [
-            'totalOfertas' => $current,
-            'trend' => $last > 0 ? round((($current - $last)/$last)*100, 1) : 0,
-            'aceptadas' => Oferta::where('estat', 'ACEPTADA')->count(),
-            'activas' => Oferta::whereIn('estat', ['PENDIENTE','EN_TRANSIT'])->count()
-        ];
+        return OfertaResource::collection($oferta) && UsuariosResource::collection($client);
     }
 
-    public function getWeeklyActivity()
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Oferta $oferta, Usuarios $client)
     {
-        $start = Carbon::now()->startOfWeek();
-        $data = [];
-
-        for ($i = 0; $i < 7; $i++) {
-            $day = $start->copy()->addDays($i);
-
-            $data[] = [
-                'date' => $day->format('Y-m-d'),
-                'enviadas' => Oferta::whereDate('created_at', $day)->count(),
-                'aceptadas' => Oferta::where('estat', 'ACEPTADA')
-                    ->whereDate('updated_at', $day)->count()
-            ];
-        }
-
-        return $data;
-    }
-
-    public function getRecentOffers($request)
-    {
-        return Oferta::with('client')
-            ->latest()
-            ->paginate($request->get('per_page', 10));
-    }
-
-    public function getUserData()
-    {
-        $user = auth()->user();
-
-        return [
-            'name' => $user->name,
-            'email' => $user->email
-        ];
+        $oferta->id = $request->id;
+        $client->nom = $request->nom;
     }
 }
-?>
