@@ -223,125 +223,122 @@
     </div>
 </template>
 
-<script>
-export default {
-    name: 'ClientesComponent',
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 
-    data() {
-        return {
-            clientes: [],
-            busqueda: '',
-            filtroEstado: '',
-            modalVer: false,
-            modalForm: false,
-            clienteSeleccionado: null,
-            modoEdicion: false,
-            form: { empresa: '', cif: '', contacto: '', email: '', telefono: '' },
-            errorForm: null,
-        }
-    },
+const clientes = ref([])
+const busqueda = ref('')
+const filtroEstado = ref('')
+const modalVer = ref(false)
+const modalForm = ref(false)
+const clienteSeleccionado = ref(null)
+const modoEdicion = ref(false)
+const form = ref({ empresa: '', cif: '', contacto: '', email: '', telefono: '' })
+const errorForm = ref(null)
 
-    computed: {
-        clientesFiltrados() {
-            return this.clientes.filter(cliente => {
-                const texto = this.busqueda.toLowerCase()
-                const coincideTexto = !texto ||
-                    cliente.empresa.toLowerCase().includes(texto) ||
-                    cliente.contacto.toLowerCase().includes(texto) ||
-                    cliente.email.toLowerCase().includes(texto)
-                const coincideEstado = !this.filtroEstado ||
-                    (this.filtroEstado === 'activo' && cliente.activo) ||
-                    (this.filtroEstado === 'inactivo' && !cliente.activo)
-                return coincideTexto && coincideEstado
-            })
-        },
-        totalEmpresas() { return this.clientes.length },
-        totalContactos() { return this.clientes.length },
-        totalOfertas() { return this.clientes.reduce((suma, c) => suma + Number(c.ofertas), 0) },
-    },
+const clientesFiltrados = computed(() => {
+    return clientes.value.filter(cliente => {
+        const texto = busqueda.value.toLowerCase()
+        const coincideTexto = !texto ||
+            cliente.empresa.toLowerCase().includes(texto) ||
+            cliente.contacto.toLowerCase().includes(texto) ||
+            cliente.email.toLowerCase().includes(texto)
+        const coincideEstado = !filtroEstado.value ||
+            (filtroEstado.value === 'activo' && cliente.activo) ||
+            (filtroEstado.value === 'inactivo' && !cliente.activo)
+        return coincideTexto && coincideEstado
+    })
+})
 
-    mounted() {
-        this.cargarClientes()
-    },
+const totalEmpresas = computed(() => clientes.value.length)
+const totalContactos = computed(() => clientes.value.length)
+const totalOfertas = computed(() => clientes.value.reduce((suma, c) => suma + Number(c.ofertas), 0))
 
-    methods: {
-        async cargarClientes() {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('/api/clientes', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json',
-                    }
-                });
-                const data = await response.json();
-                this.clientes = data;
-            } catch (e) {
-                console.error('Error cargando clientes:', e);
+const cargarClientes = async () => {
+    try {
+        const token = localStorage.getItem('token')
+        const response = await fetch('/api/clientes', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
             }
-        },
-
-        async toggleEstado(cliente) {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`/api/clientes/${cliente.id}/estado`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                const data = await response.json();
-                cliente.activo = data.activo;
-            } catch (e) {
-                console.error('Error actualizando estado:', e);
-            }
-        },
-
-        verCliente(cliente) {
-            this.clienteSeleccionado = cliente
-            this.modalVer = true
-        },
-        editarCliente(cliente) {
-            this.modoEdicion = true
-            this.clienteSeleccionado = cliente
-            this.form = { ...cliente }
-            this.modalForm = true
-        },
-        abrirModalNuevo() {
-            this.modoEdicion = false
-            this.clienteSeleccionado = null
-            this.form = { empresa: '', cif: '', contacto: '', email: '', telefono: '' }
-            this.errorForm = null
-            this.modalForm = true
-        },
-        guardarCliente() {
-            if (!this.form.empresa || !this.form.cif || !this.form.contacto || !this.form.email) {
-                this.errorForm = 'Por favor rellena todos los campos obligatorios.'
-                return
-            }
-            this.errorForm = null
-            if (this.modoEdicion) {
-                const idx = this.clientes.findIndex(c => c.id === this.clienteSeleccionado.id)
-                if (idx !== -1) Object.assign(this.clientes[idx], this.form)
-            } else {
-                const nuevoId = Math.max(...this.clientes.map(c => c.id)) + 1
-                this.clientes.push({ ...this.form, id: nuevoId, ofertas: 0, activo: true })
-            }
-            this.cerrarModal()
-        },
-        nuevoPedido(cliente) {
-            alert(`Nuevo pedido para: ${cliente.empresa}\n(Funcionalidad pendiente)`)
-        },
-        cerrarModal() {
-            this.modalVer = false
-            this.modalForm = false
-            this.clienteSeleccionado = null
-            this.errorForm = null
-        },
-    },
+        })
+        const data = await response.json()
+        clientes.value = data
+    } catch (e) {
+        console.error('Error cargando clientes:', e)
+    }
 }
+
+const toggleEstado = async (cliente) => {
+    try {
+        const token = localStorage.getItem('token')
+        const response = await fetch(`/api/clientes/${cliente.id}/estado`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        const data = await response.json()
+        cliente.activo = data.activo
+    } catch (e) {
+        console.error('Error actualizando estado:', e)
+    }
+}
+
+const verCliente = (cliente) => {
+    clienteSeleccionado.value = cliente
+    modalVer.value = true
+}
+
+const editarCliente = (cliente) => {
+    modoEdicion.value = true
+    clienteSeleccionado.value = cliente
+    form.value = { ...cliente }
+    modalForm.value = true
+}
+
+const abrirModalNuevo = () => {
+    modoEdicion.value = false
+    clienteSeleccionado.value = null
+    form.value = { empresa: '', cif: '', contacto: '', email: '', telefono: '' }
+    errorForm.value = null
+    modalForm.value = true
+}
+
+const guardarCliente = () => {
+    if (!form.value.empresa || !form.value.cif || !form.value.contacto || !form.value.email) {
+        errorForm.value = 'Por favor rellena todos los campos obligatorios.'
+        return
+    }
+    errorForm.value = null
+    if (modoEdicion.value) {
+        const idx = clientes.value.findIndex(c => c.id === clienteSeleccionado.value.id)
+        if (idx !== -1) Object.assign(clientes.value[idx], form.value)
+    } else {
+        const nuevoId = Math.max(...clientes.value.map(c => c.id)) + 1
+        clientes.value.push({ ...form.value, id: nuevoId, ofertas: 0, activo: true })
+    }
+    cerrarModal()
+}
+
+const nuevoPedido = (cliente) => {
+    alert(`Nuevo pedido para: ${cliente.empresa}\n(Funcionalidad pendiente)`)
+}
+
+const cerrarModal = () => {
+    modalVer.value = false
+    modalForm.value = false
+    clienteSeleccionado.value = null
+    errorForm.value = null
+}
+
+onMounted(() => {
+    cargarClientes()
+})
 </script>
+
 
 <style scoped>
 .clientes-page {

@@ -61,7 +61,7 @@
                         <td class="px-4 py-3 text-gray-700">{{ oferta.client ? oferta.client.nom + ' ' +
                             oferta.client.cognoms : '—' }}</td>
                         <td class="px-4 py-3 text-orange-500 font-medium">{{ oferta.client ? oferta.client.empresa : '—'
-                        }}</td>
+                            }}</td>
                         <td class="px-4 py-3">
                             <span class="flex items-center gap-1 text-gray-600">
                                 <span>{{ iconTransport(oferta.tipus_transport?.tipus) }}</span>
@@ -101,113 +101,94 @@
     </div>
 </template>
 
-<script>
-export default {
-    name: 'OfertasComerciales',
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 
-    data() {
-        return {
-            // Objeto de paginación que devuelve Laravel con paginate()
-            ofertes: { data: [], from: 0, to: 0, total: 0, last_page: 1, current_page: 1 },
-            estats: [],     // Lista de estados para el filtro
-            transports: [], // Lista de transportes para el filtro
-            loading: true,
-            search: '',
-            filtreEstat: '',
-            filtreTransport: '',
-        };
-    },
+const ofertes = ref({ data: [], from: 0, to: 0, total: 0, last_page: 1, current_page: 1 })
+const estats = ref([])
+const transports = ref([])
+const loading = ref(true)
+const search = ref('')
+const filtreEstat = ref('')
+const filtreTransport = ref('')
 
-    computed: {
-        // Filtra las ofertas según búsqueda, estado y transporte
-        ofertasFiltrades() {
-            return this.ofertes.data.filter(o => {
-                const textMatch = this.search === '' ||
-                    (o.client?.nom + ' ' + o.client?.cognoms).toLowerCase().includes(this.search.toLowerCase()) ||
-                    o.comentaris?.toLowerCase().includes(this.search.toLowerCase());
+const ofertasFiltrades = computed(() => {
+    return ofertes.value.data.filter(o => {
+        const textMatch = search.value === '' ||
+            (o.client?.nom + ' ' + o.client?.cognoms).toLowerCase().includes(search.value.toLowerCase()) ||
+            o.comentaris?.toLowerCase().includes(search.value.toLowerCase())
 
-                const estatMatch = this.filtreEstat === '' || o.estat_oferta_id == this.filtreEstat;
-                const transportMatch = this.filtreTransport === '' || o.tipus_transport_id == this.filtreTransport;
+        const estatMatch = filtreEstat.value === '' || o.estat_oferta_id == filtreEstat.value
+        const transportMatch = filtreTransport.value === '' || o.tipus_transport_id == filtreTransport.value
 
-                return textMatch && estatMatch && transportMatch;
-            });
-        },
+        return textMatch && estatMatch && transportMatch
+    })
+})
 
-        // Cuenta ofertas por estado para las tarjetas resumen
-        stats() {
-            const data = this.ofertes.data;
-            return [
-                { label: 'Borrador', count: data.filter(o => o.estat_oferta?.estat === 'Borrador').length, color: '#6366f1' },
-                { label: 'Enviadas', count: data.filter(o => o.estat_oferta?.estat === 'Enviada').length, color: '#3b82f6', sub: 'Sin respuesta' },
-                { label: 'Aceptadas', count: data.filter(o => o.estat_oferta?.estat === 'Acceptada').length, color: '#22c55e' },
-                { label: 'Rechazadas', count: data.filter(o => o.estat_oferta?.estat === 'Rebutjada').length, color: '#ef4444' },
-                { label: 'Caducadas', count: data.filter(o => o.estat_oferta?.estat === 'Caducada').length, color: '#f97316' },
-            ];
-        },
-    },
+const stats = computed(() => {
+    const data = ofertes.value.data
+    return [
+        { label: 'Borrador', count: data.filter(o => o.estat_oferta?.estat === 'Borrador').length, color: '#6366f1' },
+        { label: 'Enviadas', count: data.filter(o => o.estat_oferta?.estat === 'Enviada').length, color: '#3b82f6', sub: 'Sin respuesta' },
+        { label: 'Aceptadas', count: data.filter(o => o.estat_oferta?.estat === 'Acceptada').length, color: '#22c55e' },
+        { label: 'Rechazadas', count: data.filter(o => o.estat_oferta?.estat === 'Rebutjada').length, color: '#ef4444' },
+        { label: 'Caducadas', count: data.filter(o => o.estat_oferta?.estat === 'Caducada').length, color: '#f97316' },
+    ]
+})
 
-    methods: {
-        // Carga las ofertas paginadas desde la API usando fetch nativo (igual que el Dashboard)
-        async carregarOfertes(page = 1) {
-            this.loading = true;
-            try {
-                const token = localStorage.getItem('token');
-                const res = await fetch(`/api/ofertes?page=${page}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                this.ofertes = await res.json();
-            } catch (e) {
-                console.error('Error carregant ofertes:', e);
-            } finally {
-                this.loading = false;
-            }
-        },
+const carregarOfertes = async (page = 1) => {
+    loading.value = true
+    try {
+        const token = localStorage.getItem('token')
+        const res = await fetch(`/api/ofertes?page=${page}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        ofertes.value = await res.json()
+    } catch (e) {
+        console.error('Error carregant ofertes:', e)
+    } finally {
+        loading.value = false
+    }
+}
 
-        // Carga estados y transportes para los desplegables de filtro
-        async carregarFiltres() {
-            try {
-                const token = localStorage.getItem('token');
-                const headers = { Authorization: `Bearer ${token}` };
-                const [estatsRes, transportsRes] = await Promise.all([
-                    fetch('/api/estats-ofertes', { headers }),
-                    fetch('/api/tipus-transports', { headers }),
-                ]);
-                this.estats = await estatsRes.json();
-                this.transports = await transportsRes.json();
-            } catch (e) {
-                console.error('Error carregant filtres:', e);
-            }
-        },
+const carregarFiltres = async () => {
+    try {
+        const token = localStorage.getItem('token')
+        const headers = { Authorization: `Bearer ${token}` }
+        const [estatsRes, transportsRes] = await Promise.all([
+            fetch('/api/estats-ofertes', { headers }),
+            fetch('/api/tipus-transports', { headers }),
+        ])
+        estats.value = await estatsRes.json()
+        transports.value = await transportsRes.json()
+    } catch (e) {
+        console.error('Error carregant filtres:', e)
+    }
+}
 
-        // Formatea fecha a formato legible (ej: 10 may)
-        formatData(data) {
-            if (!data) return '—';
-            return new Date(data).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
-        },
+const formatData = (data) => {
+    if (!data) return '—'
+    return new Date(data).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+}
 
-        // Devuelve la clase CSS del badge según el estado
-        colorEstat(estat) {
-            const mapa = {
-                'Enviada': 'bg-blue-100 text-blue-700',
-                'Acceptada': 'bg-green-100 text-green-700',
-                'Rebutjada': 'bg-red-100 text-red-700',
-                'Borrador': 'bg-gray-100 text-gray-600',
-                'Caducada': 'bg-orange-100 text-orange-600',
-            };
-            return mapa[estat] ?? 'bg-gray-100 text-gray-500';
-        },
+const colorEstat = (estat) => {
+    const mapa = {
+        'Enviada': 'bg-blue-100 text-blue-700',
+        'Acceptada': 'bg-green-100 text-green-700',
+        'Rebutjada': 'bg-red-100 text-red-700',
+        'Borrador': 'bg-gray-100 text-gray-600',
+        'Caducada': 'bg-orange-100 text-orange-600',
+    }
+    return mapa[estat] ?? 'bg-gray-100 text-gray-500'
+}
 
-        // Devuelve el icono según el tipo de transporte
-        iconTransport(tipus) {
-            const mapa = { 'Marítimo': '🚢', 'Aéreo': '✈️', 'Terrestre': '🚛' };
-            return mapa[tipus] ?? '📦';
-        },
-    },
+const iconTransport = (tipus) => {
+    const mapa = { 'Marítimo': '🚢', 'Aéreo': '✈️', 'Terrestre': '🚛' }
+    return mapa[tipus] ?? '📦'
+}
 
-    // Se ejecuta al montar el componente — carga datos y filtros
-    mounted() {
-        this.carregarOfertes();
-        this.carregarFiltres();
-    },
-};
+onMounted(() => {
+    carregarOfertes()
+    carregarFiltres()
+})
 </script>
