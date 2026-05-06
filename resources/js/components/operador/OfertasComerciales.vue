@@ -11,29 +11,21 @@
             </div>
         </div>
 
-        <!-- Filtros y botón Nueva Oferta -->
+        <!-- Filtros — búsqueda por texto, estado y transporte -->
         <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
-            <div class="flex flex-wrap gap-3 items-center justify-between">
-                <div class="flex flex-wrap gap-3">
-                    <input v-model="search" type="text" placeholder="Buscar..."
-                        class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-orange-400" />
-                    <select v-model="filtreEstat"
-                        class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                        <option value="">Estado</option>
-                        <option v-for="estat in estats" :key="estat.id" :value="estat.id">{{ estat.estat }}</option>
-                    </select>
-                    <select v-model="filtreTransport"
-                        class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                        <option value="">Modo transporte</option>
-                        <option v-for="t in transports" :key="t.id" :value="t.id">{{ t.tipus }}</option>
-                    </select>
-                </div>
-                <!-- Botón que lleva al formulario NuevoPedido -->
-                <button
-                    @click="$emit('cambiarPagina', 'nuevoPedido')"
-                    class="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-                    + Nueva Oferta
-                </button>
+            <div class="flex flex-wrap gap-3">
+                <input v-model="search" type="text" placeholder="Buscar..."
+                    class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                <select v-model="filtreEstat"
+                    class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    <option value="">Estado</option>
+                    <option v-for="estat in estats" :key="estat.id" :value="estat.id">{{ estat.estat }}</option>
+                </select>
+                <select v-model="filtreTransport"
+                    class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    <option value="">Modo transporte</option>
+                    <option v-for="t in transports" :key="t.id" :value="t.id">{{ t.tipus }}</option>
+                </select>
             </div>
         </div>
 
@@ -110,8 +102,6 @@
 </template>
 
 <script>
-import axios from '../../axios.js' // importar nuestro axios configurado
-
 export default {
     name: 'OfertasComerciales',
 
@@ -157,12 +147,15 @@ export default {
     },
 
     methods: {
-
+        // Carga las ofertas paginadas desde la API usando fetch nativo (igual que el Dashboard)
         async carregarOfertes(page = 1) {
             this.loading = true;
             try {
-                const res = await axios.get(`/ofertes?page=${page}`);
-                this.ofertes = res.data;
+                const token = localStorage.getItem('token');
+                const res = await fetch(`/api/ofertes?page=${page}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                this.ofertes = await res.json();
             } catch (e) {
                 console.error('Error carregant ofertes:', e);
             } finally {
@@ -170,15 +163,17 @@ export default {
             }
         },
 
-
+        // Carga estados y transportes para los desplegables de filtro
         async carregarFiltres() {
             try {
+                const token = localStorage.getItem('token');
+                const headers = { Authorization: `Bearer ${token}` };
                 const [estatsRes, transportsRes] = await Promise.all([
-                    axios.get('/estats-ofertes'),
-                    axios.get('/tipus-transports'),
+                    fetch('/api/estats-ofertes', { headers }),
+                    fetch('/api/tipus-transports', { headers }),
                 ]);
-                this.estats = estatsRes.data;
-                this.transports = transportsRes.data;
+                this.estats = await estatsRes.json();
+                this.transports = await transportsRes.json();
             } catch (e) {
                 console.error('Error carregant filtres:', e);
             }

@@ -23,15 +23,19 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    // Dashboard Admin
+    //Datos del administrador (dashboard, usuarios, datos maestros)
+
+    //Dashboard Admin
     Route::get('/data', [DashboardAdminController::class, 'getDashboardData']);
     Route::get('/advanced-stats', [DashboardAdminController::class, 'getAdvancedStats']);
+
     Route::post('/export', [DashboardAdminController::class, 'exportDashboardData']);
     Route::get('/export', [DashboardAdminController::class, 'exportDashboardData']);
+
     Route::get('/notifications', [DashboardAdminController::class, 'getNotifications']);
     Route::put('/notifications/{id}/read', [DashboardAdminController::class, 'markNotificationAsRead']);
 
-    // Gestion de usuarios - admin
+    //Gestion de usuarios - admin
     Route::get('/usuarios', [UsuariosController::class, 'index']);
     Route::get('/usuarios/stats', [UsuariosController::class, 'stats']);
     Route::post('/usuarios', [UsuariosController::class, 'store']);
@@ -39,10 +43,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/usuarios/{id}', [UsuariosController::class, 'update']);
     Route::delete('/usuarios/{id}', [UsuariosController::class, 'destroy']);
 
-    // Datos Maestros Admin
+    //Datos Maestros Admin
+    // Dashboard datos maestros
     Route::get('/datos-maestros/dashboard', [DatosMaestrosController::class, 'getDashboardData']);
     Route::get('/datos-maestros/estadisticas', [DatosMaestrosController::class, 'getEstadisticas']);
+    
+    // CRUDs
     Route::apiResource('empresas', EmpresaController::class);
+
 
     // Dashboard Operador
     Route::get('/dashboard/stats', [DashboardOperadorController::class, 'stats']);
@@ -60,16 +68,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/estats-ofertes', [EstatOfertaController::class, 'index']);
     Route::get('/tipus-transports', [TipusTransportController::class, 'index']);
 
-    // Nuevo Pedido
-    Route::get('/clientes-rol', [OfertaController::class, 'clientes']);
-    Route::post('/ofertes', [OfertaController::class, 'store']);
-
     // Operaciones
     Route::get('/operaciones/stats', [OperacionesController::class, 'stats']);
     Route::get('/operaciones/distribucio', [OperacionesController::class, 'distribucio']);
     Route::get('/operaciones/operacions', [OperacionesController::class, 'operacions']);
 
-    // Notificaciones
+    // NOTIFICACIONS
     Route::get('/notificacions', [NotificacionsController::class, 'index']);
     Route::put('/notificacions/marcar-totes', [NotificacionsController::class, 'marcarTotes']);
     Route::put('/notificacions/{id}/llegir', [NotificacionsController::class, 'marcarLlegida']);

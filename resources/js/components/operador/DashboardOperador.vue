@@ -42,16 +42,6 @@
                     Ofertas Comerciales
                 </a>
 
-                <a href="#" @click.prevent="paginaActual = 'nuevoPedido'"
-                    :class="paginaActual === 'nuevoPedido' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Nuevo Pedido
-                </a>
-
-
                 <a href="#" @click.prevent="paginaActual = 'operaciones'"
                     :class="paginaActual === 'operaciones' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'"
                     class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition">
@@ -141,7 +131,6 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <button v-if="paginaActual === 'dashboard' || paginaActual === 'ofertas'"
-                        @click="paginaActual = 'nuevoPedido'"
                         class="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-medium px-4 py-2 rounded-lg transition text-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -244,7 +233,7 @@
                                 <div v-for="alert in alerts" :key="alert.id"
                                     class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                                     <span class="text-sm font-medium text-gray-700 w-32 flex-shrink-0">{{ alert.id
-                                        }}</span>
+                                    }}</span>
                                     <span class="text-sm text-gray-500 flex-1">{{ alert.issue }}</span>
                                     <button
                                         class="text-xs border border-gray-300 text-gray-600 hover:bg-gray-50 px-3 py-1 rounded-lg transition ml-2">Ver</button>
@@ -262,7 +251,7 @@
                                             :style="{ width: op.percent + '%' }"></div>
                                     </div>
                                     <span class="text-xs text-gray-500 w-8 text-right flex-shrink-0">{{ op.percent
-                                        }}%</span>
+                                    }}%</span>
                                 </div>
                             </div>
                         </div>
@@ -338,14 +327,14 @@
                 <!-- v-if muestra este componente solo cuando paginaActual === 'clientes' -->
                 <!-- Es el mismo patrón que usamos con v-if="error" en el LoginComponent -->
                 <clientes-component v-if="paginaActual === 'clientes'" />
+                <ofertas-comerciales v-if="paginaActual === 'ofertas'" />
                 <operaciones-component v-if="paginaActual === 'operaciones'" />
                 <notificacions-component v-if="paginaActual === 'notificaciones'" />
-                <OfertasComerciales v-if="paginaActual === 'ofertas'" @cambiarPagina="paginaActual = $event" />
-                <NuevoPedido v-if="paginaActual === 'nuevoPedido'" @cambiarPagina="paginaActual = $event" />
                 <!-- ── FIN VISTA: CLIENTES ── -->
 
+
                 <!-- ── VISTAS PENDIENTES ── -->
-                <div v-if="paginaActual !== 'dashboard' && paginaActual !== 'clientes' && paginaActual !== 'ofertas' && paginaActual !== 'operaciones' && paginaActual !== 'notificaciones' && paginaActual !== 'nuevoPedido'"
+                <div v-if="paginaActual !== 'dashboard' && paginaActual !== 'clientes' && paginaActual !== 'ofertas' && paginaActual !== 'operaciones' && paginaActual !== 'notificaciones'"
                     class="flex flex-col items-center justify-center h-full text-gray-400 gap-3 p-12">
                     <svg class="w-14 h-14 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -366,8 +355,7 @@
 import ClientesComponent from './ClientesComponent.vue'
 import OfertasComerciales from './OfertasComerciales.vue'
 import OperacionesComponent from './OperacionesComponent.vue'
-import NotificacionsComponent from './NotificacionsComponent.vue'
-import NuevoPedido from './nuevoPedido/NuevoPedido.vue';
+import NotificacionsComponent from './NotificacionsComponent.vue';
 
 export default {
     name: 'DashboardOperador',
@@ -379,7 +367,6 @@ export default {
         OfertasComerciales,
         OperacionesComponent,
         NotificacionsComponent,
-        NuevoPedido,
     },
 
     data() {
