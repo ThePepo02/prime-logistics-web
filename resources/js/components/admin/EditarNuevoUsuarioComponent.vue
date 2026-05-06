@@ -145,6 +145,7 @@
         </div>
     </div>
 </template>
+script setup
 
 <script setup>
 import { ref, computed, watch } from 'vue'
@@ -236,16 +237,18 @@ const save = async () => {
 }
 
 const deleteUser = async () => {
-    if (!confirm(`¿Estás seguro de eliminar a "${form.value.name}"?`)) return
-    try {
-        emit('deleted', form.value.id)
-        emit('close')
-    } catch (error) {
-        console.error('Error al eliminar:', error)
-        alert('Error al eliminar el usuario')
+    if (!confirm('¿Estás seguro de eliminar a "${form.value.name}" ?')) {
+        try {
+            emit('deleted', form.value.id)
+            emit('close')
+        } catch (error) {
+            console.error('Error al eliminar:', error)
+            alert('Error al eliminar el usuario')
+        }
     }
 }
 </script>
+
 
 <style lang="scss" scoped>
 .modal-overlay {
