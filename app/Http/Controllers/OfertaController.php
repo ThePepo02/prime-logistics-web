@@ -27,13 +27,12 @@ class OfertaController extends Controller
 
         return response()->json($clientes);
     }
-
     public function store(Request $request)
     {
         $request->validate([
             'client_id' => 'required|integer',
             'tipus_transport_id' => 'required|integer',
-            'tipus_fluxe_id' => 'required|integer',
+            'tipus_fluxes_id' => 'required|integer',
             'estat_oferta_id' => 'required|integer',
         ]);
 
@@ -42,7 +41,7 @@ class OfertaController extends Controller
             'agent_comercial_id' => $request->agent_comercial_id,
             'operador_id' => $request->user()->id,
             'tipus_transport_id' => $request->tipus_transport_id,
-            'tipus_fluxe_id' => $request->tipus_fluxe_id,
+            'tipus_fluxes_id'    => $request->tipus_fluxes_id,
             'tipus_carrega_id' => $request->tipus_carrega_id,
             'incoterm_id' => $request->incoterm_id,
             'tipus_contenedor_id' => $request->tipus_contenedor_id,
@@ -53,7 +52,7 @@ class OfertaController extends Controller
             'volum' => $request->volum,
             'comentaris' => $request->comentaris,
             'data_validessa_inicial' => $request->data_validessa_inicial,
-            'data_validessa_final' => $request->data_validessa_final,
+            'data_validessa_fina' => $request->data_validessa_fina,
             'estat_oferta_id' => $request->estat_oferta_id,
             'data_creacio' => now(),
         ]);

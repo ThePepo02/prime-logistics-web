@@ -49,21 +49,22 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
-import axios from '../../axios.js' // importar nuestro axios configurado
-import PasoIdentificacion from './nuevoPedido/PasoIdentificacion.vue'
-import PasoEspecificaciones from './nuevoPedido/PasoEspecificaciones.vue'
-import PasoRutaCierre from './nuevoPedido/PasoRutaCierre.vue'
-import NavegacionPasos from './nuevoPedido/NavegacionPasos.vue'
+import axios from '../../../axios.js' // importar nuestro axios configurado
+import PasoIdentificacion   from './PasoIdentificacion.vue'
+import PasoEspecificaciones from './PasoEspecificaciones.vue'
+import PasoRutaCierre       from './PasoRutaCierre.vue'
+import NavegacionPasos      from './NavegacionPasos.vue'
 
 export default {
     name: 'NuevoPedido',
+    emits: ['cambiarPagina'],
     components: {
         PasoIdentificacion,
         PasoEspecificaciones,
         PasoRutaCierre,
         NavegacionPasos
     },
-    setup() {
+    setup(props, { emit }) {
 
         // --- ESTADO ---
         const pasoActual = ref(1)
@@ -167,6 +168,10 @@ export default {
                     ? 'Borrador guardado correctamente'
                     : 'Pedido enviado correctamente'
                 mensaje.tipo = 'ok'
+
+                setTimeout(() => {
+                    emit('cambiarPagina','ofertas')
+                }, 1500)
 
             } catch (e) {
                 const data = e.response?.data
