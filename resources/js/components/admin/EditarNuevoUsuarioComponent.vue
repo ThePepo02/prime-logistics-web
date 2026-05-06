@@ -3,102 +3,31 @@
         <div class="modal">
             <!-- Header -->
             <div class="modal-header">
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-                <h3>Editar usuario — {{ form.name || 'Usuario' }}</h3>
-                <button class="close-btn" @click="$emit('close')">×</button>
-            </div>
-
-            <!-- Tabs -->
-            <div class="tabs">
-                <button 
-                    v-for="tab in tabs" 
-                    :key="tab.key" 
-                    :class="{ active: activeTab === tab.key }" 
-                    @click="activeTab = tab.key"
-                >
-                    {{ tab.label }}
-                </button>
-=======
->>>>>>> origin
                 <h3>Editar Usuario admin</h3>
                 <button class="close-btn" @click="$emit('close')">×</button>
             </div>
 
-            <!-- Tabs horizontales con scroll (como en la imagen) -->
+            <!-- Tabs horizontales con scroll -->
             <div class="tabs-container">
                 <div class="tabs-wrapper">
-                    <!-- Tab Administrador -->
                     <button class="tab-button" :class="{ active: activeMainTab === 'administrador' }"
                         @click="activeMainTab = 'administrador'">
                         Administrador
                     </button>
-
-                    <!-- Todas las opciones de Contas (como en la imagen) -->
                     <button v-for="tab in contasTabs" :key="tab" class="tab-button"
                         :class="{ active: activeMainTab === tab }" @click="activeMainTab = tab">
                         {{ tab }}
                     </button>
                 </div>
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
             </div>
 
             <!-- Contenido del modal -->
             <div class="modal-body">
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-                <!-- TAB: Datos personales -->
-                <div v-if="activeTab === 'personal'" class="personal-data">
-                    <div class="two-columns">
-                        <!-- Columna izquierda: Avatar -->
-                        <div class="avatar-section">
-                            <div class="avatar-circle">
-                                {{ initials }}
-                            </div>
-                            <button type="button" class="btn-change-photo">Cambiar foto</button>
-                        </div>
-
-                        <!-- Columna derecha: Campos -->
-                        <div class="fields-section">
-                            <div class="field">
-                                <label>Nombre completo</label>
-                                <input v-model="form.name" type="text" placeholder="María García" />
-                            </div>
-
-                            <div class="field">
-                                <label>Teléfono</label>
-                                <input v-model="form.phone" type="tel" placeholder="+34 961 234 567" />
-                            </div>
-
-                            <div class="field">
-                                <label>Email</label>
-                                <input v-model="form.email" type="email" placeholder="email@example.com" />
-                            </div>
-
-                            <div class="field">
-                                <label>Correo electrónico</label>
-                                <input v-model="form.email2" type="email" placeholder="maría@textil.com" />
-                            </div>
-
-                            <div class="field">
-                                <label>Cargo</label>
-                                <input v-model="form.position" type="text" placeholder="Responsable de Compras" />
-                            </div>
-=======
->>>>>>> origin
-                <!-- Para el tab Administrador: mostrar el formulario de edición -->
+                <!-- Tab Administrador -->
                 <div v-if="activeMainTab === 'administrador'" class="admin-content">
-                    <!-- Información del usuario -->
                     <div class="user-info-section">
                         <div class="user-avatar">
-                            <div class="avatar-circle">
-                                {{ initials }}
-                            </div>
+                            <div class="avatar-circle">{{ initials }}</div>
                         </div>
                         <div class="user-fields">
                             <div class="field-row">
@@ -142,7 +71,6 @@
                         </div>
                     </div>
 
-                    <!-- Datos de empresa -->
                     <div class="company-section">
                         <h4>Datos de empresa</h4>
                         <div class="field-row">
@@ -161,7 +89,6 @@
                         </div>
                     </div>
 
-                    <!-- Permisos -->
                     <div class="permissions-section">
                         <h4>Permisos</h4>
                         <div class="permissions-grid">
@@ -181,75 +108,11 @@
                                 <input type="checkbox" v-model="form.permissions.editSettings" />
                                 Editar configuración
                             </label>
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
                         </div>
                     </div>
                 </div>
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-                <!-- TAB: Acceso y rol -->
-                <div v-if="activeTab === 'access'" class="tab-content">
-                    <div class="field">
-                        <label>Rol de usuario</label>
-                        <select v-model="form.role">
-                            <option value="admin">Administrador</option>
-                            <option value="operator">Operador</option>
-                            <option value="client">Cliente</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Estado de cuenta</label>
-                        <select v-model="form.status">
-                            <option value="active">Activo</option>
-                            <option value="inactive">Inactivo</option>
-                            <option value="suspended">Suspendido</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- TAB: Empresa -->
-                <div v-if="activeTab === 'company'" class="tab-content">
-                    <div class="field">
-                        <label>Nombre de empresa</label>
-                        <input v-model="form.companyName" type="text" />
-                    </div>
-                    <div class="field">
-                        <label>NIF/CIF</label>
-                        <input v-model="form.cif" type="text" />
-                    </div>
-                    <div class="field">
-                        <label>Dirección</label>
-                        <input v-model="form.address" type="text" />
-                    </div>
-                </div>
-
-                <!-- TAB: Permisos -->
-                <div v-if="activeTab === 'permissions'" class="tab-content">
-                    <div class="permissions-list">
-                        <label class="checkbox-label">
-                            <input type="checkbox" v-model="form.permissions.manageUsers" />
-                            Gestionar usuarios
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" v-model="form.permissions.manageRoles" />
-                            Gestionar roles
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" v-model="form.permissions.viewReports" />
-                            Ver reportes
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" v-model="form.permissions.editSettings" />
-                            Editar configuración
-                        </label>
-=======
->>>>>>> origin
-                <!-- Para los tabs de Contas: mostrar configuración de cuentas -->
+                <!-- Tabs de Contas -->
                 <div v-else class="contas-content">
                     <div class="contas-config">
                         <h4>Configuración de {{ activeMainTab }}</h4>
@@ -267,15 +130,11 @@
                                 <input type="number" v-model="contasPaymentDays[activeMainTab]" placeholder="30" />
                             </div>
                         </div>
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
                     </div>
                 </div>
             </div>
 
-            <!-- Footer con botones -->
+            <!-- Footer -->
             <div class="modal-footer">
                 <button class="btn-danger" @click="deleteUser">Eliminar usuario</button>
                 <div class="actions-right">
@@ -286,6 +145,7 @@
         </div>
     </div>
 </template>
+script setup
 
 <script setup>
 import { ref, computed, watch } from 'vue'
@@ -297,79 +157,30 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved', 'deleted'])
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-const tabs = [
-    { key: 'personal', label: 'Datos personales' },
-    { key: 'access', label: 'Acceso y rol' },
-    { key: 'company', label: 'Empresa' },
-    { key: 'permissions', label: 'Permisos' }
-]
-
-const activeTab = ref('personal')
-
-// Estructura completa del formulario
-=======
->>>>>>> origin
-// Tabs principales (Administrador + todas las opciones de Contas)
 const activeMainTab = ref('administrador')
 
-// Generar todas las opciones de Contas como aparecen en la imagen
 const contasTabs = ref([
     'Contas de Pagamento',
     'Contas de Vendas',
     'Contas de Pagamentos',
-    'Contas de Vendas',
     'Contas de Pagamentos e Vendas',
-    'Contas de Pagamentos e Vendas (2)',
-    'Contas de Pagamentos e Vendas (3)',
-    'Contas de Pagamentos e Vendas (4)',
-    'Contas de Pagamentos e Vendas (5)',
-    'Contas de Pagamentos e Vendas (6)',
-    'Contas de Pagamentos e Vendas (7)',
-    'Contas de Pagamentos e Vendas (8)',
-    'Contas de Pagamentos e Vendas (9)',
-    'Contas de Pagamentos e Vendas (10)',
-    'Contas de Pagamentos e Vendas (11)',
-    'Contas de Pagamentos e Vendas (12)',
-    'Contas de Pagamentos e Vendas (13)',
-    'Contas de Pagamentos e Vendas (14)',
-    'Contas de Pagamentos e Vendas (15)',
-    'Contas de Pagamentos e Vendas (16)',
-    'Contas de Pagamentos e Vendas (17)',
-    'Contas de Pagamentos e Vendas (18)',
-    'Contas de Pagamentos e Vendas (19)',
-    'Contas de Pagamentos e Vendas (20)',
-    'Contas de Pagamentos e Vendas (21)',
-    'Contas de Pagamentos e Vendas (22)',
-    'Contas de Pagamentos e Vendas (23)',
-    'Contas de Pagamentos e Vendas (24)'
 ])
 
-// Configuración de cuentas
 const contasConfig = ref({})
 const contasLimits = ref({})
 const contasPaymentDays = ref({})
 
-// Inicializar configuraciones para cada tab
 contasTabs.value.forEach(tab => {
     contasConfig.value[tab] = false
     contasLimits.value[tab] = 0
     contasPaymentDays.value[tab] = 30
 })
 
-// Estructura del formulario
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
 const form = ref({
     id: null,
     name: '',
     phone: '',
     email: '',
-    email2: '',
     position: '',
     role: 'client',
     status: 'active',
@@ -384,7 +195,6 @@ const form = ref({
     }
 })
 
-// Inicializar datos cuando cambia el usuario
 watch(() => props.user, (userData) => {
     if (userData) {
         form.value = {
@@ -392,7 +202,6 @@ watch(() => props.user, (userData) => {
             name: userData.name || '',
             phone: userData.phone || '',
             email: userData.email || '',
-            email2: userData.email2 || userData.email || '',
             position: userData.position || '',
             role: userData.role || 'client',
             status: userData.status || 'active',
@@ -409,95 +218,37 @@ watch(() => props.user, (userData) => {
     }
 }, { immediate: true, deep: true })
 
-// Iniciales del avatar
 const initials = computed(() => {
     if (!form.value.name) return '?'
-    return form.value.name
-        .split(' ')
-        .map(word => word[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+    return form.value.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
 })
 
-// Guardar cambios
 const save = async () => {
     try {
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-        // Validación básica
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
         if (!form.value.name) {
             alert('El nombre completo es requerido')
             return
         }
-
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-        // Ejemplo con axios a Laravel
-        // if (form.value.id) {
-        //     await axios.put(`/api/users/${form.value.id}`, form.value)
-        // } else {
-        //     await axios.post('/api/users', form.value)
-        // }
-
         emit('saved', { ...form.value })
-        
-        // Opcional: cerrar modal después de guardar
-        // emit('close')
-=======
->>>>>>> origin
-        // Preparar datos completos incluyendo configuración de cuentas
-        const fullData = {
-            ...form.value,
-            contas_config: contasConfig.value,
-            contas_limits: contasLimits.value,
-            contas_payment_days: contasPaymentDays.value
-        }
-
-        emit('saved', fullData)
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
     } catch (error) {
         console.error('Error al guardar:', error)
         alert('Error al guardar los cambios')
     }
 }
 
-// Eliminar usuario
 const deleteUser = async () => {
-    if (!confirm(`¿Estás seguro de que quieres eliminar a "${form.value.name}"?\nEsta acción no se puede deshacer.`)) {
-        return
-    }
-
-    try {
-<<<<<<< HEAD
-        emit('deleted', form.value.id)
-        emit('close')
-=======
-<<<<<<< HEAD
-        // Ejemplo con axios
-        // await axios.delete(`/api/users/${form.value.id}`)
-
-        emit('deleted', form.value.id)
-        emit('close') // Cerrar modal después de eliminar
-=======
-        emit('deleted', form.value.id)
-        emit('close')
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
-    } catch (error) {
-        console.error('Error al eliminar:', error)
-        alert('Error al eliminar el usuario')
+    if (!confirm('¿Estás seguro de eliminar a "${form.value.name}" ?')) {
+        try {
+            emit('deleted', form.value.id)
+            emit('close')
+        } catch (error) {
+            console.error('Error al eliminar:', error)
+            alert('Error al eliminar el usuario')
+        }
     }
 }
 </script>
+
 
 <style lang="scss" scoped>
 .modal-overlay {
@@ -511,32 +262,14 @@ const deleteUser = async () => {
 }
 
 .modal {
-<<<<<<< HEAD
     width: 900px;
     max-width: 90vw;
-=======
-<<<<<<< HEAD
-    width: 750px;
-    max-width: 90%;
-=======
-    width: 900px;
-    max-width: 90vw;
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
     background: white;
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
-<<<<<<< HEAD
     max-height: 85vh;
-=======
-<<<<<<< HEAD
-    max-height: 90vh;
-=======
-    max-height: 85vh;
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
 }
 
 .modal-header {
@@ -548,15 +281,7 @@ const deleteUser = async () => {
 
     h3 {
         margin: 0;
-<<<<<<< HEAD
         font-size: 1.25rem;
-=======
-<<<<<<< HEAD
-        font-size: 1.1rem;
-=======
-        font-size: 1.25rem;
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
         font-weight: 600;
         color: #212529;
     }
@@ -567,8 +292,6 @@ const deleteUser = async () => {
         font-size: 24px;
         cursor: pointer;
         color: #6c757d;
-        line-height: 1;
-        padding: 0;
         width: 30px;
         height: 30px;
         display: flex;
@@ -583,51 +306,13 @@ const deleteUser = async () => {
     }
 }
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-.tabs {
-    display: flex;
-    gap: 4px;
-    padding: 0 24px;
-    border-bottom: 1px solid #e9ecef;
-    background: #f8f9fa;
-
-    button {
-        padding: 12px 20px;
-        border: none;
-        background: none;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-        color: #6c757d;
-        transition: all 0.2s;
-        border-bottom: 2px solid transparent;
-
-        &:hover {
-            color: #fd7e14;
-        }
-
-        &.active {
-            color: #fd7e14;
-            border-bottom-color: #fd7e14;
-            background: white;
-        }
-=======
->>>>>>> origin
-/* Tabs con scroll horizontal (como en la imagen) */
 .tabs-container {
     border-bottom: 1px solid #e9ecef;
     background: #f8f9fa;
     overflow-x: auto;
-    white-space: nowrap;
 
     &::-webkit-scrollbar {
         height: 4px;
-    }
-
-    &::-webkit-scrollbar-track {
-        background: #e9ecef;
     }
 
     &::-webkit-scrollbar-thumb {
@@ -649,7 +334,6 @@ const deleteUser = async () => {
     font-size: 13px;
     font-weight: 500;
     color: #6c757d;
-    transition: all 0.2s;
     border-bottom: 2px solid transparent;
     white-space: nowrap;
 
@@ -661,10 +345,6 @@ const deleteUser = async () => {
         color: #fd7e14;
         border-bottom-color: #fd7e14;
         background: white;
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
     }
 }
 
@@ -674,28 +354,6 @@ const deleteUser = async () => {
     flex: 1;
 }
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-.two-columns {
-    display: grid;
-    grid-template-columns: 120px 1fr;
-    gap: 24px;
-}
-
-.avatar-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-}
-
-.avatar-circle {
-    width: 100px;
-    height: 100px;
-=======
->>>>>>> origin
-/* Contenido del Administrador */
 .admin-content {
     display: flex;
     flex-direction: column;
@@ -709,112 +367,50 @@ const deleteUser = async () => {
     border-bottom: 1px solid #e9ecef;
 }
 
-.user-avatar {
-    flex-shrink: 0;
-}
-
 .avatar-circle {
     width: 80px;
     height: 80px;
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
     border-radius: 50%;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-    font-size: 32px;
-    font-weight: 600;
-}
-
-.btn-change-photo {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    color: #495057;
-
-    &:hover {
-        background: #e9ecef;
-    }
-}
-
-.fields-section {
-=======
->>>>>>> origin
     font-size: 28px;
     font-weight: 600;
 }
 
 .user-fields {
     flex: 1;
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> origin
 .field-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
 .field {
     display: flex;
     flex-direction: column;
     gap: 6px;
 
     label {
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-        font-size: 13px;
-        font-weight: 500;
-        color: #495057;
-    }
-
-    input, select {
-=======
->>>>>>> origin
         font-size: 12px;
         font-weight: 500;
         color: #495057;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
     }
 
     input,
     select {
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
         padding: 8px 12px;
         border: 1px solid #dee2e6;
         border-radius: 6px;
         font-size: 14px;
-        transition: all 0.2s;
 
         &:focus {
             outline: none;
@@ -824,12 +420,6 @@ const deleteUser = async () => {
     }
 }
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-.tab-content {
-=======
->>>>>>> origin
 .company-section,
 .permissions-section {
     h4 {
@@ -846,55 +436,6 @@ const deleteUser = async () => {
     gap: 12px;
 }
 
-/* Contenido de Contas */
-.contas-content {
-    padding: 8px 0;
-}
-
-.contas-config {
-    h4 {
-        margin: 0 0 20px 0;
-        font-size: 16px;
-        font-weight: 600;
-        color: #fd7e14;
-    }
-}
-
-.config-options {
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-.permissions-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-
-    .checkbox-label {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
-        font-size: 14px;
-
-        input {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-    }
-}
-
-=======
->>>>>>> origin
 .checkbox-label {
     display: flex;
     align-items: center;
@@ -909,11 +450,21 @@ const deleteUser = async () => {
     }
 }
 
-/* Modal Footer */
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
+.contas-config {
+    h4 {
+        margin: 0 0 20px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fd7e14;
+    }
+}
+
+.config-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .modal-footer {
     display: flex;
     justify-content: space-between;
@@ -937,7 +488,6 @@ const deleteUser = async () => {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    transition: background 0.2s;
 
     &:hover {
         background: #e96b0a;
@@ -952,11 +502,9 @@ const deleteUser = async () => {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    transition: all 0.2s;
 
     &:hover {
         background: #f8f9fa;
-        border-color: #adb5bd;
     }
 }
 
@@ -968,55 +516,10 @@ const deleteUser = async () => {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    transition: all 0.2s;
 
     &:hover {
         background: #dc3545;
         color: white;
     }
 }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> origin
-
-/* Responsive */
-@media (max-width: 768px) {
-    .user-info-section {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .field-row {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .permissions-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .modal-footer {
-        flex-direction: column-reverse;
-        gap: 12px;
-
-        .btn-danger {
-            width: 100%;
-        }
-
-        .actions-right {
-            width: 100%;
-
-            button {
-                flex: 1;
-            }
-        }
-    }
-}
-<<<<<<< HEAD
-=======
->>>>>>> 85504a212599af02a064be8bbbae9ecaadc60c39
->>>>>>> origin
 </style>
