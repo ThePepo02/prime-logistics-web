@@ -47,7 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dashboard datos maestros
     Route::get('/datos-maestros/dashboard', [DatosMaestrosController::class, 'getDashboardData']);
     Route::get('/datos-maestros/estadisticas', [DatosMaestrosController::class, 'getEstadisticas']);
-    
+
     // CRUDs
     Route::apiResource('empresas', EmpresaController::class);
 
@@ -63,6 +63,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Ofertas
     Route::get('/ofertes', [OfertaController::class, 'index']);
+    Route::post('/ofertes', [OfertaController::class, 'store']); // ← INSERT nueva oferta
+
+    // Nuevo Pedido
+    Route::get('/clientes-rol', [OfertaController::class, 'clientes']); // ← clientes para el select
 
     // Filtros
     Route::get('/estats-ofertes', [EstatOfertaController::class, 'index']);
