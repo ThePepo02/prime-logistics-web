@@ -14,7 +14,7 @@ class Oferta extends Model
 
     protected $fillable = [
         'tipus_transport_id',         // Tipo de transporte
-        'tipus_fluxes_id',             // Flujo (importación/exportación)
+        'tipus_fluxe_id',             // Flujo (importación/exportación)
         'tipus_carrega_id',           // Tipo de carga
         'incoterm_id',                // Condiciones de entrega
         'client_id',                  // Cliente asignado

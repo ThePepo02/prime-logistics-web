@@ -33,9 +33,9 @@
                 <label class="text-xs text-gray-500 mb-2 block">Flujo *</label>
                 <div class="grid grid-cols-2 gap-3">
                     <div
-                        @click="emitir('tipus_fluxes_id', 1)"
+                        @click="emitir('tipus_fluxe_id', 1)"
                         class="border-2 rounded-xl p-4 cursor-pointer transition"
-                        :class="datos.tipus_fluxes_id == 1
+                        :class="datos.tipus_fluxe_id == 1
                             ? 'border-orange-400 bg-orange-50'
                             : 'border-gray-200 hover:border-gray-300'"
                     >
@@ -43,9 +43,9 @@
                         <p class="text-xs text-gray-400">Mercancía entra hacia España</p>
                     </div>
                     <div
-                        @click="emitir('tipus_fluxes_id', 2)"
+                        @click="emitir('tipus_fluxe_id', 2)"
                         class="border-2 rounded-xl p-4 cursor-pointer transition"
-                        :class="datos.tipus_fluxes_id == 2
+                        :class="datos.tipus_fluxe_id == 2
                             ? 'border-orange-400 bg-orange-50'
                             : 'border-gray-200 hover:border-gray-300'"
                     >
@@ -53,8 +53,8 @@
                         <p class="text-xs text-gray-400">Mercancía sale desde España</p>
                     </div>
                 </div>
-                <p v-if="errors.tipus_fluxes_id" class="text-xs text-red-500 mt-1">
-                    {{ errors.tipus_fluxes_id }}
+                <p v-if="errors.tipus_fluxe_id" class="text-xs text-red-500 mt-1">
+                    {{ errors.tipus_fluxe_id }}
                 </p>
             </div>
 

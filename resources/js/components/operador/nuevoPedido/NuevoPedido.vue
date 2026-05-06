@@ -78,7 +78,7 @@ export default {
             client_id: null,
             agent_comercial_id: null,
             tipus_transport_id: null,
-            tipus_fluxes_id: null,
+            tipus_fluxe_id: null,
             tipus_carrega_id: null,
             incoterm_id: null,
             tipus_contenidor_id: null,
@@ -140,7 +140,7 @@ export default {
             // Estos son campos ibligatorios random o que solo sean estos obligatorios??
             if (pasoActual.value === 2) {
                 if (!formulario.tipus_transport_id) errors.tipus_transport_id = 'El tipo de transporte es obligatorio'
-                if (!formulario.tipus_fluxes_id) errors.tipus_fluxes_id = 'El flujo es obligatorio'
+                if (!formulario.tipus_fluxe_id) errors.tipus_fluxe_id = 'El flujo es obligatorio'
             }
 
             return Object.keys(errors).length === 0

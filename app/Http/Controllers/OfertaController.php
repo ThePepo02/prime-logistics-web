@@ -34,7 +34,7 @@ class OfertaController extends Controller
         $request->validate([
             'client_id' => 'required|integer',
             'tipus_transport_id' => 'required|integer',
-            'tipus_fluxes_id' => 'required|integer',
+            'tipus_fluxe_id' => 'required|integer',
             'estat_oferta_id' => 'required|integer',
         ]);
         // 2. Crea el registro en la tabla ofertes
@@ -43,14 +43,14 @@ class OfertaController extends Controller
             'agent_comercial_id' => $request->agent_comercial_id,
             'operador_id' => $request->user()->id, // operador que crea la oferta
             'tipus_transport_id' => $request->tipus_transport_id,
-            'tipus_fluxes_id' => $request->tipus_fluxes_id,
-            'tipus_carrega_id' => $request->tipus_carrega_id,
-            'incoterm_id' => $request->incoterm_id,
+            'tipus_fluxe_id' => $request->tipus_fluxe_id,
+            'tipus_carrega_id' => $request->tipus_carrega_id ?? 1, // Valor por defecto si no se envía
+            'incoterm_id' => $request->incoterm_id ?? 1, // Valor por defecto si no se envía
             'transportista_id' => $request->transportista_id,
             'port_origen_id' => $request->port_origen_id,
             'port_desti_id' => $request->port_desti_id,
-            'pes_brut' => $request->pes_brut,
-            'volum' => $request->volum,
+            'pes_brut' => $request->pes_brut ?? 0, // Valor por defecto si no se envía
+            'volum' => $request->volum ?? 0, // Valor por defecto si no se envía
             'comentaris' => $request->comentaris,
             'data_validessa_inicial' => $request->data_validessa_inicial,
             'data_validessa_fina' => $request->data_validessa_fina,
