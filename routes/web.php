@@ -10,11 +10,7 @@ Route::get('/login', function() {
     return view('auth.login');
 });
 
-<<<<<<< HEAD
 Route::get('/dashboard', function(){
-=======
-Route::get('/admin', function(){
->>>>>>> origin
     return view('index');
 });
 
