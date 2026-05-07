@@ -33,7 +33,7 @@ class Oferta extends Model
         'operador_id',                // Operador que la gestiona
         'data_creacio',               // Fecha de creación
         'data_validessa_inicial',     // Inicio de validez
-        'data_validessa_final',       // Fin de validez
+        'data_validessa_fina',        // Fin de validez
         'rao_rebuig',                 // Razón de rechazo
         'tipus_contenidor_id',        // Tipo de contenedor
         'estat_envio_id',             // Estado del envío
