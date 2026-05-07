@@ -78,7 +78,7 @@ export default {
             client_id: null,
             agent_comercial_id: null,
             tipus_transport_id: null,
-            tipus_fluxes_id: null,
+            tipus_fluxe_id: null,
             tipus_carrega_id: null,
             incoterm_id: null,
             tipus_contenidor_id: null,
@@ -105,7 +105,7 @@ export default {
 
         // --- MÉTODOS ---
 
-        // Carga clientes con rol_id = 3 desde la API
+        // Carga clientes con rol_id = 3 desde la API y los paso al hijo para el select
         async function carregarClientes() {
             try {
                 const res = await axios.get('/clientes-rol')
@@ -115,7 +115,7 @@ export default {
             }
         }
 
-        // Carga tipos de transport desde la API
+        // Carga tipos de transport desde la API y los paso al hijo para el select
         async function carregarTransports() {
             try {
                 const res = await axios.get('/tipus-transports')
@@ -127,20 +127,20 @@ export default {
 
         // Recibe cambios del hijo y los guarda en formulario
         function actualizarDatos(nuevosDatos) {
-            Object.assign(formulario, nuevosDatos)
+            Object.assign(formulario, nuevosDatos) // este solo actualiza los campos que cambian, el resto se mantiene
         }
 
         // Valida campos obligatorios del paso actual
         function validarPaso() {
             Object.keys(errors).forEach(k => delete errors[k]) // Limpiar errores previos
-
+            // comprobar campos obligatorios según el paso actual
             if (pasoActual.value === 1) {
                 if (!formulario.client_id) errors.client_id = 'El cliente es obligatorio'
             }
             // Estos son campos ibligatorios random o que solo sean estos obligatorios??
             if (pasoActual.value === 2) {
                 if (!formulario.tipus_transport_id) errors.tipus_transport_id = 'El tipo de transporte es obligatorio'
-                if (!formulario.tipus_fluxes_id) errors.tipus_fluxes_id = 'El flujo es obligatorio'
+                if (!formulario.tipus_fluxe_id) errors.tipus_fluxe_id = 'El flujo es obligatorio'
             }
 
             return Object.keys(errors).length === 0
