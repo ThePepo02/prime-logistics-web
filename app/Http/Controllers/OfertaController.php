@@ -14,7 +14,7 @@ class OfertaController extends Controller
             ->orderBy('id', 'desc') // Más recientes primero
             ->paginate(8);          // 8 registros por página
 
-        return response()->json($ofertes); // Devuelve JSON para Vue
+        return response()->json($ofertes); // devuelve JSON que Vue puede leer
     }
 
     // GET /api/clientes-rol — trae los clientes para el select del formulario

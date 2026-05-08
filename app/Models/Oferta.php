@@ -39,7 +39,7 @@ class Oferta extends Model
         'estat_envio_id',             // Estado del envío
     ];
 
-    // Oferta → pertenece a un Usuario (cliente)
+    // Una Oferta le pertenezca a un Usuario (cliente)
     public function client()
     {
         return $this->belongsTo(Usuarios::class, 'client_id');

@@ -143,7 +143,7 @@ export default {
                 if (!formulario.tipus_fluxe_id) errors.tipus_fluxe_id = 'El flujo es obligatorio'
             }
 
-            return Object.keys(errors).length === 0
+            return Object.keys(errors).length === 0 // recorre validaciones y ve si no hay errores osea 0 pasa al siguiente paso
         }
 
         // Avanzar al siguiente paso si la validación pasa
@@ -172,6 +172,7 @@ export default {
                 setTimeout(() => {
                     emit('cambiarPagina','ofertas')
                 }, 1500)
+                // Espera 1.5 segundos y redirige a la lista de ofertas
 
             } catch (e) {
                 const data = e.response?.data
