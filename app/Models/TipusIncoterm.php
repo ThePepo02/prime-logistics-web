@@ -10,6 +10,7 @@ class TipusIncoterm extends Model
 {
     protected $table = 'tipus_incoterms';
     public $timestamps = false;
+    protected $fillable = ['id', 'codi', 'nom'];
 
     protected $fillable = ['id', 'codi', 'nom'];
 

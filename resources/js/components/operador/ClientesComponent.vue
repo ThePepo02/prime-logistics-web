@@ -121,6 +121,7 @@
                                 <button class="btn-editar" :disabled="!cliente.activo"
                                     :class="{ 'btn-editar--disabled': !cliente.activo }"
                                     @click="editarCliente(cliente)">Editar</button>
+                                <button class="btn-eliminar" @click="eliminarCliente(cliente)">Eliminar</button>
                                 <button class="btn-nuevo-pedido" @click="nuevoPedido(cliente)">
                                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"
                                         viewBox="0 0 24 24">
@@ -156,11 +157,11 @@
                     <div class="modal-field"><span class="modal-label">Empresa</span><span>{{
                         clienteSeleccionado.empresa }}</span></div>
                     <div class="modal-field"><span class="modal-label">CIF/NIF</span><span>{{ clienteSeleccionado.cif
-                            }}</span></div>
+                    }}</span></div>
                     <div class="modal-field"><span class="modal-label">Contacto</span><span>{{
                         clienteSeleccionado.contacto }}</span></div>
                     <div class="modal-field"><span class="modal-label">Email</span><span>{{ clienteSeleccionado.email
-                            }}</span></div>
+                    }}</span></div>
                     <div class="modal-field"><span class="modal-label">Teléfono</span><span>{{
                         clienteSeleccionado.telefono }}</span></div>
                     <div class="modal-field"><span class="modal-label">Ofertas</span><span>{{
@@ -265,36 +266,38 @@ export default {
     },
 
     methods: {
+        // Carga todos los clientes desde la API
         async cargarClientes() {
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('token')
                 const response = await fetch('/api/clientes', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json',
                     }
-                });
-                const data = await response.json();
-                this.clientes = data;
+                })
+                const data = await response.json()
+                this.clientes = data
             } catch (e) {
-                console.error('Error cargando clientes:', e);
+                console.error('Error cargando clientes:', e)
             }
         },
 
+        // Activa o desactiva un cliente en la BD
         async toggleEstado(cliente) {
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('token')
                 const response = await fetch(`/api/clientes/${cliente.id}/estado`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
                     },
-                });
-                const data = await response.json();
-                cliente.activo = data.activo;
+                })
+                const data = await response.json()
+                cliente.activo = data.activo
             } catch (e) {
-                console.error('Error actualizando estado:', e);
+                console.error('Error actualizando estado:', e)
             }
         },
 
@@ -302,12 +305,14 @@ export default {
             this.clienteSeleccionado = cliente
             this.modalVer = true
         },
+
         editarCliente(cliente) {
             this.modoEdicion = true
             this.clienteSeleccionado = cliente
             this.form = { ...cliente }
             this.modalForm = true
         },
+
         abrirModalNuevo() {
             this.modoEdicion = false
             this.clienteSeleccionado = null
@@ -315,24 +320,108 @@ export default {
             this.errorForm = null
             this.modalForm = true
         },
-        guardarCliente() {
+
+        // Guarda el cliente — llama a POST (crear) o PUT (editar) según el modo
+        async guardarCliente() {
+            // Validación básica antes de llamar a la API
             if (!this.form.empresa || !this.form.cif || !this.form.contacto || !this.form.email) {
                 this.errorForm = 'Por favor rellena todos los campos obligatorios.'
                 return
             }
             this.errorForm = null
-            if (this.modoEdicion) {
-                const idx = this.clientes.findIndex(c => c.id === this.clienteSeleccionado.id)
-                if (idx !== -1) Object.assign(this.clientes[idx], this.form)
-            } else {
-                const nuevoId = Math.max(...this.clientes.map(c => c.id)) + 1
-                this.clientes.push({ ...this.form, id: nuevoId, ofertas: 0, activo: true })
+
+            const token = localStorage.getItem('token')
+
+            try {
+                if (this.modoEdicion) {
+                    // PUT — editar cliente existente
+                    const response = await fetch(`/api/clientes/${this.clienteSeleccionado.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                        },
+                        body: JSON.stringify(this.form)
+                    })
+
+                    if (!response.ok) {
+                        this.errorForm = 'Error al guardar los cambios.'
+                        return
+                    }
+
+                    const clienteActualizado = await response.json()
+                    // Actualiza el cliente en la lista local sin recargar todo
+                    const idx = this.clientes.findIndex(c => c.id === this.clienteSeleccionado.id)
+                    if (idx !== -1) this.clientes[idx] = clienteActualizado
+
+                } else {
+                    // POST — crear cliente nuevo
+                    const response = await fetch('/api/clientes', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                        },
+                        body: JSON.stringify(this.form)
+                    })
+
+                    if (!response.ok) {
+                        this.errorForm = 'Error al crear el cliente.'
+                        return
+                    }
+
+                    const clienteNuevo = await response.json()
+                    // Añade el nuevo cliente a la lista local
+                    this.clientes.push(clienteNuevo)
+                }
+
+                this.cerrarModal()
+
+            } catch (e) {
+                this.errorForm = 'Error de conexión con el servidor.'
+                console.error('Error guardando cliente:', e)
             }
-            this.cerrarModal()
         },
+
+        // Elimina un cliente de la BD tras confirmar
+        async eliminarCliente(cliente) {
+            if (!confirm(`¿Seguro que quieres eliminar a ${cliente.empresa}?`)) return
+
+            try {
+                const token = localStorage.getItem('token')
+                const response = await fetch(`/api/clientes/${cliente.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                }
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                alert('Error al eliminar el cliente.')
+                return
+            }
+
+            if (data.desactivado) {
+                // Tenía ofertas — solo se desactivó, actualizamos el estado en la lista
+                const idx = this.clientes.findIndex(c => c.id === cliente.id)
+                if (idx !== -1) this.clientes[idx].activo = false
+                alert('Este cliente tiene ofertas asociadas y ha sido desactivado.')
+            } else {
+                // No tenía ofertas — se eliminó, lo quitamos de la lista
+                this.clientes = this.clientes.filter(c => c.id !== cliente.id)
+            }
+
+    } catch (e) {
+        console.error('Error eliminando cliente:', e)
+    }
+},
+
         nuevoPedido(cliente) {
-            alert(`Nuevo pedido para: ${cliente.empresa}\n(Funcionalidad pendiente)`)
+            alert(`Nuevo pedido para: ${cliente.empresa}`)
         },
+
         cerrarModal() {
             this.modalVer = false
             this.modalForm = false
@@ -590,6 +679,25 @@ export default {
     gap: 8px;
     align-items: center;
 }
+
+
+
+
+.btn-eliminar {
+    padding: 6px 14px;
+    border: 1px solid #FCA5A5;
+    border-radius: 7px;
+    background: #FEF2F2;
+    font-size: 13px;
+    cursor: pointer;
+    color: #DC2626;
+    font-weight: 500;
+}
+
+.btn-eliminar:hover {
+    background: #FEE2E2;
+}
+
 
 .btn-ver {
     padding: 6px 14px;
