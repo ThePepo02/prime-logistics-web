@@ -1,42 +1,66 @@
 <template>
     <div class="p-6">
 
-
         <div class="flex items-center justify-center mb-8">
             <div v-for="(paso, index) in pasos" :key="index" class="flex items-center">
-                <!-- Círculo del paso -->
                 <div class="flex flex-col items-center">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" :class="pasoActual > index + 1
-                        ? 'bg-green-500 text-white'
-                        : pasoActual === index + 1
-                            ? 'bg-orange-500 text-white'
-                            : 'bg-gray-200 text-gray-500'">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                        :class="pasoActual > index + 1
+                            ? 'bg-green-500 text-white'
+                            : pasoActual === index + 1
+                                ? 'bg-orange-500 text-white'
+                                : 'bg-gray-200 text-gray-500'">
                         <span v-if="pasoActual > index + 1">✓</span>
                         <span v-else>{{ index + 1 }}</span>
                     </div>
                     <span class="text-xs mt-1 text-gray-500">{{ paso }}</span>
                 </div>
-                <!-- Línea entre pasos -->
                 <div v-if="index < pasos.length - 1" class="w-24 h-0.5 mx-2 mb-4"
                     :class="pasoActual > index + 1 ? 'bg-green-500' : 'bg-gray-200'"></div>
             </div>
         </div>
 
         <!-- Paso 1 — Identificación -->
-        <PasoIdentificacion v-if="pasoActual === 1" :datos="formulario" :clientes="clientes" :errors="errors"
-            @actualizar="actualizarDatos" />
+        <PasoIdentificacion
+            v-if="pasoActual === 1"
+            :datos="formulario"
+            :clientes="clientes"
+            :errors="errors"
+            @actualizar="actualizarDatos"
+            @limpiarError="(campo) => delete errors[campo]"
+        />
 
         <!-- Paso 2 — Especificaciones -->
-        <PasoEspecificaciones v-if="pasoActual === 2" :datos="formulario" :transports="transports" :errors="errors"
-            @actualizar="actualizarDatos" />
+        <PasoEspecificaciones
+            v-if="pasoActual === 2"
+            :datos="formulario"
+            :transports="transports"
+            :tipusCarrega="tipusCarrega"
+            :errors="errors"
+            @actualizar="actualizarDatos"
+        />
 
         <!-- Paso 3 — Ruta y Cierre -->
-        <PasoRutaCierre v-if="pasoActual === 3" :datos="formulario" :errors="errors" @actualizar="actualizarDatos" />
+        <PasoRutaCierre
+            v-if="pasoActual === 3"
+            :datos="formulario"
+            :ports="ports"
+            :transportistes="transportistes"
+            :tipusIncoterms="tipusIncoterms"
+            :errors="errors"
+            @actualizar="actualizarDatos"
+        />
 
         <!-- Botones de navegación -->
-        <NavegacionPasos :pasoActual="pasoActual" :totalPasos="pasos.length" :guardando="guardando"
-            @anterior="pasoAnterior" @siguiente="pasoSiguiente" @guardarBorrador="guardarBorrador"
-            @enviarPedido="enviarPedido" />
+        <NavegacionPasos
+            :pasoActual="pasoActual"
+            :totalPasos="pasos.length"
+            :guardando="guardando"
+            @anterior="pasoAnterior"
+            @siguiente="pasoSiguiente"
+            @guardarBorrador="guardarBorrador"
+            @enviarPedido="enviarPedido"
+        />
 
         <!-- Mensaje de éxito o error -->
         <div v-if="mensaje.texto" class="mt-4 p-3 rounded-lg text-sm font-medium"
@@ -49,7 +73,7 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
-import axios from '../../../axios.js' // importar nuestro axios configurado
+import axios from '../../../axios.js'
 import PasoIdentificacion   from './PasoIdentificacion.vue'
 import PasoEspecificaciones from './PasoEspecificaciones.vue'
 import PasoRutaCierre       from './PasoRutaCierre.vue'
@@ -58,12 +82,8 @@ import NavegacionPasos      from './NavegacionPasos.vue'
 export default {
     name: 'NuevoPedido',
     emits: ['cambiarPagina'],
-    components: {
-        PasoIdentificacion,
-        PasoEspecificaciones,
-        PasoRutaCierre,
-        NavegacionPasos
-    },
+    components: { PasoIdentificacion, PasoEspecificaciones, PasoRutaCierre, NavegacionPasos },
+
     setup(props, { emit }) {
 
         // --- ESTADO ---
@@ -72,6 +92,10 @@ export default {
         const guardando = ref(false)
         const clientes = ref([])
         const transports = ref([])
+        const ports = ref([])
+        const tipusCarrega = ref([])
+        const transportistes = ref([])
+        const tipusIncoterms = ref([])
 
         // Todos los datos del formulario en un solo objeto reactivo
         const formulario = reactive({
@@ -96,16 +120,12 @@ export default {
             rao_rebuig: '',
         })
 
-
-        // Errores de validación por campo
         const errors = reactive({})
-
-        // Mensaje de feedback para el usuario
         const mensaje = reactive({ texto: '', tipo: '' })
 
-        // --- MÉTODOS ---
+        // --- MÉTODOS DE CARGA ---
 
-        // Carga clientes con rol_id = 3 desde la API y los paso al hijo para el select
+        // Carga clientes con rol_id = 3 para el select del paso 1
         async function carregarClientes() {
             try {
                 const res = await axios.get('/clientes-rol')
@@ -115,7 +135,7 @@ export default {
             }
         }
 
-        // Carga tipos de transport desde la API y los paso al hijo para el select
+        // Carga tipos de transporte para las tarjetas del paso 2
         async function carregarTransports() {
             try {
                 const res = await axios.get('/tipus-transports')
@@ -125,55 +145,83 @@ export default {
             }
         }
 
-        // Recibe cambios del hijo y los guarda en formulario
-        function actualizarDatos(nuevosDatos) {
-            Object.assign(formulario, nuevosDatos) // este solo actualiza los campos que cambian, el resto se mantiene
+        // Carga tipos de carga para el select del paso 2
+        async function carregarTipusCarrega() {
+            try {
+                const res = await axios.get('/tipus-carrega')
+                tipusCarrega.value = res.data
+            } catch (error) {
+                console.error('Error al cargar tipos de carga:', error)
+            }
         }
 
-        // Valida campos obligatorios del paso actual
+        // Carga puertos para los selects del paso 3
+        async function carregarPorts() {
+            try {
+                const res = await axios.get('/ports')
+                ports.value = res.data
+            } catch (error) {
+                console.error('Error al cargar puertos:', error)
+            }
+        }
+
+        // Carga transportistas para el select del paso 3
+        async function carregarTransportistes() {
+            try {
+                const res = await axios.get('/transportistes')
+                transportistes.value = res.data
+            } catch (error) {
+                console.error('Error al cargar transportistes:', error)
+            }
+        }
+
+        // Carga incoterms para el select del paso 3
+        async function carregarTipusIncoterms() {
+            try {
+                const res = await axios.get('/tipus-incoterms')
+                tipusIncoterms.value = res.data
+            } catch (error) {
+                console.error('Error al cargar incoterms:', error)
+            }
+        }
+
+        // --- MÉTODOS DE FORMULARIO ---
+
+        // Recibe los datos del hijo y los fusiona en el formulario principal
+        function actualizarDatos(nuevosDatos) {
+            Object.assign(formulario, nuevosDatos)
+        }
+
+        // Valida los campos obligatorios del paso actual
         function validarPaso() {
-            Object.keys(errors).forEach(k => delete errors[k]) // Limpiar errores previos
-            // comprobar campos obligatorios según el paso actual
+            Object.keys(errors).forEach(k => delete errors[k])
             if (pasoActual.value === 1) {
                 if (!formulario.client_id) errors.client_id = 'El cliente es obligatorio'
             }
-            // Estos son campos ibligatorios random o que solo sean estos obligatorios??
             if (pasoActual.value === 2) {
                 if (!formulario.tipus_transport_id) errors.tipus_transport_id = 'El tipo de transporte es obligatorio'
                 if (!formulario.tipus_fluxe_id) errors.tipus_fluxe_id = 'El flujo es obligatorio'
             }
-
-            return Object.keys(errors).length === 0 // recorre validaciones y ve si no hay errores osea 0 pasa al siguiente paso
+            return Object.keys(errors).length === 0
         }
 
-        // Avanzar al siguiente paso si la validación pasa
         function pasoSiguiente() {
             if (validarPaso()) pasoActual.value++
         }
 
-        // Retroceder al paso anterior. Solo retrocede si no estamos en el paso 1
         function pasoAnterior() {
             if (pasoActual.value > 1) pasoActual.value--
         }
 
-        // Hace el INSERT en la BD via API (Hace un post) es el ultimo paso
+        // Hace el INSERT en la BD via API
         async function enviarFormulario(estatId) {
             guardando.value = true
             mensaje.texto = ''
-
             try {
                 await axios.post('/ofertes', { ...formulario, estat_oferta_id: estatId })
-
-                mensaje.texto = estatId === 1
-                    ? 'Borrador guardado correctamente'
-                    : 'Pedido enviado correctamente'
+                mensaje.texto = estatId === 1 ? 'Borrador guardado correctamente' : 'Pedido enviado correctamente'
                 mensaje.tipo = 'ok'
-
-                setTimeout(() => {
-                    emit('cambiarPagina','ofertas')
-                }, 1500)
-                // Espera 1.5 segundos y redirige a la lista de ofertas
-
+                setTimeout(() => emit('cambiarPagina', 'ofertas'), 1500)
             } catch (e) {
                 const data = e.response?.data
                 mensaje.texto = data?.message || 'Error al guardar'
@@ -184,24 +232,24 @@ export default {
             }
         }
 
+        function guardarBorrador() { enviarFormulario(1) }
+        function enviarPedido() { if (validarPaso()) enviarFormulario(2) }
 
-        // Guardar con estado borrador (id = 1)
-        function guardarBorrador() {
-            enviarFormulario(1)
-        }
-
-        // Envía el pedido (id = 2) con validación extra
-        function enviarPedido() {
-            if (validarPaso()) enviarFormulario(2)
-        }
-
-        // Al montar el componenete carga los datos necesarios
+        // Carga todos los datos al montar el componente
         onMounted(() => {
             carregarClientes()
             carregarTransports()
+            carregarTipusCarrega()
+            carregarPorts()
+            carregarTransportistes()
+            carregarTipusIncoterms()
         })
 
-        return { pasoActual, pasos, formulario, errors, mensaje, clientes, transports, guardando, actualizarDatos, pasoSiguiente, pasoAnterior, guardarBorrador, enviarPedido }
+        return {
+            pasoActual, pasos, formulario, errors, mensaje,
+            clientes, transports, tipusCarrega, ports, transportistes, tipusIncoterms,
+            guardando, actualizarDatos, pasoSiguiente, pasoAnterior, guardarBorrador, enviarPedido
+        }
     }
 }
 </script>

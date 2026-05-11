@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Pais extends Model
 {
-    protected $table = '';
+    protected $table = 'paisos';
     public $timestamps = false;
-
+    protected $fillable = ['id', 'nom'];
     /**
      * Get the ciutats that owns the Pais
      *

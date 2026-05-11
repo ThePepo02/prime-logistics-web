@@ -25,8 +25,7 @@
             <div>
                 <label class="text-xs text-gray-500 mb-1 block">Cliente / Razón Social *</label>
                 <select
-                    :value="datos.client_id"
-                    @change="emitir('client_id', $event.target.value)"
+                    v-model="local.client_id"
                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                     :class="errors.client_id ? 'border-red-400' : 'border-gray-200'"
                 >
@@ -45,36 +44,62 @@
                 <input
                     type="text"
                     placeholder="Ej: TSA-2025-001"
-                    :value="datos.comentaris"
-                    @input="emitir('comentaris', $event.target.value)"
+                    v-model="local.comentaris"
                     class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                 />
             </div>
 
         </div>
+
+        <!-- Botón guardar paso -->
+        <div class="flex justify-end mt-6">
+            <button
+                @click="guardarPaso"
+                class="bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium px-6 py-2 rounded-lg transition"
+            >
+                Guardar y continuar →
+            </button>
+        </div>
+
     </div>
 </template>
 
 <script>
+import { reactive } from 'vue'
+
 export default {
     name: 'PasoIdentificacion',
 
-    // Props — datos que recibe del padre, no se modifican aquí
     props: {
-        datos:    { type: Object, required: true }, // formulario completo
-        clientes: { type: Array,  required: true }, // lista de clientes de la API
-        errors:   { type: Object, required: true }, // errores de validación
+        datos:    { type: Object, required: true },
+        clientes: { type: Array,  required: true },
+        errors:   { type: Object, required: true },
     },
 
     setup(props, { emit }) {
 
-        // Avisa al padre qué campo cambió y con qué valor
-        // El padre es quien actualiza el formulario — el hijo solo avisa
-        function emitir(campo, valor) {
-            emit('actualizar', { [campo]: valor })
+        // Estado local — copia de los datos del padre
+        // El hijo trabaja con su propia copia y solo avisa al padre cuando pulsa el botón
+        const local = reactive({
+            client_id:  props.datos.client_id  || null,
+            comentaris: props.datos.comentaris || '',
+        })
+
+        // Cuando el usuario selecciona un cliente, limpia el error de ese campo
+        // para que desaparezca el borde rojo sin tener que pulsar el botón
+        function limpiarError(campo) {
+            emit('limpiarError', campo)
         }
 
-        return { emitir }
+        // Solo emite cuando el usuario pulsa "Guardar y continuar"
+        function guardarPaso() {
+            emit('actualizar', {
+                client_id:  local.client_id,
+                comentaris: local.comentaris,
+            })
+        }
+
+        return { local, guardarPaso, limpiarError }
     }
 }
 </script>
