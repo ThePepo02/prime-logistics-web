@@ -21,13 +21,13 @@
 
         <!-- Correu -->
         <div class="mb-4">
-            <input v-model="correu" type="email" placeholder="Correo electrónico"
+            <input v-model="form.correu" type="email" placeholder="Correo electrónico"
                 class="border border-gray-300 text-gray-900 placeholder-gray-400 rounded-lg block w-full p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
         </div>
 
         <!-- Contrasenya -->
         <div class="mb-2">
-            <input v-model="contrasenya" type="password" placeholder="Contraseña"
+            <input v-model="form.contrasenya" type="password" placeholder="Contraseña"
                 class="border border-gray-300 text-gray-900 placeholder-gray-400 rounded-lg block w-full p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
         </div>
 
@@ -53,60 +53,231 @@
     </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-
-// Estado
-const logoUrl = window.location.origin + '/images/Prime-Logistics.png'
-const correu = ref('')
-const contrasenya = ref('')
-const error = ref(null)
-const loading = ref(false)
-
-// Función login
-const handleLogin = async () => {
-    error.value = null
-    loading.value = true
-
-    try {
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+<script scoped>
+export default {
+    name: 'LoginComponents',
+    data() {
+        return {
+            logoUrl: window.location.origin + '/images/Prime-Logistics.png',
+            form: {
+                correu: '',
+                contrasenya: '',
             },
-            body: JSON.stringify({
-                correu: correu.value,
-                contrasenya: contrasenya.value,
-            }),
-        })
+            error: null,
+            loading: false,
+        };
+    },
+    methods: {
+        async handleLogin() {
+            this.error = null;
+            this.loading = true;
 
-        const data = await response.json()
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify(this.form),
+                });
 
-        if (!response.ok) {
-            error.value = data.message || 'Error al iniciar sesión'
-            return
-        }
+                const data = await response.json();
 
-        // Guardar en localStorage
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('usuario', JSON.stringify(data.user))
+                if (!response.ok) {
+                    this.error = data.message || 'Error al iniciar sessió';
+                    return;
+                }
 
-        // Redirigir según rol
-        const rolId = data.user.rol_id
-        if (rolId == 1) window.location.href = '/admin'
-        else if (rolId == 2) window.location.href = '/operador'
-        else if (rolId == 3) window.location.href = '/cliente'
-        else error.value = 'Rol de usuario desconocido'
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                const rolId = data.user.rol_id;
 
-    } catch (e) {
-        error.value = 'Error de conexión con el servidor'
-    } finally {
-        loading.value = false
-    }
-}
+                if (rolId == 1) {
+                    window.location.href = '/admin';
+                } else if (rolId == 2) {
+                    window.location.href = '/operador';
+                } else if (rolId == 3) {
+                    window.location.href = '/cliente';
+                } else {
+                    this.error = 'Rol de usuario desconocido';
+                }
+
+            } catch (e) {
+                this.error = 'Error de connexió amb el servidor';
+            } finally {
+                this.loading = false;
+            }
+        },
+    },
+};
 </script>
 <style scoped>
-/* Estilos simples - apenas necesarios */
+/* ===== Fondo general tipo dashboard oscuro ===== */
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+}
+
+/* ===== Card principal ===== */
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 18px;
+    padding: 40px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* ===== Logo ===== */
+.login-logo {
+    height: 36px;
+    margin-bottom: 16px;
+}
+
+/* ===== Título ===== */
+.login-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+/* ===== Subtítulo ===== */
+.login-subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 28px;
+}
+
+/* ===== Inputs ===== */
+.login-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+    margin-bottom: 14px;
+    background: #fff;
+}
+
+.login-input:focus {
+    border-color: #f97316;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+/* ===== Error ===== */
+.error-box {
+    background: #fee2e2;
+    color: #b91c1c;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+}
+
+/* ===== Forgot password ===== */
+.forgot {
+    text-align: right;
+    margin-bottom: 18px;
+}
+
+.forgot a {
+    font-size: 12px;
+    color: #f97316;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.forgot a:hover {
+    color: #ea580c;
+    text-decoration: underline;
+}
+
+/* ===== Botón ===== */
+.login-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #f97316;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.login-btn:hover {
+    background: #ea580c;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 25px rgba(249, 115, 22, 0.3);
+}
+
+.login-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ===== Divider ===== */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 24px 0;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+.divider::before {
+    margin-right: 10px;
+}
+
+.divider::after {
+    margin-left: 10px;
+}
+
+/* ===== Footer ===== */
+.footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+    text-align: center;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+/* ===== Animación ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 </style>

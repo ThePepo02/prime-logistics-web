@@ -7,16 +7,13 @@
                 <button class="close-btn" @click="$emit('close')">×</button>
             </div>
 
-            <!-- Tabs horizontales con scroll (como en la imagen) -->
+            <!-- Tabs horizontales con scroll -->
             <div class="tabs-container">
                 <div class="tabs-wrapper">
-                    <!-- Tab Administrador -->
                     <button class="tab-button" :class="{ active: activeMainTab === 'administrador' }"
                         @click="activeMainTab = 'administrador'">
                         Administrador
                     </button>
-
-                    <!-- Todas las opciones de Contas (como en la imagen) -->
                     <button v-for="tab in contasTabs" :key="tab" class="tab-button"
                         :class="{ active: activeMainTab === tab }" @click="activeMainTab = tab">
                         {{ tab }}
@@ -26,14 +23,11 @@
 
             <!-- Contenido del modal -->
             <div class="modal-body">
-                <!-- Para el tab Administrador: mostrar el formulario de edición -->
+                <!-- Tab Administrador -->
                 <div v-if="activeMainTab === 'administrador'" class="admin-content">
-                    <!-- Información del usuario -->
                     <div class="user-info-section">
                         <div class="user-avatar">
-                            <div class="avatar-circle">
-                                {{ initials }}
-                            </div>
+                            <div class="avatar-circle">{{ initials }}</div>
                         </div>
                         <div class="user-fields">
                             <div class="field-row">
@@ -77,7 +71,6 @@
                         </div>
                     </div>
 
-                    <!-- Datos de empresa -->
                     <div class="company-section">
                         <h4>Datos de empresa</h4>
                         <div class="field-row">
@@ -96,7 +89,6 @@
                         </div>
                     </div>
 
-                    <!-- Permisos -->
                     <div class="permissions-section">
                         <h4>Permisos</h4>
                         <div class="permissions-grid">
@@ -120,7 +112,7 @@
                     </div>
                 </div>
 
-                <!-- Para los tabs de Contas: mostrar configuración de cuentas -->
+                <!-- Tabs de Contas -->
                 <div v-else class="contas-content">
                     <div class="contas-config">
                         <h4>Configuración de {{ activeMainTab }}</h4>
@@ -142,7 +134,7 @@
                 </div>
             </div>
 
-            <!-- Footer con botones -->
+            <!-- Footer -->
             <div class="modal-footer">
                 <button class="btn-danger" @click="deleteUser">Eliminar usuario</button>
                 <div class="actions-right">
@@ -164,60 +156,30 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved', 'deleted'])
 
-// Tabs principales (Administrador + todas las opciones de Contas)
 const activeMainTab = ref('administrador')
 
-// Generar todas las opciones de Contas como aparecen en la imagen
 const contasTabs = ref([
     'Contas de Pagamento',
     'Contas de Vendas',
     'Contas de Pagamentos',
-    'Contas de Vendas',
     'Contas de Pagamentos e Vendas',
-    'Contas de Pagamentos e Vendas (2)',
-    'Contas de Pagamentos e Vendas (3)',
-    'Contas de Pagamentos e Vendas (4)',
-    'Contas de Pagamentos e Vendas (5)',
-    'Contas de Pagamentos e Vendas (6)',
-    'Contas de Pagamentos e Vendas (7)',
-    'Contas de Pagamentos e Vendas (8)',
-    'Contas de Pagamentos e Vendas (9)',
-    'Contas de Pagamentos e Vendas (10)',
-    'Contas de Pagamentos e Vendas (11)',
-    'Contas de Pagamentos e Vendas (12)',
-    'Contas de Pagamentos e Vendas (13)',
-    'Contas de Pagamentos e Vendas (14)',
-    'Contas de Pagamentos e Vendas (15)',
-    'Contas de Pagamentos e Vendas (16)',
-    'Contas de Pagamentos e Vendas (17)',
-    'Contas de Pagamentos e Vendas (18)',
-    'Contas de Pagamentos e Vendas (19)',
-    'Contas de Pagamentos e Vendas (20)',
-    'Contas de Pagamentos e Vendas (21)',
-    'Contas de Pagamentos e Vendas (22)',
-    'Contas de Pagamentos e Vendas (23)',
-    'Contas de Pagamentos e Vendas (24)'
 ])
 
-// Configuración de cuentas
 const contasConfig = ref({})
 const contasLimits = ref({})
 const contasPaymentDays = ref({})
 
-// Inicializar configuraciones para cada tab
 contasTabs.value.forEach(tab => {
     contasConfig.value[tab] = false
     contasLimits.value[tab] = 0
     contasPaymentDays.value[tab] = 30
 })
 
-// Estructura del formulario
 const form = ref({
     id: null,
     name: '',
     phone: '',
     email: '',
-    email2: '',
     position: '',
     role: 'client',
     status: 'active',
@@ -232,7 +194,6 @@ const form = ref({
     }
 })
 
-// Inicializar datos cuando cambia el usuario
 watch(() => props.user, (userData) => {
     if (userData) {
         form.value = {
@@ -240,7 +201,6 @@ watch(() => props.user, (userData) => {
             name: userData.name || '',
             phone: userData.phone || '',
             email: userData.email || '',
-            email2: userData.email2 || userData.email || '',
             position: userData.position || '',
             role: userData.role || 'client',
             status: userData.status || 'active',
@@ -257,46 +217,26 @@ watch(() => props.user, (userData) => {
     }
 }, { immediate: true, deep: true })
 
-// Iniciales del avatar
 const initials = computed(() => {
     if (!form.value.name) return '?'
-    return form.value.name
-        .split(' ')
-        .map(word => word[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+    return form.value.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
 })
 
-// Guardar cambios
 const save = async () => {
     try {
         if (!form.value.name) {
             alert('El nombre completo es requerido')
             return
         }
-
-        // Preparar datos completos incluyendo configuración de cuentas
-        const fullData = {
-            ...form.value,
-            contas_config: contasConfig.value,
-            contas_limits: contasLimits.value,
-            contas_payment_days: contasPaymentDays.value
-        }
-
-        emit('saved', fullData)
+        emit('saved', { ...form.value })
     } catch (error) {
         console.error('Error al guardar:', error)
         alert('Error al guardar los cambios')
     }
 }
 
-// Eliminar usuario
 const deleteUser = async () => {
-    if (!confirm(`¿Estás seguro de que quieres eliminar a "${form.value.name}"?\nEsta acción no se puede deshacer.`)) {
-        return
-    }
-
+    if (!confirm(`¿Estás seguro de eliminar a "${form.value.name}"?`)) return
     try {
         emit('deleted', form.value.id)
         emit('close')
@@ -349,8 +289,6 @@ const deleteUser = async () => {
         font-size: 24px;
         cursor: pointer;
         color: #6c757d;
-        line-height: 1;
-        padding: 0;
         width: 30px;
         height: 30px;
         display: flex;
@@ -365,19 +303,13 @@ const deleteUser = async () => {
     }
 }
 
-/* Tabs con scroll horizontal (como en la imagen) */
 .tabs-container {
     border-bottom: 1px solid #e9ecef;
     background: #f8f9fa;
     overflow-x: auto;
-    white-space: nowrap;
 
     &::-webkit-scrollbar {
         height: 4px;
-    }
-
-    &::-webkit-scrollbar-track {
-        background: #e9ecef;
     }
 
     &::-webkit-scrollbar-thumb {
@@ -399,7 +331,6 @@ const deleteUser = async () => {
     font-size: 13px;
     font-weight: 500;
     color: #6c757d;
-    transition: all 0.2s;
     border-bottom: 2px solid transparent;
     white-space: nowrap;
 
@@ -420,7 +351,6 @@ const deleteUser = async () => {
     flex: 1;
 }
 
-/* Contenido del Administrador */
 .admin-content {
     display: flex;
     flex-direction: column;
@@ -432,10 +362,6 @@ const deleteUser = async () => {
     gap: 24px;
     padding-bottom: 20px;
     border-bottom: 1px solid #e9ecef;
-}
-
-.user-avatar {
-    flex-shrink: 0;
 }
 
 .avatar-circle {
@@ -474,7 +400,6 @@ const deleteUser = async () => {
         font-weight: 500;
         color: #495057;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
     }
 
     input,
@@ -483,7 +408,6 @@ const deleteUser = async () => {
         border: 1px solid #dee2e6;
         border-radius: 6px;
         font-size: 14px;
-        transition: all 0.2s;
 
         &:focus {
             outline: none;
@@ -509,9 +433,18 @@ const deleteUser = async () => {
     gap: 12px;
 }
 
-/* Contenido de Contas */
-.contas-content {
-    padding: 8px 0;
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+
+    input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
 }
 
 .contas-config {
@@ -529,21 +462,6 @@ const deleteUser = async () => {
     gap: 20px;
 }
 
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    font-size: 14px;
-
-    input {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-    }
-}
-
-/* Modal Footer */
 .modal-footer {
     display: flex;
     justify-content: space-between;
@@ -567,7 +485,6 @@ const deleteUser = async () => {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    transition: background 0.2s;
 
     &:hover {
         background: #e96b0a;
@@ -582,11 +499,9 @@ const deleteUser = async () => {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    transition: all 0.2s;
 
     &:hover {
         background: #f8f9fa;
-        border-color: #adb5bd;
     }
 }
 
@@ -598,46 +513,10 @@ const deleteUser = async () => {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    transition: all 0.2s;
 
     &:hover {
         background: #dc3545;
         color: white;
-    }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .user-info-section {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .field-row {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .permissions-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .modal-footer {
-        flex-direction: column-reverse;
-        gap: 12px;
-
-        .btn-danger {
-            width: 100%;
-        }
-
-        .actions-right {
-            width: 100%;
-
-            button {
-                flex: 1;
-            }
-        }
     }
 }
 </style>

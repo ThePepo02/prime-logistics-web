@@ -19,11 +19,7 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-<<<<<<< HEAD
-            '@': '/resources',
-=======
             '@/services/dashboardService': '/images',
->>>>>>> Operador.chatbot
         },
     },
 });
