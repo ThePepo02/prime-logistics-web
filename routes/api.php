@@ -97,6 +97,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/clientes', [ClientesController::class, 'index']);
     // GET /api/clientes → lista de clientes para la página Clientes
 
+    Route::post('/clientes', [ClientesController::class, 'store']);
+    // POST /api/clientes → crear nuevo cliente
+
+    Route::put('/clientes/{id}/estado', [ClientesController::class, 'toggleEstado']);
+    // PUT /api/clientes/1/estado → activa o desactiva un cliente
+
+    Route::put('/clientes/{id}', [ClientesController::class, 'update']);
+    // PUT /api/clientes/1 → editar un cliente existente
+
+    Route::delete('/clientes/{id}', [ClientesController::class, 'destroy']);
+    // DELETE /api/clientes/1 → eliminar un cliente
+
     // ── OPERADOR: OFERTAS COMERCIALES ───────────────────────────
     Route::get('/ofertes', [OfertaController::class, 'index']);
     // GET /api/ofertes → lista paginada de ofertas para la tabla
@@ -118,6 +130,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tipus-transports', [TipusTransportController::class, 'index']);
     // GET /api/tipus-transports → tipos de transporte (Marítimo, Aéreo, Terrestre)
     // Lo usan OfertasComerciales.vue y PasoEspecificaciones.vue
+
+    Route::get('/ports', [OfertaController::class, 'ports']);
+    // GET /api/ports → lista de puertos para los selects
+
+    Route::get('/tipus-carrega', [OfertaController::class, 'tipusCarrega']);
+    // GET /api/tipus-carrega → tipos de carga para el select
+
+    Route::get('/transportistes', [OfertaController::class, 'transportistes']);
+    // GET /api/transportistes → agentes de transporte para el select
+
+    Route::get('/tipus-incoterms', [OfertaController::class, 'tipusIncoterm']);
+    // GET /api/tipus-incoterms → incoterms para el select
 
     // ── OPERADOR: OPERACIONES ────────────────────────────────────
     Route::get('/operaciones/stats', [OperacionesController::class, 'stats']);

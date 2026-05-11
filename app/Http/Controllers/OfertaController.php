@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Oferta;
 use App\Models\Usuarios;
 use Illuminate\Http\Request;
@@ -55,6 +56,7 @@ class OfertaController extends Controller
             'data_validessa_inicial' => $request->data_validessa_inicial,
             'data_validessa_fina' => $request->data_validessa_fina,
             'estat_oferta_id' => $request->estat_oferta_id,
+            'tipus_validacio_id' => $request->tipus_validacio_id ?? 1, // Valor por defecto si no se envía
             'data_creacio' => now(),
         ]);
 
@@ -63,4 +65,35 @@ class OfertaController extends Controller
             'oferta' => $oferta,
         ], 201); // Devuelve 201 Created
     }
+
+        // GET /api/ports — trae los puertos para los selects
+        public function ports()
+        {
+            $ports = \App\Models\Port::select('id', 'nom')->get();
+            return response()->json($ports);
+        }
+
+        // GET /api/tipus-carrega — trae los tipos de carga para el select
+        public function tipusCarrega()
+        {
+            $tipus = \App\Models\TipusCarrega::select('id', 'tipus')->get();
+            return response()->json($tipus);
+        }
+
+        // GET /api/transportistes — agentes de transporte para el select
+        public function transportistes()
+        {
+            $data = \App\Models\Transportista::select('id', 'nom')->get();
+            return response()->json($data);
+        }
+
+        // GET /api/tipus-incoterms — incoterms para el select
+        public function tipusIncoterm()
+        {
+            $data = \App\Models\TipusIncoterm::select('id', 'codi', 'nom')->get();
+            return response()->json($data);
+        }
+
+
+
 }

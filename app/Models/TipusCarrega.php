@@ -10,6 +10,7 @@ class TipusCarrega extends Model
 {
     protected $table = 'tipus_carrega';
     public $timestamps = false;
+    protected $fillable = ['id', 'tipus'];
 
     /**
      * Get the ofertes that owns the TipusCarrega

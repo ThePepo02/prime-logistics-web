@@ -24,14 +24,15 @@
 
         <!-- Paso 1 — Identificación -->
         <PasoIdentificacion v-if="pasoActual === 1" :datos="formulario" :clientes="clientes" :errors="errors"
-            @actualizar="actualizarDatos" />
+            @actualizar="actualizarDatos" @limpiarError="(campo) => delete errors[campo]" />
 
         <!-- Paso 2 — Especificaciones -->
-        <PasoEspecificaciones v-if="pasoActual === 2" :datos="formulario" :transports="transports" :errors="errors"
-            @actualizar="actualizarDatos" />
+        <PasoEspecificaciones v-if="pasoActual === 2" :datos="formulario" :transports="transports"
+            :tipusCarrega="tipusCarrega" :errors="errors" @actualizar="actualizarDatos" />
 
         <!-- Paso 3 — Ruta y Cierre -->
-        <PasoRutaCierre v-if="pasoActual === 3" :datos="formulario" :errors="errors" @actualizar="actualizarDatos" />
+        <PasoRutaCierre v-if="pasoActual === 3" :datos="formulario" :ports="ports" :transportistes="transportistes" :tipusIncoterms="tipusIncoterms" :errors="errors"
+            @actualizar="actualizarDatos" />
 
         <!-- Botones de navegación -->
         <NavegacionPasos :pasoActual="pasoActual" :totalPasos="pasos.length" :guardando="guardando"
@@ -50,10 +51,10 @@
 <script>
 import { ref, reactive, onMounted } from 'vue'
 import axios from '../../../axios.js' // importar nuestro axios configurado
-import PasoIdentificacion   from './PasoIdentificacion.vue'
+import PasoIdentificacion from './PasoIdentificacion.vue'
 import PasoEspecificaciones from './PasoEspecificaciones.vue'
-import PasoRutaCierre       from './PasoRutaCierre.vue'
-import NavegacionPasos      from './NavegacionPasos.vue'
+import PasoRutaCierre from './PasoRutaCierre.vue'
+import NavegacionPasos from './NavegacionPasos.vue'
 
 export default {
     name: 'NuevoPedido',
@@ -72,6 +73,10 @@ export default {
         const guardando = ref(false)
         const clientes = ref([])
         const transports = ref([])
+        const ports = ref([])
+        const tipusCarrega = ref([])
+        const transportistes = ref([])
+        const tipusIncoterms = ref([])
 
         // Todos los datos del formulario en un solo objeto reactivo
         const formulario = reactive({
@@ -103,7 +108,7 @@ export default {
         // Mensaje de feedback para el usuario
         const mensaje = reactive({ texto: '', tipo: '' })
 
-        // --- MÉTODOS ---
+        // --- MÉTODOS DE CARGA ---
 
         // Carga clientes con rol_id = 3 desde la API y los paso al hijo para el select
         async function carregarClientes() {
@@ -124,6 +129,43 @@ export default {
                 console.error('Error al cargar tipos de transport:', error)
             }
         }
+
+        // Carga puertos desde la API y los paso al hijo para el select
+        async function carregarPorts() {
+            try {
+                const res = await axios.get('/ports')
+                ports.value = res.data
+            } catch (error) {
+                console.error('Error al cargar puertos:', error)
+            }
+        }
+        async function carregarTipusCarrega() {
+            try {
+                const res = await axios.get('/tipus-carrega')
+                tipusCarrega.value = res.data
+            } catch (error) {
+                console.error('Error al cargar tipos de carga:', error)
+            }
+        }
+
+        async function carregarTransportistes() {
+            try {
+                const res = await axios.get('/transportistes')
+                transportistes.value = res.data
+            } catch (error) {
+                console.error('Error al cargar transportistes:', error)
+            }
+        }
+
+        async function carregarTipusIncoterms() {
+            try {
+                const res = await axios.get('/tipus-incoterms')
+                tipusIncoterms.value = res.data
+            } catch (error) {
+                console.error('Error al cargar incoterms:', error)
+            }
+        }
+
 
         // Recibe cambios del hijo y los guarda en formulario
         function actualizarDatos(nuevosDatos) {
@@ -170,7 +212,7 @@ export default {
                 mensaje.tipo = 'ok'
 
                 setTimeout(() => {
-                    emit('cambiarPagina','ofertas')
+                    emit('cambiarPagina', 'ofertas')
                 }, 1500)
 
             } catch (e) {
@@ -198,9 +240,13 @@ export default {
         onMounted(() => {
             carregarClientes()
             carregarTransports()
+            carregarPorts()
+            carregarTipusCarrega()
+            carregarTransportistes()
+            carregarTipusIncoterms()
         })
 
-        return { pasoActual, pasos, formulario, errors, mensaje, clientes, transports, guardando, actualizarDatos, pasoSiguiente, pasoAnterior, guardarBorrador, enviarPedido }
+        return { pasoActual, pasos, formulario, errors, mensaje, clientes, transports, ports, tipusCarrega,transportistes, tipusIncoterms, guardando, actualizarDatos, pasoSiguiente, pasoAnterior, guardarBorrador, enviarPedido }
     }
 }
 </script>

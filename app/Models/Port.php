@@ -12,6 +12,7 @@ class Port extends Model
 {
     protected $table = 'ports';
     public $timestamps = false;
+    protected $fillable = ['id', 'nom', 'ciutat_id'];
 
     /**
      * The ofertes that belong to the Port

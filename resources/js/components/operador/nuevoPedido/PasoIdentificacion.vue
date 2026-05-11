@@ -24,12 +24,11 @@
             <!-- Cliente — select con los clientes de la API -->
             <div>
                 <label class="text-xs text-gray-500 mb-1 block">Cliente / Razón Social *</label>
-                <select
-                    :value="datos.client_id"
-                    @change="emitir('client_id', $event.target.value)"
-                    class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    :class="errors.client_id ? 'border-red-400' : 'border-gray-200'"
-                >
+            <select
+                v-model="local.client_id"
+                class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                :class="errors.client_id ? 'border-red-400' : 'border-gray-200'"
+            >
                     <option value="">Selecciona un cliente</option>
                     <option v-for="c in clientes" :key="c.id" :value="c.id">
                         {{ c.nom }} {{ c.cognoms }} — {{ c.empresa }}
@@ -45,13 +44,22 @@
                 <input
                     type="text"
                     placeholder="Ej: TSA-2025-001"
-                    :value="datos.comentaris"
-                    @input="emitir('comentaris', $event.target.value)"
+                    v-model="local.comentaris"
                     class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                 />
             </div>
-
         </div>
+
+        <!-- Botón guardar paso -->
+                <div class="flex justify-end mt-4">
+                    <button
+                        @click="guardarPaso"
+                        class="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+                    >
+                        Guardar datos del paso ✓
+                    </button>
+                </div>
+
     </div>
 </template>
 
@@ -59,22 +67,36 @@
 export default {
     name: 'PasoIdentificacion',
 
-    // Props — datos que recibe del padre, no se modifican aquí
     props: {
-        datos:    { type: Object, required: true }, // formulario completo
-        clientes: { type: Array,  required: true }, // lista de clientes de la API
-        errors:   { type: Object, required: true }, // errores de validación
+        datos:    { type: Object, required: true },
+        clientes: { type: Array,  required: true },
+        errors:   { type: Object, required: true },
     },
 
-    setup(props, { emit }) {
-
-        // Avisa al padre qué campo cambió y con qué valor
-        // El padre es quien actualiza el formulario — el hijo solo avisa
-        function emitir(campo, valor) {
-            emit('actualizar', { [campo]: valor })
+    // local guarda una copia local de los datos mientras el usuario rellena
+    // solo se envían al padre cuando pulsa el botón "Guardar datos"
+    data() {
+        return {
+            local: {
+                client_id: this.datos.client_id,
+                comentaris: this.datos.comentaris,
+            }
         }
+    },
 
-        return { emitir }
+    // Cuando el usuario selecciona un cliente, limpia el error de ese campo
+        watch: {
+            'local.client_id'(val) {
+                if (val) this.$emit('limpiarError', 'client_id')
+            }
+        },
+
+
+    methods: {
+        // Se llama al pulsar el botón — envía los datos al padre
+        guardarPaso() {
+            this.$emit('actualizar', { ...this.local })
+        }
     }
 }
 </script>
