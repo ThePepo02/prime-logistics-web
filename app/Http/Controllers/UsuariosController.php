@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UsuariosResource;
 use App\Models\Usuarios;
 use Illuminate\Http\Request;
 
@@ -12,23 +13,23 @@ class UsuariosController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $usuarios = Usuarios::all();
+        return UsuariosResource::collection($usuarios);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Usuarios $usuarios)
     {
-        //
+        $usuarios->correu = $request->correu;
+        $usuarios->contrasenya = $request->contrasenya;
+        $usuarios->nom = $request->nom;
+        $usuarios->cognoms = $request->cognoms;
+        $usuarios->empresa = $request->empresa;
+
+        $usuarios->save();
+        return new UsuariosResource($usuarios);
     }
 
     /**
@@ -36,15 +37,8 @@ class UsuariosController extends Controller
      */
     public function show(Usuarios $usuarios)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Usuarios $usuarios)
-    {
-        //
+        $usuarios = Usuarios::find($usuarios->id);
+        return new UsuariosResource($usuarios);
     }
 
     /**
@@ -52,7 +46,13 @@ class UsuariosController extends Controller
      */
     public function update(Request $request, Usuarios $usuarios)
     {
-        //
+        $usuarios->contrasenya = $request->contrasenya;
+        $usuarios->nom = $request->nom;
+        $usuarios->cognoms = $request->cognoms;
+        $usuarios->empresa = $request->empresa;
+
+        $usuarios->save();
+        return new UsuariosResource($usuarios);
     }
 
     /**
@@ -60,6 +60,32 @@ class UsuariosController extends Controller
      */
     public function destroy(Usuarios $usuarios)
     {
-        //
+        $usuarios = Usuarios::find($usuarios->id);
+
+         // Prevenir eliminación del admin
+            if (strtolower($usuarios->name) === 'admin') {
+                return response()->json([
+                    'error' => 'No se puede eliminar el usuario administrador principal'
+                ], 403);
+            }
+
+        $usuarios->delete();
+        return new UsuariosResource($usuarios);
+    }
+
+        /**
+     * Get user statistics
+     */
+    public function stats()
+    {
+        $total = Usuarios::count();
+        $activos = Usuarios::where('activo', true)->count();
+        $desactivados = Usuarios::where('activo', false)->count();
+        
+        return response()->json([
+            'total' => $total,
+            'activos' => $activos,
+            'desactivados' => $desactivados
+        ]);
     }
 }

@@ -21,13 +21,13 @@
 
         <!-- Correu -->
         <div class="mb-4">
-            <input v-model="form.correu" type="email" placeholder="Correo electrónico"
+            <input v-model="correu" type="email" placeholder="Correo electrónico"
                 class="border border-gray-300 text-gray-900 placeholder-gray-400 rounded-lg block w-full p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
         </div>
 
         <!-- Contrasenya -->
         <div class="mb-2">
-            <input v-model="form.contrasenya" type="password" placeholder="Contraseña"
+            <input v-model="contrasenya" type="password" placeholder="Contraseña"
                 class="border border-gray-300 text-gray-900 placeholder-gray-400 rounded-lg block w-full p-4 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
         </div>
 
@@ -53,63 +53,60 @@
     </div>
 </template>
 
-<script>
-export default {
-    name: 'LoginComponents',
-    data() {
-        return {
-            logoUrl: window.location.origin + '/images/Prime-Logistics.png',
-            form: {
-                correu: '',
-                contrasenya: '',
+<script setup>
+import { ref } from 'vue'
+
+// Estado
+const logoUrl = window.location.origin + '/images/Prime-Logistics.png'
+const correu = ref('')
+const contrasenya = ref('')
+const error = ref(null)
+const loading = ref(false)
+
+// Función login
+const handleLogin = async () => {
+    error.value = null
+    loading.value = true
+
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             },
-            error: null,
-            loading: false,
-        };
-    },
-    methods: {
-        async handleLogin() {
-            this.error = null;
-            this.loading = true;
+            body: JSON.stringify({
+                correu: correu.value,
+                contrasenya: contrasenya.value,
+            }),
+        })
 
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    },
-                    body: JSON.stringify(this.form),
-                });
+        const data = await response.json()
 
-                const data = await response.json();
+        if (!response.ok) {
+            error.value = data.message || 'Error al iniciar sesión'
+            return
+        }
 
-                if (!response.ok) {
-                    this.error = data.message || 'Error al iniciar sessió';
-                    return;
-                }
+        // Guardar en localStorage
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('usuario', JSON.stringify(data.user))
 
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                const rolId = data.user.rol_id;
+        // Redirigir según rol
+        const rolId = data.user.rol_id
+        if (rolId == 1) window.location.href = '/admin'
+        else if (rolId == 2) window.location.href = '/operador'
+        else if (rolId == 3) window.location.href = '/cliente'
+        else error.value = 'Rol de usuario desconocido'
 
-                if (rolId == 1) {
-                    window.location.href = '/dashboard';
-                } else if (rolId == 2) {
-                    window.location.href = '/operador';
-                } else if (rolId == 3) {
-                    window.location.href = '/cliente';
-                } else {
-                    this.error = 'Rol de usuario desconocido';
-                }
-
-            } catch (e) {
-                this.error = 'Error de connexió amb el servidor';
-            } finally {
-                this.loading = false;
-            }
-        },
-    },
-};
+    } catch (e) {
+        error.value = 'Error de conexión con el servidor'
+    } finally {
+        loading.value = false
+    }
+}
 </script>
+<style scoped>
+/* Estilos simples - apenas necesarios */
+</style>

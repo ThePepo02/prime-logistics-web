@@ -1,13 +1,17 @@
 <?php
 
+use App\Http\Controllers\Api\DatosMaestrosController;
+use App\Http\Controllers\Api\EmpresaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientesController;
+use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\DashboardOperadorController;
 use App\Http\Controllers\EstatOfertaController;
+use App\Http\Controllers\NotificacionsController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\OperacionesController;
 use App\Http\Controllers\TipusTransportController;
-use App\Http\Controllers\NotificacionsController;
+use App\Http\Controllers\UsuariosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +23,34 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    //Gestion Usuarios Administrador
+    //Datos del administrador (dashboard, usuarios, datos maestros)
+
+    //Dashboard Admin
+    Route::get('/data', [DashboardAdminController::class, 'getDashboardData']);
+    Route::get('/advanced-stats', [DashboardAdminController::class, 'getAdvancedStats']);
+
+    Route::post('/export', [DashboardAdminController::class, 'exportDashboardData']);
+    Route::get('/export', [DashboardAdminController::class, 'exportDashboardData']);
+
+    Route::get('/notifications', [DashboardAdminController::class, 'getNotifications']);
+    Route::put('/notifications/{id}/read', [DashboardAdminController::class, 'markNotificationAsRead']);
+
+    //Gestion de usuarios - admin
+    Route::get('/usuarios', [UsuariosController::class, 'index']);
+    Route::get('/usuarios/stats', [UsuariosController::class, 'stats']);
+    Route::post('/usuarios', [UsuariosController::class, 'store']);
+    Route::get('/usuarios/{id}', [UsuariosController::class, 'show']);
+    Route::put('/usuarios/{id}', [UsuariosController::class, 'update']);
+    Route::delete('/usuarios/{id}', [UsuariosController::class, 'destroy']);
+
+    //Datos Maestros Admin
+    // Dashboard datos maestros
+    Route::get('/datos-maestros/dashboard', [DatosMaestrosController::class, 'getDashboardData']);
+    Route::get('/datos-maestros/estadisticas', [DatosMaestrosController::class, 'getEstadisticas']);
+    
+    // CRUDs
+    Route::apiResource('empresas', EmpresaController::class);
+
 
     // Dashboard Operador
     Route::get('/dashboard/stats', [DashboardOperadorController::class, 'stats']);
@@ -38,12 +69,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tipus-transports', [TipusTransportController::class, 'index']);
 
     // Operaciones
-    Route::get('/operaciones/stats',       [OperacionesController::class, 'stats']);
+    Route::get('/operaciones/stats', [OperacionesController::class, 'stats']);
     Route::get('/operaciones/distribucio', [OperacionesController::class, 'distribucio']);
-    Route::get('/operaciones/operacions',  [OperacionesController::class, 'operacions']);
+    Route::get('/operaciones/operacions', [OperacionesController::class, 'operacions']);
 
     // NOTIFICACIONS
-    Route::get('/notificacions',                [NotificacionsController::class, 'index']);
-    Route::put('/notificacions/marcar-totes',   [NotificacionsController::class, 'marcarTotes']);
-    Route::put('/notificacions/{id}/llegir',    [NotificacionsController::class, 'marcarLlegida']);
+    Route::get('/notificacions', [NotificacionsController::class, 'index']);
+    Route::put('/notificacions/marcar-totes', [NotificacionsController::class, 'marcarTotes']);
+    Route::put('/notificacions/{id}/llegir', [NotificacionsController::class, 'marcarLlegida']);
 });

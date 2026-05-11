@@ -1,584 +1,852 @@
 <template>
-    <div class="ofertas-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo">Admin</div>
-            <nav class="nav-menu">
-                <div class="nav-section">
-                    <div class="nav-title">Información</div>
-                    <ul>
-                        <li><a href="#">Administradores</a></li>
-                        <li><a href="#">Dashboard</a></li>
-                        <li><a href="#">Gestión de Usuarios</a></li>
-                    </ul>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-title">Comunicaciones</div>
-                    <ul>
-                        <li><a href="#" class="active">Todas las Ofertas</a></li>
-                        <li><a href="#">Operaciones Activas</a></li>
-                    </ul>
-                </div>
-            </nav>
+    <div class="todas-ofertas-container">
+        <!-- HEADER con título -->
+        <div class="page-header">
+            <h1>Todas las ofertas admin</h1>
         </div>
 
-        <!-- Contenido principal -->
-        <div class="main-content">
-            <div class="header">
-                <h1>TODAS LAS OFERTAS</h1>
-                <div class="info-badge">Mostrando {{ paginationInfo.from }}-{{ paginationInfo.to }} de {{ totalItems }}
-                    ofertas</div>
+        <!-- TABS horizontales (exactamente como en la imagen) -->
+        <div class="tabs-container">
+            <div class="tabs-wrapper">
+                <button v-for="tab in tabs" :key="tab" class="tab-button" :class="{ active: activeTab === tab }"
+                    @click="activeTab = tab">
+                    {{ tab }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div v-if="mensajeError" class="alert error">
+            {{ mensajeError }}
+            <button @click="mensajeError = null">×</button>
+        </div>
+
+        <!-- TARJETAS DE ESTADÍSTICAS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ formatNumber(stats.total_ofertas) }}</div>
+                <div class="stat-label">Total de ofertas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ formatNumber(stats.todas_ofertas) }}</div>
+                <div class="stat-label">Todas las ofertas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ formatNumber(stats.completadas) }}</div>
+                <div class="stat-label">Todas las ofertas completadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ formatNumber(stats.pendientes) }}</div>
+                <div class="stat-label">Todas las ofertas pendientes</div>
+            </div>
+        </div>
+
+        <!-- TABLA DE OFERTAS -->
+        <div class="table-container">
+            <div class="table-header">
+                <h2>Ofertas</h2>
+                <button @click="cargarOfertas" class="btn-refresh" :disabled="cargando">
+                    {{ cargando ? 'Cargando...' : '⟳ Actualizar' }}
+                </button>
             </div>
 
-            <!-- Filtros -->
-            <div class="filters-bar">
-                <input v-model="filters.search" type="text" placeholder="Buscar por ID, cliente, ruta..."
-                    class="search-input" />
-                <select v-model="filters.estado" class="filter-select">
-                    <option value="">Todos los estados</option>
-                    <option value="EN TRANSITO">En Tránsito</option>
-                    <option value="ACEPTADA">Aceptada</option>
-                    <option value="COMPLETADA">Completada</option>
-                    <option value="RECHAZADA">Rechazada</option>
-                </select>
+            <!-- Loading -->
+            <div v-if="cargando && !ofertas.length" class="loading-state">
+                <div class="spinner"></div>
+                <p>Cargando ofertas...</p>
             </div>
 
             <!-- Tabla -->
-            <div class="table-wrapper">
+            <div v-else class="table-responsive">
                 <table class="ofertas-table">
                     <thead>
                         <tr>
-                            <th @click="sortBy('id')" class="sortable">
-                                ID Oferta
-                                <span class="sort-icon">{{ getSortIcon('id') }}</span>
-                            </th>
-                            <th @click="sortBy('cliente')" class="sortable">
-                                Cliente
-                                <span class="sort-icon">{{ getSortIcon('cliente') }}</span>
-                            </th>
-                            <th>Empresa</th>
-                            <th>Modo</th>
-                            <th>Ruta</th>
-                            <th @click="sortBy('fecha')" class="sortable">
-                                Fecha
-                                <span class="sort-icon">{{ getSortIcon('fecha') }}</span>
-                            </th>
-                            <th>Estado</th>
-                            <th>Acondicionado</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Valor unitario</th>
+                            <th>Valor total</th>
                             <th>Acciones</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th><input v-model="filters.nombre" placeholder="Filtrar nombre..." class="filter-input"
+                                    @input="handleFilter"></th>
+                            <th><input v-model="filters.descripcion" placeholder="Filtrar descripción..."
+                                    class="filter-input" @input="handleFilter"></th>
+                            <th><input v-model="filters.valor_unitario" placeholder="Filtrar valor..."
+                                    class="filter-input" @input="handleFilter"></th>
+                            <th><input v-model="filters.valor_total" placeholder="Filtrar valor..." class="filter-input"
+                                    @input="handleFilter"></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="oferta in paginatedOfertas" :key="oferta.id">
-                            <td class="id-cell">{{ oferta.id }}</td>
-                            <td>{{ oferta.cliente }}</td>
-                            <td>{{ oferta.empresa }}</td>
-                            <td><span class="modo-badge">{{ oferta.modo }}</span></td>
-                            <td>{{ oferta.ruta }}</td>
-                            <td>{{ formatDate(oferta.fecha) }}</td>
-                            <td>
-                                <span :class="['estado-badge', getEstadoClass(oferta.estado)]">
-                                    {{ oferta.estado }}
-                                </span>
-                            </td>
-                            <td>
-                                <button class="action-btn view-btn" @click="verAcondicionado(oferta)">
-                                    Ver
+                        <tr v-for="oferta in ofertasFiltradas" :key="oferta.id">
+                            <td data-label="Nombre">{{ oferta.nombre }}</td>
+                            <td data-label="Descripción">{{ oferta.descripcion }}</td>
+                            <td data-label="Valor unitario">{{ formatMoney(oferta.valor_unitario) }}</td>
+                            <td data-label="Valor total">{{ formatMoney(oferta.valor_total) }}</td>
+                            <td data-label="Acciones" class="acciones-cell">
+                                <button @click="verDetalles(oferta)" class="btn-accion btn-ver" title="Ver detalles">
+                                    👁️ Ver detalles
+                                </button>
+                                <button @click="editarOferta(oferta)" class="btn-accion btn-editar" title="Editar">
+                                    ✏️ Editar
+                                </button>
+                                <button @click="eliminarOferta(oferta.id)" class="btn-accion btn-eliminar"
+                                    title="Eliminar">
+                                    🗑️ Eliminar
                                 </button>
                             </td>
-                            <td>
-                                <button class="action-btn edit-btn" @click="editarOferta(oferta)">
-                                    Editar
-                                </button>
+                        </tr>
+                        <tr v-if="ofertasFiltradas.length === 0 && !cargando">
+                            <td colspan="5" class="empty-state">
+                                No se encontraron ofertas
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            <!-- Paginación -->
-            <div class="pagination">
-                <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">
-                    Anterior
-                </button>
-                <button v-for="page in visiblePages" :key="page" :class="['page-btn', { active: page === currentPage }]"
-                    @click="goToPage(page)">
-                    {{ page }}
-                </button>
-                <button class="page-btn" :disabled="currentPage === totalPages" @click="currentPage++">
-                    Siguiente
-                </button>
+        <!-- FOOTER (exactamente como en la imagen) -->
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="#">Navegación</a>
+                <a href="#">Inicio</a>
+                <a href="#">Contacto</a>
+                <a href="#">Sobre nosotros</a>
+                <a href="#">Página principal</a>
+            </div>
+            <div class="footer-copy">
+                © {{ currentYear }} - Sistema de Gestión de Ofertas
+            </div>
+        </footer>
+
+        <!-- MODAL DETALLES -->
+        <div v-if="modalDetallesVisible" class="modal" @click.self="modalDetallesVisible = false">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Detalles de la oferta</h3>
+                    <button class="modal-close" @click="modalDetallesVisible = false">×</button>
+                </div>
+                <div class="modal-body" v-if="ofertaSeleccionada">
+                    <p><strong>Nombre:</strong> {{ ofertaSeleccionada.nombre }}</p>
+                    <p><strong>Descripción:</strong> {{ ofertaSeleccionada.descripcion }}</p>
+                    <p><strong>Valor unitario:</strong> {{ formatMoney(ofertaSeleccionada.valor_unitario) }}</p>
+                    <p><strong>Valor total:</strong> {{ formatMoney(ofertaSeleccionada.valor_total) }}</p>
+                    <p><strong>Estado:</strong> {{ ofertaSeleccionada.estado || 'Activa' }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button @click="modalDetallesVisible = false" class="btn-cerrar">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL EDITAR -->
+        <div v-if="modalEditarVisible" class="modal" @click.self="modalEditarVisible = false">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Editar oferta</h3>
+                    <button class="modal-close" @click="modalEditarVisible = false">×</button>
+                </div>
+                <div class="modal-body" v-if="ofertaEditando">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input v-model="ofertaEditando.nombre" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea v-model="ofertaEditando.descripcion" class="form-input" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor unitario</label>
+                        <input type="number" v-model="ofertaEditando.valor_unitario" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Valor total</label>
+                        <input type="number" v-model="ofertaEditando.valor_total" class="form-input">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button @click="guardarEdicion" class="btn-guardar">Guardar cambios</button>
+                    <button @click="modalEditarVisible = false" class="btn-cancelar">Cancelar</button>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 // Estado
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
-const totalItems = ref(4200)
-const sortField = ref('id')
-const sortOrder = ref('asc')
-const filters = ref({
-    search: '',
-    estado: ''
-})
+const cargando = ref(false)
+const mensajeError = ref(null)
+const ofertas = ref([])
 
-// Datos
-const ofertas = ref([
-    {
-        id: 'OC-2024-021',
-        cliente: 'María García',
-        empresa: 'Testi SA',
-        modo: 'Marlimo',
-        ruta: 'Valencia → Shanghai',
-        fecha: '2025-01-10',
-        estado: 'EN TRANSITO'
-    },
-    {
-        id: 'OC-2024-020',
-        cliente: 'Pedro López',
-        empresa: 'Moda Express SL',
-        modo: 'Adeno',
-        ruta: 'Barcelona → Nueva York',
-        fecha: '2025-01-08',
-        estado: 'ACEPTADA'
-    },
-    {
-        id: 'OC-2024-019',
-        cliente: 'María García',
-        empresa: 'Testi SA',
-        modo: 'Adeno',
-        ruta: 'Madrid → Miami',
-        fecha: '2025-01-02',
-        estado: 'ACEPTADA'
-    },
-    {
-        id: 'OC-2024-018',
-        cliente: 'Sara Ruiz',
-        empresa: 'Import Global',
-        modo: 'Temiste',
-        ruta: 'Madrid → Lisboa',
-        fecha: '2024-12-26',
-        estado: 'COMPLETADA'
-    },
-    {
-        id: 'OC-2024-017',
-        cliente: 'Pedro López',
-        empresa: 'Moda Express SL',
-        modo: 'Marlimo',
-        ruta: 'Valencia → Rostredum',
-        fecha: '2024-12-22',
-        estado: 'COMPLETADA'
-    },
-    {
-        id: 'OC-2024-016',
-        cliente: 'Laura Gómez',
-        empresa: 'Tech Imports SA',
-        modo: 'Adeno',
-        ruta: 'Bilbao → Chicago',
-        fecha: '2024-12-16',
-        estado: 'RECHAZADA'
-    },
-    {
-        id: 'OC-2024-015',
-        cliente: 'María García',
-        empresa: 'Testi SA',
-        modo: 'Marlimo',
-        ruta: 'Bilbao → Rotterdam',
-        fecha: '2024-12-15',
-        estado: 'RECHAZADA'
-    },
-    {
-        id: 'OC-2024-014',
-        cliente: 'Sara Ruiz',
-        empresa: 'Import Global',
-        modo: 'Temiste',
-        ruta: 'Barcelona → Lyon',
-        fecha: '2024-12-10',
-        estado: 'COMPLETADA'
-    },
-    {
-        id: 'OC-2024-013',
-        cliente: 'Pedro López',
-        empresa: 'Moda Express SL',
-        modo: 'Marlimo',
-        ruta: 'Valencia → Singapore',
-        fecha: '2024-12-05',
-        estado: 'COMPLETADA'
-    },
-    {
-        id: 'OC-2024-012',
-        cliente: 'María García',
-        empresa: 'Testi SA',
-        modo: 'Adeno',
-        ruta: 'Valencia → Nueva York',
-        fecha: '2024-12-01',
-        estado: 'COMPLETADA'
-    }
+// Tabs (exactamente como en la imagen)
+const tabs = ref([
+    'Administración', 'Servicios', 'Contratación', 'Recursos Humanos',
+    'Finanzas', 'Marketing', 'Tecnología', 'Gestión de Proyectos',
+    'Informática', 'Comunicaciones', 'Contabilidad', 'Seguridad y Salud',
+    'Medio Ambiente', 'Desarrollo Sostenible', 'Empresarial', 'Pymes', 'Otros'
 ])
+const activeTab = ref('Administración')
 
-// Computed
-const filteredOfertas = computed(() => {
-    let result = [...ofertas.value]
+// Estadísticas
+const stats = ref({
+    total_ofertas: 4200,
+    todas_ofertas: 3308,
+    completadas: 35,
+    pendientes: 284
+})
 
-    // Búsqueda
-    if (filters.value.search) {
-        const term = filters.value.search.toLowerCase()
-        result = result.filter(o =>
-            o.id.toLowerCase().includes(term) ||
-            o.cliente.toLowerCase().includes(term) ||
-            o.ruta.toLowerCase().includes(term)
-        )
-    }
+// Filtros para la tabla
+const filters = ref({
+    nombre: '',
+    descripcion: '',
+    valor_unitario: '',
+    valor_total: ''
+})
 
-    // Filtro por estado
-    if (filters.value.estado) {
-        result = result.filter(o => o.estado === filters.value.estado)
-    }
+// Modales
+const modalDetallesVisible = ref(false)
+const modalEditarVisible = ref(false)
+const ofertaSeleccionada = ref(null)
+const ofertaEditando = ref(null)
 
-    // Ordenamiento
-    result.sort((a, b) => {
-        let aVal = a[sortField.value]
-        let bVal = b[sortField.value]
+// URL de la API
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
 
-        if (sortField.value === 'fecha') {
-            aVal = new Date(aVal)
-            bVal = new Date(bVal)
-        }
+// Año actual para el footer
+const currentYear = ref(new Date().getFullYear())
 
-        if (aVal < bVal) return sortOrder.value === 'asc' ? -1 : 1
-        if (aVal > bVal) return sortOrder.value === 'asc' ? 1 : -1
-        return 0
+// Ofertas filtradas
+const ofertasFiltradas = computed(() => {
+    if (!ofertas.value.length) return []
+
+    return ofertas.value.filter(oferta => {
+        const matchNombre = oferta.nombre?.toLowerCase().includes(filters.value.nombre.toLowerCase())
+        const matchDescripcion = oferta.descripcion?.toLowerCase().includes(filters.value.descripcion.toLowerCase())
+        const matchValorUnitario = filters.value.valor_unitario === '' ||
+            oferta.valor_unitario?.toString().includes(filters.value.valor_unitario)
+        const matchValorTotal = filters.value.valor_total === '' ||
+            oferta.valor_total?.toString().includes(filters.value.valor_total)
+
+        return matchNombre && matchDescripcion && matchValorUnitario && matchValorTotal
     })
-
-    return result
 })
 
-const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
+// Cargar ofertas desde la API
+const cargarOfertas = async () => {
+    cargando.value = true
+    mensajeError.value = null
 
-const paginatedOfertas = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage.value
-    return filteredOfertas.value.slice(start, start + itemsPerPage.value)
-})
+    try {
+        const response = await fetch(`${API_URL}/ofertas`)
+        const result = await response.json()
 
-const paginationInfo = computed(() => {
-    const from = (currentPage.value - 1) * itemsPerPage.value + 1
-    const to = Math.min(from + itemsPerPage.value - 1, totalItems.value)
-    return { from, to }
-})
+        if (result.success || Array.isArray(result)) {
+            ofertas.value = Array.isArray(result) ? result : result.data || []
 
-const visiblePages = computed(() => {
-    const maxVisible = 5
-    const pages = []
-
-    if (totalPages.value <= maxVisible) {
-        for (let i = 1; i <= totalPages.value; i++) pages.push(i)
-    } else {
-        pages.push(1, 2, 3, '...', totalPages.value)
-    }
-
-    return pages
-})
-
-// Métodos
-const formatDate = (dateStr) => {
-    const date = new Date(dateStr)
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
-}
-
-const getEstadoClass = (estado) => {
-    const classes = {
-        'EN TRANSITO': 'estado-transito',
-        'ACEPTADA': 'estado-aceptada',
-        'COMPLETADA': 'estado-completada',
-        'RECHAZADA': 'estado-rechazada'
-    }
-    return classes[estado] || ''
-}
-
-const getSortIcon = (field) => {
-    if (sortField.value !== field) return '↕️'
-    return sortOrder.value === 'asc' ? '↑' : '↓'
-}
-
-const sortBy = (field) => {
-    if (sortField.value === field) {
-        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-    } else {
-        sortField.value = field
-        sortOrder.value = 'asc'
+            // Actualizar estadísticas basadas en los datos reales
+            if (ofertas.value.length) {
+                stats.value.total_ofertas = ofertas.value.length
+                stats.value.todas_ofertas = ofertas.value.length
+                stats.value.completadas = ofertas.value.filter(o => o.estado === 'completada' || o.completada).length
+                stats.value.pendientes = ofertas.value.filter(o => o.estado === 'pendiente' || !o.completada).length
+            }
+        } else {
+            throw new Error(result.message || 'Error al cargar ofertas')
+        }
+    } catch (error) {
+        console.error('Error:', error)
+        mensajeError.value = 'Error al cargar las ofertas'
+        // Datos de ejemplo para demostración
+        ofertas.value = [
+            { id: 1, nombre: 'Oferta Premium', descripcion: 'Servicio de primera clase', valor_unitario: 1500, valor_total: 15000, estado: 'activa' },
+            { id: 2, nombre: 'Oferta Básica', descripcion: 'Servicio estándar', valor_unitario: 500, valor_total: 5000, estado: 'pendiente' },
+            { id: 3, nombre: 'Oferta Express', descripcion: 'Entrega rápida 24h', valor_unitario: 2500, valor_total: 25000, estado: 'completada' },
+            { id: 4, nombre: 'Oferta Corporativa', descripcion: 'Para empresas grandes', valor_unitario: 5000, valor_total: 50000, estado: 'activa' },
+        ]
+    } finally {
+        cargando.value = false
     }
 }
 
-const goToPage = (page) => {
-    if (page === '...') return
-    currentPage.value = page
-}
-
-const verAcondicionado = (oferta) => {
-    console.log('Ver acondicionado:', oferta.id)
-    alert(`Ver acondicionado de la oferta ${oferta.id}`)
+// CRUD de ofertas
+const verDetalles = (oferta) => {
+    ofertaSeleccionada.value = oferta
+    modalDetallesVisible.value = true
 }
 
 const editarOferta = (oferta) => {
-    console.log('Editar oferta:', oferta.id)
-    alert(`Editar oferta ${oferta.id}`)
+    ofertaEditando.value = { ...oferta }
+    modalEditarVisible.value = true
 }
+
+const guardarEdicion = async () => {
+    if (!ofertaEditando.value) return
+
+    try {
+        const response = await fetch(`${API_URL}/ofertas/${ofertaEditando.value.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(ofertaEditando.value)
+        })
+
+        if (response.ok) {
+            await cargarOfertas()
+            modalEditarVisible.value = false
+        }
+    } catch (error) {
+        console.error('Error al guardar:', error)
+        mensajeError.value = 'Error al guardar los cambios'
+    }
+}
+
+const eliminarOferta = async (id) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta oferta?')) return
+
+    try {
+        const response = await fetch(`${API_URL}/ofertas/${id}`, {
+            method: 'DELETE'
+        })
+
+        if (response.ok) {
+            await cargarOfertas()
+        } else {
+            throw new Error('Error al eliminar')
+        }
+    } catch (error) {
+        console.error('Error al eliminar:', error)
+        mensajeError.value = 'Error al eliminar la oferta'
+    }
+}
+
+// Filtros con debounce
+let filterTimeout
+const handleFilter = () => {
+    clearTimeout(filterTimeout)
+    // No necesita debounce para filtros locales, pero lo dejo por si acaso
+}
+
+// Utilitarios
+const formatNumber = (num) => {
+    return num?.toLocaleString('es-ES') ?? '0'
+}
+
+const formatMoney = (value) => {
+    if (value === undefined || value === null) return '€0'
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value)
+}
+
+// Watchers
+watch(activeTab, (newTab) => {
+    console.log('Tab seleccionada:', newTab)
+    // Aquí se podría cargar ofertas diferentes según la pestaña
+    cargarOfertas()
+})
+
+// Lifecycle
+onMounted(() => {
+    cargarOfertas()
+})
 </script>
 
 <style scoped>
-/* Estilos similares al componente anterior pero con mejoras */
-.ofertas-container {
-    display: flex;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.todas-ofertas-container {
     min-height: 100vh;
-    background: #f5f5f5;
+    background: #f5f7fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.sidebar {
-    width: 260px;
-    background: #2c3e50;
-    color: white;
-    padding: 20px 0;
+/* HEADER */
+.page-header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    padding: 24px 32px;
+    border-bottom: 3px solid #3b82f6;
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-    padding: 0 20px 20px;
-    border-bottom: 1px solid #34495e;
-    margin-bottom: 20px;
-}
-
-.nav-section {
-    margin-bottom: 20px;
-}
-
-.nav-title {
-    padding: 10px 20px;
-    font-size: 12px;
-    text-transform: uppercase;
-    color: #7f8c8d;
-    letter-spacing: 1px;
-}
-
-.nav-menu ul {
-    list-style: none;
-    padding: 0;
+.page-header h1 {
     margin: 0;
+    color: white;
+    font-size: 28px;
+    font-weight: 600;
 }
 
-.nav-menu li a {
-    display: block;
-    padding: 10px 20px;
-    color: #ecf0f1;
-    text-decoration: none;
-    transition: all 0.3s;
+/* TABS */
+.tabs-container {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    overflow-x: auto;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.nav-menu li a:hover,
-.nav-menu li a.active {
-    background: #34495e;
-    color: #3498db;
+.tabs-wrapper {
+    display: inline-flex;
+    padding: 0 20px;
 }
 
-.main-content {
-    flex: 1;
-    padding: 20px 30px;
+.tab-button {
+    background: none;
+    border: none;
+    padding: 16px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
 }
 
-.header {
+.tab-button:hover {
+    color: #3b82f6;
+    background: #f8fafc;
+}
+
+.tab-button.active {
+    color: #3b82f6;
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #3b82f6;
+}
+
+/* Mensaje de error */
+.alert {
+    margin: 20px 32px;
+    padding: 12px 16px;
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
 }
 
-.header h1 {
-    margin: 0;
-    color: #2c3e50;
-    font-size: 24px;
+.alert.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
 }
 
-.info-badge {
-    background: #ecf0f1;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-size: 14px;
-    color: #7f8c8d;
-}
-
-.filters-bar {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.search-input {
-    flex: 1;
-    max-width: 400px;
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
-}
-
-.filter-select {
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
-    background: white;
+.alert button {
+    background: none;
+    border: none;
+    font-size: 20px;
     cursor: pointer;
+    color: #991b1b;
 }
 
-.table-wrapper {
+/* TARJETAS DE ESTADÍSTICAS */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    padding: 32px;
+}
+
+.stat-card {
     background: white;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-number {
+    font-size: 42px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* TABLA */
+.table-container {
+    background: white;
+    margin: 0 32px 32px 32px;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #1e293b;
+}
+
+.btn-refresh {
+    background: #3b82f6;
+    border: none;
+    padding: 8px 20px;
     border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-refresh:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.btn-refresh:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 60px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.table-responsive {
     overflow-x: auto;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .ofertas-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px;
+}
+
+.ofertas-table th,
+.ofertas-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .ofertas-table th {
-    background: #34495e;
-    color: white;
-    padding: 12px 15px;
-    text-align: left;
+    background: #f8fafc;
     font-weight: 600;
+    color: #1e293b;
     font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.sortable {
-    cursor: pointer;
-    user-select: none;
+.filter-row th {
+    background: #ffffff;
+    padding: 8px 16px;
 }
 
-.sortable:hover {
-    background: #3d5a6b;
-}
-
-.sort-icon {
-    margin-left: 5px;
+.filter-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
     font-size: 12px;
+    transition: border-color 0.2s;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.ofertas-table tbody tr:hover {
+    background: #f8fafc;
 }
 
 .ofertas-table td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ecf0f1;
+    color: #334155;
     font-size: 14px;
 }
 
-.ofertas-table tr:hover {
-    background: #f8f9fa;
+.acciones-cell {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
-.id-cell {
-    font-weight: 600;
-    color: #3498db;
-}
-
-.modo-badge {
-    background: #ecf0f1;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-}
-
-.estado-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.estado-transito {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.estado-aceptada {
-    background: #d4edda;
-    color: #155724;
-}
-
-.estado-completada {
-    background: #d1ecf1;
-    color: #0c5460;
-}
-
-.estado-rechazada {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.action-btn {
-    padding: 5px 12px;
+.btn-accion {
+    padding: 6px 12px;
     border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    border-radius: 6px;
     font-size: 12px;
-    transition: all 0.3s;
-    margin: 0 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
 }
 
-.view-btn {
-    background: #3498db;
-    color: white;
+.btn-ver {
+    background: #e0e7ff;
+    color: #3730a3;
 }
 
-.view-btn:hover {
-    background: #2980b9;
+.btn-ver:hover {
+    background: #c7d2fe;
 }
 
-.edit-btn {
-    background: #f39c12;
-    color: white;
+.btn-editar {
+    background: #fef3c7;
+    color: #92400e;
 }
 
-.edit-btn:hover {
-    background: #e67e22;
+.btn-editar:hover {
+    background: #fde68a;
 }
 
-.pagination {
+.btn-eliminar {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.btn-eliminar:hover {
+    background: #fecaca;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 48px !important;
+    color: #94a3b8;
+}
+
+/* FOOTER */
+.footer {
+    background: #1e293b;
+    color: #cbd5e1;
+    padding: 32px;
+    text-align: center;
+    margin-top: 32px;
+}
+
+.footer-links {
     display: flex;
     justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
 }
 
-.page-btn {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s;
+.footer-links a {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
 }
 
-.page-btn:hover:not(:disabled) {
-    background: #ecf0f1;
-}
-
-.page-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.page-btn.active {
-    background: #3498db;
+.footer-links a:hover {
     color: white;
-    border-color: #3498db;
+}
+
+.footer-copy {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* MODALES */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #1e293b;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #94a3b8;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: #1e293b;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-body p {
+    margin: 12px 0;
+    line-height: 1.5;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #334155;
+    font-size: 13px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-guardar {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-guardar:hover {
+    background: #059669;
+}
+
+.btn-cancelar,
+.btn-cerrar {
+    background: #e2e8f0;
+    color: #334155;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-cancelar:hover,
+.btn-cerrar:hover {
+    background: #cbd5e1;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .table-container {
+        margin: 0 20px 20px 20px;
+    }
+
+    .footer-links {
+        gap: 20px;
+    }
+
+    .acciones-cell {
+        flex-direction: column;
+    }
+
+    .btn-accion {
+        width: 100%;
+        text-align: center;
+    }
+
+    .ofertas-table th,
+    .ofertas-table td {
+        padding: 10px 12px;
+    }
 }
 </style>

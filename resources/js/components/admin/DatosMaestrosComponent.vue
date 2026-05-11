@@ -1,398 +1,604 @@
 <template>
-    <div class="datos-maestros-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo">Admin</div>
-            <nav class="nav-menu">
-                <div class="nav-section">
-                    <div class="nav-title">Aprendizaje</div>
-                    <ul>
-                        <li><a href="#" class="active">Datos Maestros</a></li>
-                    </ul>
-                </div>
-            </nav>
-        </div>
-
-        <!-- Contenido principal -->
-        <div class="main-content">
-            <h1>Datos Maestros</h1>
-
-            <!-- Grid de categorías -->
-            <div class="categorias-grid">
-                <!-- Empresas -->
-                <div class="categoria-card">
-                    <h2>Empresas</h2>
-                    <div class="badge">4 programas ejecutables</div>
-                    <ul class="lista-items">
-                        <li>
-                            <strong>Tecni5 SA</strong>
-                            <span class="detalle">2.0 para Intel® Core™ i3</span>
-                        </li>
-                        <li>
-                            <strong>Modus Express SL</strong>
-                            <span class="detalle">Línea: 1,6 GHz</span>
-                        </li>
-                        <li>
-                            <strong>Impart Global</strong>
-                            <span class="detalle">Línea: 2 unidades</span>
-                        </li>
-                        <li>
-                            <strong>Tech Imports SA</strong>
-                            <span class="detalle">Línea: 2 unidades</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Navieras & Carriers -->
-                <div class="categoria-card">
-                    <h2>Navieras & Carriers</h2>
-                    <div class="badge">1 gran línea única</div>
-                    <ul class="lista-items">
-                        <li>
-                            <strong>MSC Mediterranean</strong>
-                            <span class="detalle">Área: 10,000 toneladas</span>
-                        </li>
-                        <li>
-                            <strong>Merax</strong>
-                            <span class="detalle">Metales: 12 operaciones</span>
-                        </li>
-                        <li>
-                            <strong>CMA OGM</strong>
-                            <span class="detalle">Metales: 7 operaciones</span>
-                        </li>
-                        <li>
-                            <strong>Rerla Cargo</strong>
-                            <span class="detalle">Metales: 11 operaciones</span>
-                        </li>
-                        <li>
-                            <strong>DHL Express</strong>
-                            <span class="detalle">Área: 8 operaciones</span>
-                        </li>
-                    </ul>
-                </div>
+    <div class="app-layout">
+        <!-- Menú lateral izquierdo (idéntico a la imagen) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Datos Maestros</h2>
+                <span class="admin-badge">admin</span>
             </div>
 
-            <!-- Incoterms -->
-            <div class="incoterms-section">
-                <h2>Incoterms Activos</h2>
-                <div class="badge">7 operaciones</div>
-                <div class="incoterms-grid">
-                    <div class="incoterm-card">
-                        <div class="incoterm-code">FOB</div>
-                        <div class="incoterm-desc">Free in Force</div>
-                    </div>
-                    <div class="incoterm-card">
-                        <div class="incoterm-code">CIF</div>
-                        <div class="incoterm-desc">Cost estimate Project</div>
-                    </div>
-                    <div class="incoterm-card">
-                        <div class="incoterm-code">EXW</div>
-                        <div class="incoterm-desc">Ex Notes</div>
-                    </div>
-                    <div class="incoterm-card">
-                        <div class="incoterm-code">DDP</div>
-                        <div class="incoterm-desc">Delivery Duty Price</div>
-                    </div>
-                    <div class="incoterm-card">
-                        <div class="incoterm-code">DAP</div>
-                        <div class="incoterm-desc">Delivered to Port</div>
-                    </div>
-                    <div class="incoterm-card">
-                        <div class="incoterm-code">CFR</div>
-                        <div class="incoterm-desc">Chai and Hangar</div>
-                    </div>
-                    <div class="incoterm-card">
-                        <div class="incoterm-code">FCA</div>
-                        <div class="incoterm-desc">Free Carrier</div>
-                    </div>
+            <nav class="sidebar-nav">
+                <!-- Inicio -->
+                <div class="nav-item">
+                    <span class="nav-icon">🏠</span>
+                    <span>Inicio</span>
                 </div>
-            </div>
 
-            <!-- Puertos / Aeropuertos -->
-            <div class="puertos-section">
-                <h2>Puertos / Aeropuertos</h2>
-                <div class="badge">5 aeropuertos activos</div>
-                <div class="puertos-grid">
-                    <div class="puerto-card">
-                        <div class="puerto-code">Valencia (VLC)</div>
-                        <div class="puerto-desc">Surge monto: 50 aeropuertos</div>
+                <!-- Administración (desplegable) -->
+                <div class="nav-group">
+                    <div class="nav-group-header" @click="toggleAdminMenu">
+                        <span class="nav-icon">⚙️</span>
+                        <span>Administración</span>
+                        <span class="chevron">{{ adminOpen ? '▼' : '▶' }}</span>
                     </div>
-                    <div class="puerto-card">
-                        <div class="puerto-code">Barcelona (BCN)</div>
-                        <div class="puerto-desc">Punto + Antenas: 24 aeropuertos</div>
-                    </div>
-                    <div class="puerto-card">
-                        <div class="puerto-code">Dibao (DBO)</div>
-                        <div class="puerto-desc">Punto máximo: 10 aeropuertos</div>
-                    </div>
-                    <div class="puerto-card">
-                        <div class="puerto-code">Madrid-Granja (MAD)</div>
-                        <div class="puerto-desc">Aeropuerto: 8 aeropuertos</div>
-                    </div>
-                    <div class="puerto-card">
-                        <div class="puerto-code">Algeciras (AGH)</div>
-                        <div class="puerto-desc">Punto máximo: 6 aeropuertos</div>
-                    </div>
-                    <div class="puerto-card">
-                        <div class="puerto-code">Palma (PMI)</div>
-                        <div class="puerto-desc">Almacenado: 3 almacenes</div>
-                    </div>
-                </div>
-            </div>
+                    <div v-if="adminOpen" class="nav-group-content">
+                        <!-- Ventas (subgrupo) -->
+                        <div class="nav-subgroup">
+                            <div class="nav-subgroup-header" @click="toggleVentasMenu">
+                                <span>📊 Ventas</span>
+                                <span class="chevron">{{ ventasOpen ? '▼' : '▶' }}</span>
+                            </div>
+                            <div v-if="ventasOpen" class="nav-subgroup-content">
+                                <div class="nav-subitem">Ventas de productos</div>
+                                <div class="nav-subitem">Ventas de servicios</div>
+                                <div class="nav-subitem">Ventas de empleo</div>
+                                <div class="nav-subitem">Ventas de proyectos</div>
+                                <div class="nav-subitem">Ventas de marketing</div>
+                                <div class="nav-subitem">Ventas de personal</div>
+                                <div class="nav-subitem">Ventas de ventas a clientes</div>
+                            </div>
+                        </div>
 
-            <!-- Agentes -->
-            <div class="agentes-section">
-                <h2>Agentes Abandonados</h2>
-                <div class="badge">2 agentes activos</div>
-                <div class="agentes-lista">
-                    <div class="agente-item">
-                        <div class="agente-nombre">Adsuara Express SL</div>
-                        <div class="agente-stats">Mando: 7 aeropuertos</div>
-                        <div class="subagente">
-                            <span>→ Global Customs SA</span>
-                            <span class="sub-detail">Gestión: 9 billetes</span>
-                            <div class="sub-sub">
-                                <span>→ Isabella Brekens</span>
-                                <span class="sub-detail">Vendedor: 16 operaciones</span>
+                        <!-- Productos (subgrupo) -->
+                        <div class="nav-subgroup">
+                            <div class="nav-subgroup-header" @click="toggleProductosMenu">
+                                <span>📦 Productos</span>
+                                <span class="chevron">{{ productosOpen ? '▼' : '▶' }}</span>
+                            </div>
+                            <div v-if="productosOpen" class="nav-subgroup-content">
+                                <div class="nav-subitem">Productos de producto</div>
+                                <div class="nav-subitem">Productos de servicio</div>
+                                <div class="nav-subitem">Productos de empleo</div>
+                                <div class="nav-subitem">Productos de proyectos</div>
+                                <div class="nav-subitem">Productos de marketing</div>
+                                <div class="nav-subitem">Productos de personal</div>
+                                <div class="nav-subitem">Productos de ventas a clientes</div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </nav>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="main-content">
+            <!-- Header con título y botón actualizar -->
+            <div class="content-header">
+                <h1>Datos Maestros Admin</h1>
+                <button @click="cargarDatos" class="btn-refresh" :disabled="cargando">
+                    {{ cargando ? 'Cargando...' : '⟳ Actualizar' }}
+                </button>
+            </div>
+
+            <!-- Mensaje de error -->
+            <div v-if="mensajeError" class="alert error">
+                {{ mensajeError }}
+                <button @click="mensajeError = null">×</button>
+            </div>
+
+            <!-- ÁREAS ADMINISTRATIVAS (exactamente como en la imagen) -->
+            <div class="areas-section">
+                <h2>Áreas administrativas</h2>
+                <div class="areas-grid">
+                    <div class="area-card" v-for="area in areasAdministrativas" :key="area">
+                        {{ area }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENIDO DINÁMICO (manteniendo funcionalidad original) -->
+            <div class="datos-section">
+                <div class="datos-group">
+                    <h3>📋 Empresas</h3>
+                    <button @click="mostrarModalEmpresa = true" class="btn-small">+ Agregar</button>
+                    <div class="datos-lista">
+                        <div v-for="emp in empresas" :key="emp.id" class="dato-item">
+                            <strong>{{ emp.nombre }}</strong> – {{ emp.email }}
+                            <button @click="eliminarEmpresa(emp.id)" class="btn-icon-sm">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="datos-group">
+                    <h3>🚢 Navieras & Carriers</h3>
+                    <button @click="mostrarModalNaviera = true" class="btn-small">+ Agregar</button>
+                    <div class="datos-lista">
+                        <div v-for="nav in navieras" :key="nav.id" class="dato-item">
+                            {{ nav.nombre }} ({{ nav.total_operaciones || 0 }} ops)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="datos-group">
+                    <h3>⚓ Puertos / Aeropuertos</h3>
+                    <button @click="mostrarModalPuerto = true" class="btn-small">+ Agregar</button>
+                    <div class="datos-lista">
+                        <div v-for="p in puertosAeropuertos" :key="p.id" class="dato-item">
+                            {{ p.nombre }} ({{ p.codigo_iata }}) – {{ p.ciudad }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="datos-group">
+                    <h3>📦 Agentes Aduanales</h3>
+                    <button @click="mostrarModalAgente = true" class="btn-small">+ Agregar</button>
+                    <div class="datos-lista">
+                        <div v-for="a in agentesAduanales" :key="a.id" class="dato-item">
+                            {{ a.nombre }} – {{ a.ubicacion }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="datos-group">
+                    <h3>📜 Incoterms Activos</h3>
+                    <button @click="mostrarModalIncoterm = true" class="btn-small">+ Agregar</button>
+                    <div class="datos-lista incoterms-lista">
+                        <span v-for="inc in incoterms" :key="inc.id" class="incoterm-badge">
+                            {{ inc.codigo }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PIE DE PÁGINA (idéntico a la imagen) -->
+            <footer class="footer">
+                <div class="footer-links">
+                    <span>Pie de página</span>
+                    <span>Información adicional</span>
+                    <span>Noticias</span>
+                    <span>Otras noticias</span>
+                    <span>Más información</span>
+                </div>
+                <div class="footer-copy">
+                    Datos Maestros - Sistema de Gestión
+                </div>
+            </footer>
+        </main>
+
+        <!-- Modales (igual que antes, simplificados) -->
+        <div v-if="mostrarModalEmpresa" class="modal">
+            <div class="modal-content">
+                <h3>Nueva Empresa</h3>
+                <input v-model="empresaForm.nombre" placeholder="Nombre" class="modal-input">
+                <input v-model="empresaForm.email" placeholder="Email" class="modal-input">
+                <button @click="guardarEmpresa" class="btn-guardar">Guardar</button>
+                <button @click="mostrarModalEmpresa = false" class="btn-cancelar">Cancelar</button>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-// No se necesita lógica adicional para este componente
+import { ref, onMounted } from 'vue'
+
+// Estado general
+const cargando = ref(false)
+const mensajeError = ref(null)
+
+// Datos maestros (igual que original)
+const empresas = ref([])
+const navieras = ref([])
+const puertosAeropuertos = ref([])
+const agentesAduanales = ref([])
+const incoterms = ref([])
+
+// Estado del menú lateral
+const adminOpen = ref(true)
+const ventasOpen = ref(false)
+const productosOpen = ref(false)
+
+// Áreas administrativas (según imagen)
+const areasAdministrativas = ref([
+    'Ventas', 'Productos', 'Empleo', 'Proyectos', 'Marketing', 'Personal', 'Ventas a clientes'
+])
+
+// Modales
+const mostrarModalEmpresa = ref(false)
+const mostrarModalNaviera = ref(false)
+const mostrarModalPuerto = ref(false)
+const mostrarModalAgente = ref(false)
+const mostrarModalIncoterm = ref(false)
+
+// Form empresa
+const empresaForm = ref({ nombre: '', email: '', cif: '' })
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+
+// Funciones del menú lateral
+const toggleAdminMenu = () => { adminOpen.value = !adminOpen.value }
+const toggleVentasMenu = () => { ventasOpen.value = !ventasOpen.value }
+const toggleProductosMenu = () => { productosOpen.value = !productosOpen.value }
+
+// Cargar datos de la API
+const cargarDatos = async () => {
+    cargando.value = true
+    mensajeError.value = null
+    try {
+        const response = await fetch(`${API_URL}/datos-maestros/dashboard`)
+        const result = await response.json()
+        if (result.success) {
+            empresas.value = result.data.empresas
+            navieras.value = result.data.navieras
+            puertosAeropuertos.value = result.data.puertos_aeropuertos
+            agentesAduanales.value = result.data.agentes_aduanales
+            incoterms.value = result.data.incoterms
+        } else {
+            throw new Error(result.message)
+        }
+    } catch (error) {
+        console.error(error)
+        mensajeError.value = 'Error al cargar datos maestros'
+    } finally {
+        cargando.value = false
+    }
+}
+
+// CRUD empresas (simplificado)
+const guardarEmpresa = async () => {
+    try {
+        await fetch(`${API_URL}/empresas`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(empresaForm.value)
+        })
+        await cargarDatos()
+        mostrarModalEmpresa.value = false
+        empresaForm.value = { nombre: '', email: '', cif: '' }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+const eliminarEmpresa = async (id) => {
+    if (!confirm('¿Eliminar empresa?')) return
+    try {
+        await fetch(`${API_URL}/empresas/${id}`, { method: 'DELETE' })
+        await cargarDatos()
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+onMounted(() => {
+    cargarDatos()
+})
 </script>
 
 <style scoped>
-.datos-maestros-container {
+/* LAYOUT PRINCIPAL: menú lateral + contenido */
+.app-layout {
     display: flex;
     min-height: 100vh;
-    background: #f5f5f5;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
+    font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
+/* ========== SIDEBAR (idéntica a imagen) ========== */
 .sidebar {
-    width: 260px;
-    background: #2c3e50;
+    width: 280px;
+    background: #1e293b;
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
+    padding: 24px 20px;
+    border-bottom: 1px solid #334155;
+    text-align: center;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 20px;
     color: white;
+}
+
+.admin-badge {
+    display: inline-block;
+    background: #3b82f6;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 6px;
+    color: white;
+}
+
+.sidebar-nav {
+    flex: 1;
     padding: 20px 0;
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-    padding: 0 20px 20px;
-    border-bottom: 1px solid #34495e;
-    margin-bottom: 20px;
-}
-
-.nav-title {
+.nav-item {
     padding: 10px 20px;
-    font-size: 12px;
-    text-transform: uppercase;
-    color: #7f8c8d;
-    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.nav-menu ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.nav-item:hover {
+    background: #334155;
 }
 
-.nav-menu li a {
-    display: block;
-    padding: 10px 20px;
-    color: #ecf0f1;
-    text-decoration: none;
-    transition: all 0.3s;
-}
-
-.nav-menu li a:hover,
-.nav-menu li a.active {
-    background: #34495e;
-    color: #3498db;
-}
-
-.main-content {
-    flex: 1;
-    padding: 20px 30px;
-}
-
-h1 {
-    color: #2c3e50;
-    margin-bottom: 30px;
-}
-
-h2 {
-    color: #2c3e50;
-    font-size: 18px;
-    margin-bottom: 15px;
-}
-
-.categorias-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.categoria-card {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.badge {
-    display: inline-block;
-    background: #ecf0f1;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    color: #7f8c8d;
-    margin-bottom: 15px;
-}
-
-.lista-items {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.lista-items li {
-    padding: 10px 0;
-    border-bottom: 1px solid #ecf0f1;
-}
-
-.lista-items li strong {
-    display: block;
-    color: #2c3e50;
-    margin-bottom: 5px;
-}
-
-.detalle {
-    font-size: 12px;
-    color: #7f8c8d;
-}
-
-.incoterms-section,
-.puertos-section,
-.agentes-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-}
-
-.incoterms-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.incoterm-card {
-    background: #f8f9fa;
-    padding: 12px;
-    border-radius: 6px;
-    text-align: center;
-    transition: all 0.3s;
-}
-
-.incoterm-card:hover {
-    background: #3498db;
-    color: white;
-    transform: translateY(-2px);
-}
-
-.incoterm-code {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 5px;
-}
-
-.incoterm-desc {
-    font-size: 11px;
-    color: #7f8c8d;
-}
-
-.incoterm-card:hover .incoterm-desc {
-    color: white;
-}
-
-.puertos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.puerto-card {
-    background: #f8f9fa;
-    padding: 12px;
-    border-radius: 6px;
-    border-left: 3px solid #3498db;
-}
-
-.puerto-code {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.puerto-desc {
-    font-size: 12px;
-    color: #7f8c8d;
-}
-
-.agentes-lista {
-    margin-top: 15px;
-}
-
-.agente-item {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 6px;
-}
-
-.agente-nombre {
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 5px;
-}
-
-.agente-stats {
-    font-size: 13px;
-    color: #7f8c8d;
-    margin-bottom: 10px;
-}
-
-.subagente {
-    margin-left: 20px;
-    padding-left: 15px;
-    border-left: 2px solid #3498db;
-}
-
-.subagente span {
-    display: block;
-    margin: 5px 0;
-}
-
-.sub-sub {
-    margin-left: 20px;
-    padding-left: 15px;
-    border-left: 2px solid #e74c3c;
+.nav-group {
     margin-top: 8px;
 }
 
-.sub-detail {
+.nav-group-header {
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.nav-group-header:hover {
+    background: #334155;
+}
+
+.nav-group-content {
+    padding-left: 20px;
+}
+
+.nav-subgroup-header {
+    padding: 8px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #cbd5e1;
+}
+
+.nav-subgroup-header:hover {
+    background: #334155;
+}
+
+.nav-subgroup-content {
+    padding-left: 35px;
+}
+
+.nav-subitem {
+    padding: 6px 20px;
+    font-size: 13px;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+.nav-subitem:hover {
+    color: white;
+    background: #334155;
+}
+
+.chevron {
+    font-size: 10px;
+    margin-left: auto;
+}
+
+/* ========== MAIN CONTENT ========== */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 32px;
+    background: #f8fafc;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.content-header h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #0f172a;
+}
+
+.btn-refresh {
+    background: #10b981;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* Áreas administrativas (grid exacto de la imagen) */
+.areas-section {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.areas-section h2 {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: #1e293b;
+}
+
+.areas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.area-card {
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 500;
+    color: #0f172a;
+    transition: all 0.2s;
+}
+
+.area-card:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px);
+}
+
+/* Datos dinámicos (empresas, navieras, etc) */
+.datos-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.datos-group {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.datos-group h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-small {
+    background: #3b82f6;
+    border: none;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
     font-size: 12px;
-    color: #95a5a6;
-    margin-left: 10px;
+    cursor: pointer;
+}
+
+.datos-lista {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.dato-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-icon-sm {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0.6;
+}
+
+.incoterms-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.incoterm-badge {
+    background: #e0e7ff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #1e40af;
+}
+
+/* Footer exacto de la imagen */
+.footer {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #cbd5e1;
+    text-align: center;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #475569;
+}
+
+.footer-links span {
+    cursor: default;
+}
+
+.footer-copy {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* Modales (igual que antes) */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    width: 400px;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+}
+
+.btn-guardar,
+.btn-cancelar {
+    padding: 6px 12px;
+    margin: 8px 4px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-guardar {
+    background: #10b981;
+    color: white;
+}
+
+.btn-cancelar {
+    background: #e2e8f0;
+}
+
+.alert {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.alert.error {
+    background: #fee2e2;
+    color: #b91c1c;
 }
 </style>
