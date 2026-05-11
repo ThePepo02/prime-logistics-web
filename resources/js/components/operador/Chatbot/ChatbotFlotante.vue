@@ -184,20 +184,23 @@ function scrollAbajo() {
 function formatearRespuesta(texto) {
     if (!texto) return ''
 
-    // Paso 1: Escapar HTML → evita XSS si el LLM devuelve etiquetas maliciosas
+    // Escapar HTML
     let html = texto
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
 
-    // Paso 2: **negrita** → <strong>
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // **negrita** → <strong> (antes de tocar nada más)
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
 
-    // Paso 3: Saltos de línea \n → <br>
+    // Saltos de línea \n → <br>
     html = html.replace(/\n/g, '<br>')
 
-    // Paso 4: Listas "- item" → "• item"
-    html = html.replace(/(^|<br>)- (.+)/g, '$1<span class="list-item">• $2</span>')
+    // Listas "- item" → bullet (después de los <br>)
+    html = html.replace(/(^|<br>)- (.+)/g, '$1&nbsp;&nbsp;• $2')
+
+    // Separador visual entre resultados numerados (1. 2. 3.)
+    html = html.replace(/<br>(<strong>\d+\.<\/strong>)/g, '<br><hr style="border:none;border-top:1px solid #e0e6ef;margin:6px 0">$1')
 
     return html
 }
