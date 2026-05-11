@@ -202,7 +202,6 @@ function formatearRespuesta(texto) {
     return html
 }
 
-// Función principal: envía la pregunta a N8N y gestiona la respuesta
 async function enviar() {
     const textoPregunta = pregunta.value.trim()
     if (!textoPregunta || cargando.value) return
@@ -210,7 +209,6 @@ async function enviar() {
     error.value = null
     pregunta.value = ''
 
-    // Añadir mensaje del usuario al array reactivo
     historial.value.push({
         rol: 'usuario',
         texto: textoPregunta,
@@ -218,11 +216,10 @@ async function enviar() {
     })
 
     cargando.value = true
-    await nextTick()   // Esperar a que Vue renderice el nuevo mensaje antes de hacer scroll
+    await nextTick()
     scrollAbajo()
 
     try {
-        // fetch() nativo — sin Axios, igual que el resto del proyecto
         const response = await fetch(WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -232,15 +229,22 @@ async function enviar() {
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
 
         const data = await response.json()
+        console.log('[N8N raw response]', JSON.stringify(data, null, 2)) // ← temporal para debug
 
-        // N8N puede devolver la respuesta en distintos campos según cómo esté configurado el nodo Code
         const textoRespuesta =
             data?.respuesta ||
             data?.output ||
             data?.message ||
+            data?.text ||
+            data?.reply ||
             data?.[0]?.respuesta ||
             data?.[0]?.output ||
-            JSON.stringify(data)
+            data?.[0]?.message ||
+            data?.[0]?.text ||
+            (() => {
+                console.warn('[Chatbot] Respuesta inesperada de N8N:', data)
+                return '⚠️ El asistente devolvió un formato inesperado. Revisa el nodo Code de N8N.'
+            })()
 
         historial.value.push({ rol: 'bot', texto: textoRespuesta, hora: horaActual.value })
 
@@ -255,7 +259,6 @@ async function enviar() {
             hora: horaActual.value
         })
     } finally {
-        // finally siempre se ejecuta, tanto si hubo error como si no
         cargando.value = false
         await nextTick()
         scrollAbajo()
