@@ -12,8 +12,6 @@ class TipusIncoterm extends Model
     public $timestamps = false;
     protected $fillable = ['id', 'codi', 'nom'];
 
-    protected $fillable = ['id', 'codi', 'nom'];
-
     /**
      * Get the incoterms that owns the TipusIncoterms
      *
