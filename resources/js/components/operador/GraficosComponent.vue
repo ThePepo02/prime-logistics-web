@@ -1,6 +1,6 @@
 <template>
-    <div class="p-6">
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
+    <div class="p-2">
+        <div class="bg-white rounded-xl shadow-sm p-2 mb-4">
             <h2 class="text-base font-semibold text-blue-700 border-l-4 border-blue-700 pl-3 mb-6">
                 GlobalPath Analytics — Datos ONU
             </h2>
@@ -62,10 +62,17 @@ export default {
 </script>
 
 <style>
+#superset-container {
+    width: 100%;
+    min-height: 2000px;
+}
+
+
 #superset-container iframe {
     width: 100% !important;
     height: 1200px !important;
     border: none !important;
     min-height: 1200px !important;
+    display: block !important;
 }
 </style>
