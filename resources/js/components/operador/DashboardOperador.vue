@@ -253,7 +253,7 @@
                                 <div v-for="alert in alerts" :key="alert.id"
                                     class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                                     <span class="text-sm font-medium text-gray-700 w-32 flex-shrink-0">{{ alert.id
-                                    }}</span>
+                                        }}</span>
                                     <span class="text-sm text-gray-500 flex-1">{{ alert.issue }}</span>
                                     <button
                                         class="text-xs border border-gray-300 text-gray-600 hover:bg-gray-50 px-3 py-1 rounded-lg transition ml-2">Ver</button>
@@ -271,7 +271,7 @@
                                             :style="{ width: op.percent + '%' }"></div>
                                     </div>
                                     <span class="text-xs text-gray-500 w-8 text-right flex-shrink-0">{{ op.percent
-                                    }}%</span>
+                                        }}%</span>
                                 </div>
                             </div>
                         </div>
@@ -368,6 +368,7 @@
 
             </main>
         </div>
+        <chatbot-flotante />
     </div>
 </template>
 
@@ -379,6 +380,7 @@ import OfertasComerciales from './OfertasComerciales.vue'
 import OperacionesComponent from './OperacionesComponent.vue'
 import NotificacionsComponent from './NotificacionsComponent.vue'
 import NuevoPedido from './nuevoPedido/NuevoPedido.vue'
+import ChatbotFlotante from './Chatbot/Chatbotflotante.vue'
 import GraficosComponent from './GraficosComponent.vue';
 
 export default {
@@ -393,6 +395,7 @@ export default {
         NotificacionsComponent,
         NuevoPedido,
         GraficosComponent,
+        ChatbotFlotante,
     },
 
     data() {
