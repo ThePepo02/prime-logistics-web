@@ -16,6 +16,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "@superset-ui/embedded-sdk": "^0.3.0",
         "@vitejs/plugin-vue": "^6.0.6",
         "flowbite": "^4.0.1",
         "vue": "^3.5.34"

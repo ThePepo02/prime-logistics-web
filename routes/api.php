@@ -11,6 +11,7 @@ use App\Http\Controllers\EstatOfertaController;
 use App\Http\Controllers\NotificacionsController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\OperacionesController;
+use App\Http\Controllers\SupersetController;
 use App\Http\Controllers\TipusTransportController;
 use App\Http\Controllers\UsuariosController;
 use Illuminate\Http\Request;
@@ -87,4 +88,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notificacions', [NotificacionsController::class, 'index']);
     Route::put('/notificacions/marcar-totes', [NotificacionsController::class, 'marcarTotes']);
     Route::put('/notificacions/{id}/llegir', [NotificacionsController::class, 'marcarLlegida']);
+
+    // ── SUPERSET — Guest token para embeber dashboards ───────────────────────
+    Route::get('/superset/guest-token', [SupersetController::class, 'guestToken']);
+
 });
