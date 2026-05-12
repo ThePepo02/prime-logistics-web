@@ -4,9 +4,7 @@
             <h2 class="text-base font-semibold text-blue-700 border-l-4 border-blue-700 pl-3 mb-6">
                 GlobalPath Analytics — Datos ONU
             </h2>
-
-            <!-- Contenedor donde se embebe el dashboard de Superset -->
-            <div id="superset-container" class="w-full rounded-lg overflow-hidden" style="height: 600px;">
+            <div id="superset-container" class="w-full rounded-lg overflow-hidden" style="height: 1200px;">
                 <div class="h-full flex items-center justify-center text-gray-400 text-sm">
                     Cargando dashboard...
                 </div>
@@ -20,27 +18,18 @@ import { embedDashboard } from '@superset-ui/embedded-sdk'
 
 export default {
     name: 'GraficosComponent',
-
     data() {
         return {
-            // URL de Superset — cambiar por la URL real cuando estés en el cole
             supersetUrl: 'http://localhost:8088',
-
-            // ID del dashboard embebido — se obtiene en Superset:
-            // Dashboard → ··· → Embed dashboard → Copy embed ID
-            dashboardId: '', // ← Pegar aquí el ID cuando estés en el cole
+            dashboardId: '5594a17e-7668-4c28-9f67-56456b54c063',
         }
     },
-
     mounted() {
         this.cargarDashboard()
     },
-
     methods: {
         async cargarDashboard() {
-            // Si no hay dashboardId configurado, no hacemos nada
             if (!this.dashboardId) return
-
             try {
                 await embedDashboard({
                     id: this.dashboardId,
@@ -48,7 +37,7 @@ export default {
                     mountPoint: document.getElementById('superset-container'),
                     fetchGuestToken: () => this.obtenerGuestToken(),
                     dashboardUiConfig: {
-                        hideTitle: false,
+                        hideTitle: true,
                         hideChartControls: false,
                         hideFilters: false,
                     },
@@ -57,9 +46,6 @@ export default {
                 console.error('Error cargando dashboard de Superset:', e)
             }
         },
-
-        // Obtiene el guest token de Superset via Laravel
-        // Laravel actúa de intermediario para no exponer credenciales en el frontend
         async obtenerGuestToken() {
             const token = localStorage.getItem('token')
             const response = await fetch('/api/superset/guest-token', {
@@ -74,3 +60,12 @@ export default {
     }
 }
 </script>
+
+<style>
+#superset-container iframe {
+    width: 100% !important;
+    height: 1200px !important;
+    border: none !important;
+    min-height: 1200px !important;
+}
+</style>
