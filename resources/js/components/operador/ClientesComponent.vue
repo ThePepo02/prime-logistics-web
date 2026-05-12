@@ -390,11 +390,9 @@ export default {
             try {
                 const token = localStorage.getItem('token')
                 const response = await fetch(`/api/clientes/${cliente.id}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                }
-            })
+                    method: 'DELETE',
+                    headers: {'Authorization': `Bearer ${token}`},
+                })
 
             const data = await response.json()
 
