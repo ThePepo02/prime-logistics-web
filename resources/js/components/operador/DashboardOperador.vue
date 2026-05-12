@@ -51,6 +51,16 @@
                     Nuevo Pedido
                 </a>
 
+                <a href="#" @click.prevent="paginaActual = 'graficos'"
+                    :class="paginaActual === 'graficos' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Gráficos
+                </a>
+
                 <a href="#" @click.prevent="paginaActual = 'operaciones'"
                     :class="paginaActual === 'operaciones' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'"
                     class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition">
@@ -139,8 +149,7 @@
                     <p class="text-sm text-gray-500">{{ subtituloActual }}</p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button
-                        v-if="paginaActual === 'dashboard' || paginaActual === 'ofertas'"
+                    <button v-if="paginaActual === 'dashboard' || paginaActual === 'ofertas'"
                         @click="paginaActual = 'nuevoPedido'"
                         class="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-medium px-4 py-2 rounded-lg transition text-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,7 +253,7 @@
                                 <div v-for="alert in alerts" :key="alert.id"
                                     class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                                     <span class="text-sm font-medium text-gray-700 w-32 flex-shrink-0">{{ alert.id
-                                        }}</span>
+                                    }}</span>
                                     <span class="text-sm text-gray-500 flex-1">{{ alert.issue }}</span>
                                     <button
                                         class="text-xs border border-gray-300 text-gray-600 hover:bg-gray-50 px-3 py-1 rounded-lg transition ml-2">Ver</button>
@@ -262,7 +271,7 @@
                                             :style="{ width: op.percent + '%' }"></div>
                                     </div>
                                     <span class="text-xs text-gray-500 w-8 text-right flex-shrink-0">{{ op.percent
-                                        }}%</span>
+                                    }}%</span>
                                 </div>
                             </div>
                         </div>
@@ -342,11 +351,12 @@
                 <operaciones-component v-if="paginaActual === 'operaciones'" />
                 <notificacions-component v-if="paginaActual === 'notificaciones'" />
                 <NuevoPedido v-if="paginaActual === 'nuevoPedido'" @cambiarPagina="paginaActual = $event" />
+                <graficos-component v-if="paginaActual === 'graficos'" />
                 <!-- ── FIN VISTA: CLIENTES ── -->
 
 
                 <!-- ── VISTAS PENDIENTES ── -->
-                <div v-if="paginaActual !== 'dashboard' && paginaActual !== 'clientes' && paginaActual !== 'ofertas' && paginaActual !== 'operaciones' && paginaActual !== 'notificaciones' && paginaActual !== 'nuevoPedido'"
+                <div v-if="paginaActual !== 'dashboard' && paginaActual !== 'clientes' && paginaActual !== 'ofertas' && paginaActual !== 'operaciones' && paginaActual !== 'notificaciones' && paginaActual !== 'nuevoPedido' && paginaActual !== 'graficos'"
                     class="flex flex-col items-center justify-center h-full text-gray-400 gap-3 p-12">
                     <svg class="w-14 h-14 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -368,7 +378,8 @@ import ClientesComponent from './ClientesComponent.vue'
 import OfertasComerciales from './OfertasComerciales.vue'
 import OperacionesComponent from './OperacionesComponent.vue'
 import NotificacionsComponent from './NotificacionsComponent.vue'
-import NuevoPedido from './nuevoPedido/NuevoPedido.vue';
+import NuevoPedido from './nuevoPedido/NuevoPedido.vue'
+import GraficosComponent from './GraficosComponent.vue';
 
 export default {
     name: 'DashboardOperador',
@@ -381,6 +392,7 @@ export default {
         OperacionesComponent,
         NotificacionsComponent,
         NuevoPedido,
+        GraficosComponent,
     },
 
     data() {
