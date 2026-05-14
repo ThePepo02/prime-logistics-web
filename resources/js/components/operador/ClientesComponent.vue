@@ -365,13 +365,14 @@ export default {
                         body: JSON.stringify(this.form)
                     })
 
+                    // ✅ Primero lees el JSON, LUEGO checkeas si fue ok
+                    const clienteNuevo = await response.json()
+
                     if (!response.ok) {
-                        this.errorForm = 'Error al crear el cliente.'
+                         this.errorForm = clienteNuevo.error || clienteNuevo.message || 'Error al crear el cliente.'
                         return
                     }
 
-                    const clienteNuevo = await response.json()
-                    // Añade el nuevo cliente a la lista local
                     this.clientes.push(clienteNuevo)
                 }
 
