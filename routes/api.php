@@ -16,6 +16,8 @@ use App\Http\Controllers\Client\DashboardController;
 use App\Http\Controllers\Client\OrderController;
 use App\Http\Controllers\Client\TrackingController;
 use App\Http\Controllers\Client\NotificationController;
+use App\Http\Controllers\TipusIncotermController;
+use App\Http\Controllers\TrackingOfertaController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -77,6 +79,18 @@ Route::prefix('client')->group(function () {
     // Filtros
     Route::get('/estats-ofertes', [EstatOfertaController::class, 'index']);
     Route::get('/tipus-transports', [TipusTransportController::class, 'index']);
+
+    // Mantenimiento de Tipos de Incoterm
+    Route::get('/tipos-incoterm', [TipusIncotermController::class, 'index']);
+    Route::get('/tipos-incoterm/{id}', [TipusIncotermController::class, 'show']);
+    Route::post('/tipos-incoterm', [TipusIncotermController::class, 'store']);
+    Route::put('/tipos-incoterm/{id}', [TipusIncotermController::class, 'update']);
+    Route::delete('/tipos-incoterm/{id}', [TipusIncotermController::class, 'destroy']);
+
+    // Tracking de Ofertas
+    Route::get('/tracking-oferta/{ofertaId}', [TrackingOfertaController::class, 'show']);
+    Route::post('/tracking-oferta/update-step', [TrackingOfertaController::class, 'updateCurrentStep']);
+    Route::get('/tracking-oferta/available-steps/{incotermId}', [TrackingOfertaController::class, 'getAvailableSteps']);
 
     // Operaciones
     Route::get('/operaciones/stats', [OperacionesController::class, 'stats']);

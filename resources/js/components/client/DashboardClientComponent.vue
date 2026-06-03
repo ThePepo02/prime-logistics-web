@@ -136,7 +136,6 @@ const dashboard = reactive({
     },
 });
 
-const chartData = ref([]);
 const recentOrders = ref([]);
 
 const userLabel = computed(() => {
@@ -172,7 +171,6 @@ const statusClass = (status) => {
 const loadDashboard = async () => {
     const { data } = await window.axios.get('/api/client/dashboard');
     dashboard.kpis = data.kpis;
-    chartData.value = data.chartData;
     recentOrders.value = data.recentOrders.slice(0, 3);
 };
 

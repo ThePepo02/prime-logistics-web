@@ -2,22 +2,33 @@
 
 namespace App\Models;
 
-use App\Models\TipusIncoterm;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Modelo Incoterm - Representa los tipos de incoterm
+ * 
+ * Los incoterms (International Commercial Terms) son los términos 
+ * estandarizados utilizados en el comercio internacional para indicar
+ * las responsabilidades de comprador y vendedor en la entrega.
+ * 
+ * Ejemplos: CIF, FOB, DDP, etc.
+ */
 class Incoterm extends Model
 {
     protected $table = 'incoterms';
     public $timestamps = false;
 
+    protected $fillable = [
+        'codi',
+        'nom',
+        'descripcio'
+    ];
+
     /**
-     * Get the tipus_incoterms that owns the Incoterm
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * Los tipos de incoterm pueden tener pasos de tracking
      */
-    public function tipus_incoterms(): BelongsTo
+    public function trackingSteps()
     {
-        return $this->belongsTo(TipusIncoterm::class, 'foreign_key', 'other_key');
+        return $this->hasMany(TrackingStep::class, 'incoterm_id');
     }
 }
