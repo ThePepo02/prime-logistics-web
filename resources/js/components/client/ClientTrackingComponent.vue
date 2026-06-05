@@ -5,7 +5,6 @@
                 <img :src="logoSrc" alt="Prime Logistics" />
             </div>
 
-
             <p class="section-title">Principal</p>
             <ul class="menu">
                 <li><a href="/cliente/dashboard">Dashboard</a></li>
@@ -15,12 +14,10 @@
                 <li><a href="/cliente/notificaciones">Notificaciones</a> <span class="dot"></span></li>
             </ul>
 
-
             <p class="section-title muted">Cuenta</p>
             <ul class="menu">
                 <li>Ajustes</li>
             </ul>
-
 
             <div class="user-card">
                 <span class="avatar">MG</span>
@@ -30,7 +27,6 @@
                 </div>
             </div>
         </aside>
-
 
         <main class="content">
             <header class="topbar">
@@ -43,7 +39,6 @@
                     <span class="mini-avatar">MG</span>
                 </div>
             </header>
-
 
             <section class="search-section">
                 <div class="search-box">
@@ -60,7 +55,6 @@
                 <div v-if="loading" class="loading">Cargando tracking...</div>
             </section>
 
-
             <section v-if="tracking && !loading" class="tracking-content">
                 <article class="panel tracking-header">
                     <div class="header-info">
@@ -71,8 +65,16 @@
                         <div class="progress-fill" :style="{ width: tracking.progress + '%' }"></div>
                         <span class="progress-text">{{ tracking.progress }}%</span>
                     </div>
+                    <!-- BOTÓN SIGUIENTE PASO -->
+                    <button
+                        v-if="tracking.progress < 100"
+                        @click="advanceTracking"
+                        class="search-btn advance-btn"
+                    >
+                        Siguiente paso →
+                    </button>
+                    <p v-else class="completed-text">✅ Envío completado</p>
                 </article>
-
 
                 <div class="grid-tracking">
                     <article class="panel timeline-section">
@@ -93,7 +95,6 @@
                             </div>
                         </div>
                     </article>
-
 
                     <aside class="right-panel">
                         <article class="panel details-section">
@@ -128,7 +129,6 @@
                             </div>
                         </article>
 
-
                         <article class="panel agent-section">
                             <h3>Agente de aduana</h3>
                             <div class="agent-info">
@@ -136,7 +136,6 @@
                                 <p class="agent-contact">📧 {{ tracking.agent.contact }}</p>
                             </div>
                         </article>
-
 
                         <article class="panel route-section">
                             <h3>Ruta</h3>
@@ -156,7 +155,6 @@
                 </div>
             </section>
 
-
             <section v-else-if="!loading && !tracking" class="empty-state">
                 <div class="empty-box">
                     <p class="empty-icon">📦</p>
@@ -167,17 +165,15 @@
     </div>
 </template>
 
-
 <script setup>
 import { onMounted, ref } from 'vue';
-
 
 const logoSrc = '/images/prime-logistics-logo.svg';
 const searchQuery = ref('');
 const tracking = ref(null);
 const loading = ref(false);
 const error = ref('');
-
+const currentOfferId = ref(null); // ← NUEVO
 
 const searchTracking = async () => {
     if (!searchQuery.value.trim()) {
@@ -185,21 +181,18 @@ const searchTracking = async () => {
         return;
     }
 
-
     error.value = '';
     loading.value = true;
-
 
     try {
         const query = searchQuery.value.trim();
         const isNumeric = /^\d+$/.test(query);
 
-
         const params = isNumeric ? { offer_id: query } : { code: query };
-        const { data } = await window.axios.get('/api/client/tracking', { params });
-
+        const { data } = await window.axios.get('/client/tracking', { params });
 
         tracking.value = data;
+        currentOfferId.value = data.id; // ← NUEVO
         error.value = '';
     } catch (err) {
         tracking.value = null;
@@ -210,13 +203,20 @@ const searchTracking = async () => {
     }
 };
 
+// ── NUEVO MÉTODO ─────────────────────────────────────────────────
+const advanceTracking = async () => {
+    try {
+        await window.axios.post('/client/tracking/advance', { offer_id: currentOfferId.value });
+        await searchTracking(); // recarga el tracking actualizado
+    } catch (err) {
+        error.value = err.response?.data?.error || 'Error al avanzar el paso';
+    }
+};
 
 onMounted(() => {
-    // Si viene con parámetros en la URL, buscar automáticamente
     const params = new URLSearchParams(window.location.search);
     const offerId = params.get('offer_id');
     const code = params.get('code');
-
 
     if (offerId || code) {
         searchQuery.value = offerId || code;
@@ -225,12 +225,8 @@ onMounted(() => {
 });
 </script>
 
-
-
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap');
-
 
 .tracking-shell {
     min-height: 100vh;
@@ -241,7 +237,6 @@ onMounted(() => {
     color: #152238;
 }
 
-
 .sidebar {
     background: linear-gradient(180deg, #0a2243 0%, #071a33 100%);
     color: #dbe7ff;
@@ -251,42 +246,33 @@ onMounted(() => {
     gap: 0.7rem;
 }
 
-
 .brand { padding: 0.2rem 0.5rem 0.9rem; }
 .brand img { height: 30px; object-fit: contain; }
 
-
 .section-title { margin: 0.5rem 0 0.2rem; text-transform: uppercase; font-size: 0.67rem; letter-spacing: 0.08em; opacity: 0.8; }
 .section-title.muted { margin-top: 0.9rem; opacity: 0.58; }
-
 
 .menu { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.26rem; }
 .menu li { padding: 0.6rem 0.72rem; border-radius: 9px; font-size: 0.82rem; display: flex; align-items: center; justify-content: space-between; color: #c6d8fb; }
 .menu li a { color: inherit; text-decoration: none; }
 .menu li.active { background: #ff7e26; color: #fff; font-weight: 700; }
 
-
 .dot { width: 8px; height: 8px; border-radius: 50%; background: #ff7e26; }
-
 
 .user-card { margin-top: auto; padding-top: 0.9rem; border-top: 1px solid rgba(198, 216, 251, 0.17); display: flex; align-items: center; gap: 0.65rem; }
 .avatar { width: 34px; height: 34px; border-radius: 50%; background: #2d65b0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
 .user-card strong { font-size: 0.75rem; display: block; }
 .user-card small { opacity: 0.75; font-size: 0.68rem; }
 
-
 .content { padding: 1rem 1.1rem; }
 .topbar { background: #f3f5f8; border: 1px solid #d6dee8; border-radius: 12px; padding: 0.8rem 1rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
 h1 { margin: 0; font-size: 1rem; font-weight: 800; }
 .topbar p { margin: 0.12rem 0 0; font-size: 0.72rem; color: #607089; }
 
-
 .actions { display: flex; align-items: center; gap: 0.5rem; }
 .icon-btn { border: 1px solid #d2dae6; background: #fff; width: 30px; height: 30px; border-radius: 50%; }
 .mini-avatar { width: 30px; height: 30px; border-radius: 50%; background: #dce8fb; color: #2d65b0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; }
 
-
-/* Search Section */
 .search-section { margin-bottom: 1rem; }
 .search-box { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
 .search-input { flex: 1; border: 1px solid #d6dee8; border-radius: 8px; padding: 0.7rem; font-size: 0.82rem; background: #fff; color: #152238; }
@@ -294,15 +280,11 @@ h1 { margin: 0; font-size: 1rem; font-weight: 800; }
 .search-btn { border: 0; background: #ff7e26; color: #fff; padding: 0.7rem 1.5rem; border-radius: 8px; font-weight: 700; cursor: pointer; }
 .search-btn:hover { background: #e56d0f; }
 
-
 .error-message { color: #c41e3a; background: #ffe0e0; border: 1px solid #ffb8c1; border-radius: 8px; padding: 0.6rem; font-size: 0.82rem; }
 .loading { color: #2d65b0; background: #e8f0ff; border: 1px solid #cfe0f8; border-radius: 8px; padding: 0.6rem; font-size: 0.82rem; text-align: center; }
 
-
-/* Tracking Content */
 .panel { background: #f7f9fc; border: 1px solid #d6dee8; border-radius: 9px; padding: 0.8rem; }
 .panel h3 { margin: 0 0 0.6rem; font-size: 0.88rem; }
-
 
 .tracking-header { margin-bottom: 0.8rem; }
 .header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
@@ -312,24 +294,20 @@ h1 { margin: 0; font-size: 1rem; font-weight: 800; }
 .status.completado { background: #e8f7ec; color: #2d8a54; }
 .status.en_curso { background: #eaf2ff; color: #2f69bd; }
 
-
 .progress-bar { width: 100%; height: 8px; background: #e0e8f0; border-radius: 10px; overflow: hidden; position: relative; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, #ff7e26, #ffa850); border-radius: 10px; transition: width 0.3s; }
 .progress-text { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 0.7rem; font-weight: 700; color: #152238; }
 
+.advance-btn { margin-top: 0.8rem; width: 100%; }
+.completed-text { margin-top: 0.8rem; text-align: center; color: #2d8a54; font-weight: 700; font-size: 0.85rem; }
 
-/* Grid Layout */
 .grid-tracking { display: grid; grid-template-columns: 2fr 1fr; gap: 0.8rem; }
 
-
-/* Timeline */
-.timeline-section { }
 .timeline { display: grid; gap: 0.8rem; }
 .timeline-item { display: flex; gap: 0.8rem; }
 .timeline-item.completed .timeline-marker { color: #2d8a54; background: #e8f7ec; }
 .timeline-item.current .timeline-marker { color: #2f69bd; background: #eaf2ff; }
 .timeline-item.pending .timeline-marker { color: #a0b0c5; background: #f0f3f8; }
-
 
 .timeline-marker { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; font-size: 1.2rem; }
 .timeline-content { flex: 1; }
@@ -337,41 +315,26 @@ h1 { margin: 0; font-size: 1rem; font-weight: 800; }
 .timeline-content .status-text { color: #7a8aa2; font-size: 0.73rem; margin: 0.15rem 0; }
 .timeline-content small { color: #a0b0c5; font-size: 0.68rem; }
 
-
-/* Right Panel */
 .right-panel { display: grid; gap: 0.8rem; align-content: start; }
 
-
-/* Details Section */
-.details-section { }
 .detail-item { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; padding-bottom: 0.6rem; border-bottom: 1px solid #e0e8f0; }
 .detail-item:last-child { border-bottom: 0; }
 .detail-item .label { font-size: 0.73rem; color: #7a8aa2; }
 .detail-item strong { font-size: 0.82rem; text-align: right; }
 
-
-/* Agent Section */
-.agent-section { }
-.agent-info { }
 .agent-name { margin: 0; font-size: 0.85rem; font-weight: 700; }
 .agent-contact { margin: 0.4rem 0 0; font-size: 0.73rem; color: #7a8aa2; }
 
-
-/* Route Section */
-.route-section { }
 .route-info { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .route-point { text-align: center; flex: 1; }
 .route-point strong { display: block; font-size: 0.73rem; color: #7a8aa2; margin-bottom: 0.3rem; }
 .route-point p { margin: 0; font-size: 0.82rem; font-weight: 700; }
 .route-arrow { color: #ff7e26; font-size: 1.2rem; }
 
-
-/* Empty State */
 .empty-state { display: flex; align-items: center; justify-content: center; min-height: 400px; }
 .empty-box { text-align: center; }
 .empty-icon { font-size: 4rem; margin: 0 0 1rem; }
 .empty-text { font-size: 1rem; color: #7a8aa2; margin: 0; }
-
 
 @media (max-width: 1200px) {
     .tracking-shell { grid-template-columns: 1fr; }
@@ -379,12 +342,3 @@ h1 { margin: 0; font-size: 1rem; font-weight: 800; }
     .right-panel { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
 }
 </style>
-
-
-
-
-
-
-
-
-

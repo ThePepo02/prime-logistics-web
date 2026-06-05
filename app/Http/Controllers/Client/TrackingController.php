@@ -1,12 +1,6 @@
 <?php
 
-
-
-
 namespace App\Http\Controllers\Client;
-
-
-
 
 use App\Http\Controllers\Controller;
 use App\Models\Oferta;
@@ -14,26 +8,20 @@ use App\Models\TrackingStep;
 use App\Models\Notificacio;
 use Illuminate\Http\Request;
 
-
-
-
 class TrackingController extends Controller
 {
     public function show(Request $request)
     {
         try {
-            // Buscar oferta por offer_id o code
             $offer_id = $request->query('offer_id');
             $code = $request->query('code');
            
             $oferta = null;
            
             if ($offer_id) {
-                // Buscar por ID directo (más rápido)
                 $oferta = Oferta::with(['client', 'tipusTransport', 'incoterm', 'port_origen', 'port_desti', 'transportista', 'operador', 'estatOferta'])
                     ->find($offer_id);
             } elseif ($code) {
-                // Buscar por código (OC-2024-018) buscando en notificaciones
                 $notificacion = Notificacio::where('entitat_tipus', 'envio')
                     ->where(function($q) use ($code) {
                         $q->where('titol', 'like', '%' . $code . '%')
@@ -48,21 +36,13 @@ class TrackingController extends Controller
             }
            
             if (!$oferta) {
-                return response()->json([
-                    'error' => 'Oferta no encontrada'
-                ], 404);
+                return response()->json(['error' => 'Oferta no encontrada'], 404);
             }
            
-            // Obtener el código real de las notificaciones
             $offerCode = $this->extractOfferCodeFromNotification($oferta->id);
-           
-            // Construir la ruta (puertos para marítimo, aeropuertos para aéreo)
             $route = $this->buildRoute($oferta);
-           
-            // Obtener todos los tracking steps disponibles
             $trackingSteps = TrackingStep::orderBy('ordre', 'asc')->get();
            
-            // Construir la respuesta
             $currentStep = (int)($oferta->tracking_actual ?? 1);
             $totalSteps = $trackingSteps->count();
             $progress = $totalSteps > 0 ? round(($currentStep / $totalSteps) * 100) : 0;
@@ -82,6 +62,7 @@ class TrackingController extends Controller
             })->toArray();
            
             return response()->json([
+                'id' => $oferta->id, // ← añadido para el botón de avanzar
                 'code' => $offerCode ?? 'OC-' . str_pad($oferta->id, 6, '0', STR_PAD_LEFT),
                 'route' => $this->formatRoute($oferta),
                 'status' => $oferta->estatOferta?->nom ?? 'Pendiente',
@@ -111,26 +92,43 @@ class TrackingController extends Controller
         }
     }
 
+    // ── NUEVO MÉTODO ─────────────────────────────────────────────
+    public function advance(Request $request)
+    {
+        try {
+            $oferta = Oferta::find($request->input('offer_id'));
 
+            if (!$oferta) {
+                return response()->json(['error' => 'Oferta no encontrada'], 404);
+            }
 
+            $totalSteps = TrackingStep::count();
+            $currentStep = (int)($oferta->tracking_actual ?? 1);
 
-    /**
-     * Construye la ruta en formato array considerando tanto puertos como aeropuertos
-     */
+            if ($currentStep >= $totalSteps) {
+                return response()->json(['error' => 'Ya está en el último paso'], 400);
+            }
+
+            $oferta->tracking_actual = $currentStep + 1;
+            $oferta->save();
+
+            return response()->json(['tracking_actual' => $oferta->tracking_actual]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     private function formatRoute($oferta)
     {
         $origen = 'Origen';
         $destino = 'Destino';
        
-        // Si tiene puertos (marítimo)
         if ($oferta->port_origen_id) {
             $origen = $oferta->port_origen?->nom ?? 'Origen';
         }
         if ($oferta->port_desti_id) {
             $destino = $oferta->port_desti?->nom ?? 'Destino';
         }
-       
-        // Si tiene aeropuertos (aéreo)
         if ($oferta->aeroport_origen_id && !$oferta->port_origen_id) {
             $aeroOrigen = \App\Models\Aeroport::find($oferta->aeroport_origen_id);
             $origen = $aeroOrigen?->nom ?? 'Aeropuerto Origen';
@@ -140,32 +138,20 @@ class TrackingController extends Controller
             $destino = $aeroDesti?->nom ?? 'Aeropuerto Destino';
         }
        
-        return [
-            'origin' => $origen,
-            'destination' => $destino
-        ];
+        return ['origin' => $origen, 'destination' => $destino];
     }
 
-
-
-
-    /**
-     * Construye la ruta considerando tanto puertos como aeropuertos (anterior)
-     */
     private function buildRoute($oferta)
     {
         $origen = 'Origen';
         $destino = 'Destino';
        
-        // Si tiene puertos (marítimo)
         if ($oferta->port_origen_id) {
             $origen = $oferta->port_origen?->nom ?? 'Origen';
         }
         if ($oferta->port_desti_id) {
             $destino = $oferta->port_desti?->nom ?? 'Destino';
         }
-       
-        // Si tiene aeropuertos (aéreo)
         if ($oferta->aeroport_origen_id && !$oferta->port_origen_id) {
             $aeroOrigen = \App\Models\Aeroport::find($oferta->aeroport_origen_id);
             $origen = $aeroOrigen?->nom ?? 'Aeropuerto Origen';
@@ -174,8 +160,6 @@ class TrackingController extends Controller
             $aeroDesti = \App\Models\Aeroport::find($oferta->aeroport_desti_id);
             $destino = $aeroDesti?->nom ?? 'Aeropuerto Destino';
         }
-       
-        // Fallback al comentario si no hay rutas especificadas
         if ($origen === 'Origen' && $destino === 'Destino' && $oferta->comentaris) {
             return $oferta->comentaris;
         }
@@ -183,12 +167,6 @@ class TrackingController extends Controller
         return $origen . ' → ' . $destino;
     }
 
-
-
-
-    /**
-     * Extrae el código real de la oferta de las notificaciones
-     */
     private function extractOfferCodeFromNotification($oferta_id)
     {
         $notificacion = Notificacio::where('entitat_id', $oferta_id)
@@ -203,26 +181,3 @@ class TrackingController extends Controller
         return null;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

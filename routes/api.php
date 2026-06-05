@@ -36,6 +36,7 @@ Route::prefix('client')->group(function () {
     Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/tracking', [TrackingController::class, 'show']);
+    Route::post('/tracking/advance', [TrackingController::class, 'advance']);
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/accept-offer', [NotificationController::class, 'accept']);
     Route::post('/reject-offer', [NotificationController::class, 'reject']);
@@ -47,6 +48,7 @@ Route::prefix('client')->group(function () {
     Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/tracking', [TrackingController::class, 'show']);
+    Route::post('/tracking/advance', [TrackingController::class, 'advance']);
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/accept-offer', [NotificationController::class, 'accept']);
     Route::post('/reject-offer', [NotificationController::class, 'reject']);
