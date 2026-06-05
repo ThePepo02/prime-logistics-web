@@ -1,12 +1,15 @@
 <?php
 
+
 namespace App\Models;
+
 
 use Illuminate\Database\Eloquent\Model;
 
+
 /**
  * Modelo Oferta - Representa las ofertas de transporte logístico
- * 
+ *
  * Una oferta es una propuesta de transporte de mercancías que incluye
  * información del cliente, ruta, tipo de transporte, carga, etc.
  */
@@ -14,6 +17,7 @@ class Oferta extends Model
 {
     protected $table = 'ofertes';
     public $timestamps = false;
+
 
     protected $fillable = [
         'tipus_transport_id',         // Tipo de transporte
@@ -42,15 +46,18 @@ class Oferta extends Model
         'estat_envio_id',             // Estado del envío
     ];
 
+
     // Relaciones
+
 
     /**
      * La oferta pertenece a un cliente (usuario)
      */
     public function client()
     {
-        return $this->belongsTo(User::class, 'client_id');
+        return $this->belongsTo(Usuarios::class, 'client_id');
     }
+
 
     /**
      * La oferta tiene un estado
@@ -60,6 +67,7 @@ class Oferta extends Model
         return $this->belongsTo(EstatOferta::class, 'estat_oferta_id');
     }
 
+
     /**
      * La oferta tiene un tipo de transporte
      */
@@ -67,6 +75,7 @@ class Oferta extends Model
     {
         return $this->belongsTo(TipusTransport::class, 'tipus_transport_id');
     }
+
 
     /**
      * La oferta tiene un incoterm (término comercial)
@@ -76,6 +85,43 @@ class Oferta extends Model
         return $this->belongsTo(Incoterm::class, 'incoterm_id');
     }
 
+
+    /**
+     * La oferta tiene un puerto origen
+     */
+    public function port_origen()
+    {
+        return $this->belongsTo(Port::class, 'port_origen_id');
+    }
+
+
+    /**
+     * La oferta tiene un puerto destino
+     */
+    public function port_desti()
+    {
+        return $this->belongsTo(Port::class, 'port_desti_id');
+    }
+
+
+    /**
+     * La oferta tiene un transportista
+     */
+    public function transportista()
+    {
+        return $this->belongsTo(Transportista::class, 'transportista_id');
+    }
+
+
+    /**
+     * La oferta tiene un operador asignado
+     */
+    public function operador()
+    {
+        return $this->belongsTo(Usuarios::class, 'operador_id');
+    }
+
+
     /**
      * La oferta puede tener múltiples pasos de tracking
      */
@@ -83,6 +129,7 @@ class Oferta extends Model
     {
         return $this->hasMany(TrackingStep::class, 'oferta_id');
     }
+
 
     /**
      * La oferta tiene un envío asociado
@@ -92,3 +139,8 @@ class Oferta extends Model
         return $this->hasOne(Envio::class, 'oferta_id');
     }
 }
+
+
+
+
+

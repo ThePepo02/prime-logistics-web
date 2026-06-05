@@ -1,12 +1,15 @@
 <?php
 
+
 namespace App\Http\Controllers\Client;
+
 
 use App\Http\Controllers\Controller;
 use App\Models\Notificacio;
 use App\Models\TrackingStep;
 use App\Models\Oferta;
 use Illuminate\Http\Request;
+
 
 class NotificationController extends Controller
 {
@@ -28,16 +31,19 @@ class NotificationController extends Controller
                 'secondary' => null,
                 'entitat_tipus' => $n->entitat_tipus,
                 'entitat_id' => $n->entitat_id,
+                'offer_code' => $this->extractOfferCode($n->titol, $n->missatge),
                 'tracking_id' => $this->getTrackingId($n->entitat_tipus, $n->entitat_id, $n->tipus),
             ])->toArray();
 
+
             $unreadCount = Notificacio::where('llegida', false)->count();
+
 
             return response()->json([
                 'notices' => $notices,
                 'priority' => $notices[0] ?? null,
                 'stats' => [
-                    'unread' => $unreadCount, 
+                    'unread' => $unreadCount,
                     'total' => Notificacio::count(),
                     'pending_action' => $unreadCount,
                     'resolved_month' => Notificacio::where('llegida', true)->count()
@@ -58,27 +64,41 @@ class NotificationController extends Controller
         }
     }
 
-    private function getTrackingId($entitat_tipus, $entitat_id, $tipus)
+
+    /**
+     * Extrae el código de la oferta del título o mensaje
+     * Busca patrones como OC-2024-018, OC-2025-023, etc.
+     */
+    private function extractOfferCode($titulo, $mensaje)
     {
-        // Si es de tipo envio, usar entitat_id como tracking_id
-        if (!empty($tipus)) {
-            $tipus_check = strtolower(trim($tipus));
-            if ($tipus_check === 'envio' || strpos($tipus_check, 'envio') !== false) {
-                return $entitat_id;
-            }
+        $text = $titulo . ' ' . $mensaje;
+        if (preg_match('/OC-\d{4}-\d{3,}/', $text, $matches)) {
+            return $matches[0];
         }
-        
-        if (!empty($entitat_tipus) && $entitat_id) {
-            if ($entitat_tipus === 'TrackingStep') {
-                $step = TrackingStep::find($entitat_id);
-                return $step?->oferta_id;
-            } elseif ($entitat_tipus === 'Oferta') {
-                return $entitat_id;
-            }
-        }
-        
         return null;
     }
+
+
+    private function getTrackingId($entitat_tipus, $entitat_id, $tipus)
+    {
+        // Normalizar entitat_tipus a minúsculas para comparación
+        $entitat_tipus_check = strtolower(trim($entitat_tipus ?? ''));
+       
+        // Si es de tipo envio, retornar el ID de entidad como tracking_id
+        if ($entitat_tipus_check === 'envio' && $entitat_id) {
+            return $entitat_id;
+        }
+       
+        // Si es TrackingStep, obtener el oferta_id relacionado
+        if ($entitat_tipus_check === 'trackingstep' && $entitat_id) {
+            $step = TrackingStep::find($entitat_id);
+            return $step?->oferta_id;
+        }
+       
+        // Las notificaciones de tipo oferta no tienen tracking_id
+        return null;
+    }
+
 
     public function accept(Request $request)
     {
@@ -91,6 +111,7 @@ class NotificationController extends Controller
         }
     }
 
+
     public function reject(Request $request)
     {
         try {
@@ -102,3 +123,6 @@ class NotificationController extends Controller
         }
     }
 }
+
+
+
