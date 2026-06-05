@@ -10,6 +10,7 @@ class Transportista extends Model
 {
     protected $table = 'transportistes';
     public $timestamps = false;
+    protected $fillable = ['id', 'nom', 'ciutat_id'];
 
     /**
      * Get the ciutats that owns the Transportista

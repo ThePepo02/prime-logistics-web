@@ -16,37 +16,30 @@ class Oferta extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'tipus_transport_id',
-        'tipus_fluxe_id',
-        'tipus_carrega_id',
-        'incoterm_id',
-        'client_id',
-        'comentaris',
-        'agent_comercial_id',
-        'transportista_id',
-        'pes_brut',
-        'volum',
-        'tipus_validacio_id',
-        'port_origen_id',
-        'port_desti_id',
-        'aeroport_origen_id',
-        'aeroport_desti_id',
-        'linia_transport_maritim_id',
-        'estat_oferta_id',
-        'operador_id',
-        'data_creacio',
-        'data_validessa_inicial',
-        'data_validessa_final',
-        'rao_rebuig',
-        'tipus_contenidor_id',
-        'estat_envio_id',
-        'tracking_actual'
-    ];
-
-    protected $casts = [
-        'data_creacio' => 'datetime',
-        'data_validessa_inicial' => 'datetime',
-        'data_validessa_final' => 'datetime',
+        'tipus_transport_id',         // Tipo de transporte
+        'tipus_fluxe_id',             // Flujo (importación/exportación)
+        'tipus_carrega_id',           // Tipo de carga
+        'incoterm_id',                // Condiciones de entrega
+        'client_id',                  // Cliente asignado
+        'comentaris',                 // Ruta o nota (ej: Barcelona → NY)
+        'agent_comercial_id',         // Agente comercial
+        'transportista_id',           // Transportista
+        'pes_brut',                   // Peso en kg
+        'volum',                      // Volumen en m³
+        'tipus_validacio_id',         // Tipo de validación
+        'port_origen_id',             // Puerto origen
+        'port_desti_id',              // Puerto destino
+        'aeroport_origen_id',         // Aeropuerto origen
+        'aeroport_desti_id',          // Aeropuerto destino
+        'linia_transport_maritim_id', // Línea marítima
+        'estat_oferta_id',            // Estado de la oferta
+        'operador_id',                // Operador que la gestiona
+        'data_creacio',               // Fecha de creación
+        'data_validessa_inicial',     // Inicio de validez
+        'data_validessa_fina',        // Fin de validez
+        'rao_rebuig',                 // Razón de rechazo
+        'tipus_contenidor_id',        // Tipo de contenedor
+        'estat_envio_id',             // Estado del envío
     ];
 
     // Relaciones

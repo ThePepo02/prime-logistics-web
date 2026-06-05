@@ -6,10 +6,11 @@ use App\Models\Incoterm;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class TipusIncoterms extends Model
+class TipusIncoterm extends Model
 {
     protected $table = 'tipus_incoterms';
     public $timestamps = false;
+    protected $fillable = ['id', 'codi', 'nom'];
 
     /**
      * Get the incoterms that owns the TipusIncoterms

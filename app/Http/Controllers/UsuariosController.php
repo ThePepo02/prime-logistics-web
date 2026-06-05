@@ -61,6 +61,14 @@ class UsuariosController extends Controller
     public function destroy(Usuarios $usuarios)
     {
         $usuarios = Usuarios::find($usuarios->id);
+
+         // Prevenir eliminación del admin
+            if (strtolower($usuarios->name) === 'admin') {
+                return response()->json([
+                    'error' => 'No se puede eliminar el usuario administrador principal'
+                ], 403);
+            }
+
         $usuarios->delete();
         return new UsuariosResource($usuarios);
     }
