@@ -12,15 +12,21 @@ export default defineConfig({
         tailwindcss(),
         vue(),
     ],
-    server: {
-        watch: {
-            ignored: ['**/storage/framework/views/**'],
-        },
-        hmr: {
-            host: 'localhost',
-            port: 5173,
-        },
+   server: {
+    proxy: {
+        '/api': {
+            target: 'http://localhost:8000',
+            changeOrigin: true,
+        }
     },
+    watch: {
+        ignored: ['**/storage/framework/views/**'],
+    },
+    hmr: {
+        host: 'localhost',
+        port: 5173,
+    },
+},
     resolve: {
         alias: {
             '@': '/resources',

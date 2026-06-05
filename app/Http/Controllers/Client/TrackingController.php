@@ -1,7 +1,11 @@
 <?php
 
 
+
+
 namespace App\Http\Controllers\Client;
+
+
 
 
 use App\Http\Controllers\Controller;
@@ -9,6 +13,8 @@ use App\Models\Oferta;
 use App\Models\TrackingStep;
 use App\Models\Notificacio;
 use Illuminate\Http\Request;
+
+
 
 
 class TrackingController extends Controller
@@ -77,7 +83,7 @@ class TrackingController extends Controller
            
             return response()->json([
                 'code' => $offerCode ?? 'OC-' . str_pad($oferta->id, 6, '0', STR_PAD_LEFT),
-                'route' => $route,
+                'route' => $this->formatRoute($oferta),
                 'status' => $oferta->estatOferta?->nom ?? 'Pendiente',
                 'progress' => $progress,
                 'details' => [
@@ -106,8 +112,45 @@ class TrackingController extends Controller
     }
 
 
+
+
     /**
-     * Construye la ruta considerando tanto puertos como aeropuertos
+     * Construye la ruta en formato array considerando tanto puertos como aeropuertos
+     */
+    private function formatRoute($oferta)
+    {
+        $origen = 'Origen';
+        $destino = 'Destino';
+       
+        // Si tiene puertos (marítimo)
+        if ($oferta->port_origen_id) {
+            $origen = $oferta->port_origen?->nom ?? 'Origen';
+        }
+        if ($oferta->port_desti_id) {
+            $destino = $oferta->port_desti?->nom ?? 'Destino';
+        }
+       
+        // Si tiene aeropuertos (aéreo)
+        if ($oferta->aeroport_origen_id && !$oferta->port_origen_id) {
+            $aeroOrigen = \App\Models\Aeroport::find($oferta->aeroport_origen_id);
+            $origen = $aeroOrigen?->nom ?? 'Aeropuerto Origen';
+        }
+        if ($oferta->aeroport_desti_id && !$oferta->port_desti_id) {
+            $aeroDesti = \App\Models\Aeroport::find($oferta->aeroport_desti_id);
+            $destino = $aeroDesti?->nom ?? 'Aeropuerto Destino';
+        }
+       
+        return [
+            'origin' => $origen,
+            'destination' => $destino
+        ];
+    }
+
+
+
+
+    /**
+     * Construye la ruta considerando tanto puertos como aeropuertos (anterior)
      */
     private function buildRoute($oferta)
     {
@@ -141,6 +184,8 @@ class TrackingController extends Controller
     }
 
 
+
+
     /**
      * Extrae el código real de la oferta de las notificaciones
      */
@@ -158,6 +203,20 @@ class TrackingController extends Controller
         return null;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

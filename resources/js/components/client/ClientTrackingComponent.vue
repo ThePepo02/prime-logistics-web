@@ -1,5 +1,5 @@
 <template>
-    <div class="notifications-shell">
+    <div class="tracking-shell">
         <aside class="sidebar">
             <div class="brand">
                 <img :src="logoSrc" alt="Prime Logistics" />
@@ -11,8 +11,8 @@
                 <li><a href="/cliente/dashboard">Dashboard</a></li>
                 <li><a href="/cliente/nuevo-pedido">Nuevo Pedido</a></li>
                 <li><a href="/cliente/mis-pedidos">Mis Pedidos</a> <span class="dot"></span></li>
-                <li><a href="/cliente/tracking">Tracking</a></li>
-                <li class="active">Notificaciones <span class="dot"></span></li>
+                <li class="active"><a href="/cliente/tracking">Tracking</a></li>
+                <li><a href="/cliente/notificaciones">Notificaciones</a> <span class="dot"></span></li>
             </ul>
 
 
@@ -35,91 +35,133 @@
         <main class="content">
             <header class="topbar">
                 <div>
-                    <h1>Notificaciones</h1>
-                    <p>Centro de mensajes y alertas</p>
+                    <h1>Tracking</h1>
+                    <p>Rastreo de envíos y ofertas</p>
                 </div>
                 <div class="actions">
-                    <button class="mark-read" type="button">Marcar todo como leido</button>
                     <button class="icon-btn" type="button">🔔</button>
                     <span class="mini-avatar">MG</span>
                 </div>
             </header>
 
 
-            <section class="grid-main">
-                <article class="panel inbox">
-                    <div class="inbox-head">
-                        <h2>Bandeja de entrada</h2>
-                        <div class="tabs">
-                            <button class="active">Todas</button>
-                            <button>No leidas - {{ stats.unread }}</button>
-                            <button>Ofertas</button>
-                            <button>Sistema</button>
-                        </div>
+            <section class="search-section">
+                <div class="search-box">
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Buscar por código de oferta (ej: OC-2024-001) o ID"
+                        @keyup.enter="searchTracking"
+                        class="search-input"
+                    />
+                    <button @click="searchTracking" class="search-btn">Buscar</button>
+                </div>
+                <div v-if="error" class="error-message">{{ error }}</div>
+                <div v-if="loading" class="loading">Cargando tracking...</div>
+            </section>
+
+
+            <section v-if="tracking && !loading" class="tracking-content">
+                <article class="panel tracking-header">
+                    <div class="header-info">
+                        <h2>{{ tracking.code }}</h2>
+                        <p class="status" :class="tracking.status.toLowerCase()">{{ tracking.status }}</p>
                     </div>
-
-
-                    <ul class="notice-list">
-                        <li v-for="notice in notices" :key="notice.id" class="notice-item" :class="{ featured: notice.featured, selected: priority.id === notice.id }" @click="selectNotice(notice)">
-                            <div class="bullet"></div>
-                            <div class="notice-content">
-                                <h3>{{ notice.title }}</h3>
-                                <p>{{ notice.message }}</p>
-                                <div class="chips">
-                                    <span class="chip">{{ notice.code }}</span>
-                                    <span class="chip status" :class="notice.typeClass">{{ notice.type }}</span>
-                                </div>
-                                <small>{{ notice.time }}</small>
-                            </div>
-                            <div class="notice-actions">
-                                <button v-if="notice.tracking_id" type="button" class="action-btn" @click="handlePrimaryAction(notice)">Ver Tracking</button>
-                                <button v-else-if="notice.primary" type="button" class="action-btn" @click="handlePrimaryAction(notice)">{{ notice.primary }}</button>
-                                <button v-if="notice.secondary" type="button" class="action-btn ghost">{{ notice.secondary }}</button>
-                            </div>
-                        </li>
-                    </ul>
-
-
-                    <div class="list-footer">
-                        <small>Mostrando {{ notices.length }} de {{ stats.total }} notificaciones</small>
-                        <div class="pagination">
-                            <button type="button">&lt;</button>
-                            <button type="button" class="active">1</button>
-                            <button type="button">2</button>
-                            <button type="button">3</button>
-                            <button type="button">&gt;</button>
-                        </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" :style="{ width: tracking.progress + '%' }"></div>
+                        <span class="progress-text">{{ tracking.progress }}%</span>
                     </div>
                 </article>
 
 
-                <aside class="right-col">
-                    <article class="panel priority-card">
-                        <small class="tag">Accion requerida</small>
-                        <h3>{{ priority.title }}</h3>
-                        <p>{{ priority.message }}</p>
-                        <div class="offer-grid">
-                            <span>Codigo</span><strong>{{ priority.code }}</strong>
-                            <span>Tipo</span><strong class="highlight">{{ priority.type }}</strong>
-                            <span>Fecha</span><strong>{{ priority.time }}</strong>
+                <div class="grid-tracking">
+                    <article class="panel timeline-section">
+                        <h3>Timeline de envío</h3>
+                        <div class="timeline">
+                            <div
+                                v-for="(step, index) in tracking.timeline"
+                                :key="index"
+                                class="timeline-item"
+                                :class="step.state"
+                            >
+                                <div class="timeline-marker">{{ step.icon }}</div>
+                                <div class="timeline-content">
+                                    <h4>{{ step.title }}</h4>
+                                    <p class="status-text">{{ step.status }}</p>
+                                    <small>{{ step.date }}</small>
+                                </div>
+                            </div>
                         </div>
-                        <textarea readonly>{{ priority.message }}</textarea>
-                        <button v-if="priority.tracking_id" class="accept" type="button" @click="handlePrimaryAction(priority)">Ver Tracking</button>
-                        <button v-if="!priority.llegida" class="accept" type="button" @click="acceptOffer(priority.id)">Marcar como Leído</button>
-                        <button class="reject" type="button" @click="rejectOffer(priority.id)">Eliminar</button>
                     </article>
 
 
-                    <article class="panel status-card">
-                        <h3>Estado de notificaciones</h3>
-                        <ul>
-                            <li><span>No leidas</span><strong>{{ stats.unread }}</strong></li>
-                            <li><span>Pendientes accion</span><strong>{{ stats.pending_action }}</strong></li>
-                            <li><span>Resueltas este mes</span><strong>{{ stats.resolved_month }}</strong></li>
-                            <li><span>Total historico</span><strong>{{ stats.total }}</strong></li>
-                        </ul>
-                    </article>
-                </aside>
+                    <aside class="right-panel">
+                        <article class="panel details-section">
+                            <h3>Detalles del envío</h3>
+                            <div class="detail-item">
+                                <span class="label">Línea de transporte</span>
+                                <strong>{{ tracking.details.shipping_line }}</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Buque/Vuelo</span>
+                                <strong>{{ tracking.details.vessel }}</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Contenedor</span>
+                                <strong>{{ tracking.details.container }}</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Incoterm</span>
+                                <strong>{{ tracking.details.incoterm }}</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">ETD</span>
+                                <strong>{{ tracking.details.etd }}</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">ETA</span>
+                                <strong>{{ tracking.details.eta }}</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Días en tránsito</span>
+                                <strong>{{ tracking.details.days_in_transit }}</strong>
+                            </div>
+                        </article>
+
+
+                        <article class="panel agent-section">
+                            <h3>Agente de aduana</h3>
+                            <div class="agent-info">
+                                <p class="agent-name">{{ tracking.agent.name }}</p>
+                                <p class="agent-contact">📧 {{ tracking.agent.contact }}</p>
+                            </div>
+                        </article>
+
+
+                        <article class="panel route-section">
+                            <h3>Ruta</h3>
+                            <div class="route-info">
+                                <div class="route-point">
+                                    <strong>Origen</strong>
+                                    <p>{{ tracking.route.origin }}</p>
+                                </div>
+                                <div class="route-arrow">→</div>
+                                <div class="route-point">
+                                    <strong>Destino</strong>
+                                    <p>{{ tracking.route.destination }}</p>
+                                </div>
+                            </div>
+                        </article>
+                    </aside>
+                </div>
+            </section>
+
+
+            <section v-else-if="!loading && !tracking" class="empty-state">
+                <div class="empty-box">
+                    <p class="empty-icon">📦</p>
+                    <p class="empty-text">Ingresa un código de oferta para ver el tracking</p>
+                </div>
             </section>
         </main>
     </div>
@@ -127,89 +169,70 @@
 
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 
 const logoSrc = '/images/prime-logistics-logo.svg';
+const searchQuery = ref('');
+const tracking = ref(null);
+const loading = ref(false);
+const error = ref('');
 
 
-const notices = ref([]);
-const stats = reactive({
-    unread: 0,
-    pending_action: 0,
-    resolved_month: 0,
-    total: 0,
-});
-
-
-const priority = reactive({
-    title: '-',
-    message: '-',
-    code: '-',
-    type: '-',
-    time: '-',
-});
-
-
-const loadNotifications = async () => {
-    const { data } = await window.axios.get('/client/notifications');
-    notices.value = data.notices;
-    Object.assign(stats, data.stats);
-
-
-    if (data.priority) {
-        Object.assign(priority, data.priority);
+const searchTracking = async () => {
+    if (!searchQuery.value.trim()) {
+        error.value = 'Por favor ingresa un código o ID';
+        return;
     }
-};
 
 
-const selectNotice = (notice) => {
-    Object.assign(priority, notice);
-};
+    error.value = '';
+    loading.value = true;
 
 
-const handlePrimaryAction = (notice) => {
-    if (notice.tracking_id && notice.offer_code) {
-        window.location.href = `/cliente/tracking?code=${notice.offer_code}&offer_id=${notice.tracking_id}`;
-    }
-};
-
-
-const acceptOffer = async (notificationId) => {
     try {
-        await window.axios.post('/client/accept-offer', { notification_id: notificationId });
-        await loadNotifications();
-    } catch (error) {
-        console.error('Error marking notification as read', error);
+        const query = searchQuery.value.trim();
+        const isNumeric = /^\d+$/.test(query);
+
+
+        const params = isNumeric ? { offer_id: query } : { code: query };
+        const { data } = await window.axios.get('/api/client/tracking', { params });
+
+
+        tracking.value = data;
+        error.value = '';
+    } catch (err) {
+        tracking.value = null;
+        error.value = err.response?.data?.error || 'No se encontró el tracking. Verifica el código o ID.';
+        console.error('Error en búsqueda de tracking:', err);
+    } finally {
+        loading.value = false;
     }
 };
 
 
-const rejectOffer = async (notificationId) => {
-    try {
-        await window.axios.post('/client/reject-offer', { notification_id: notificationId });
-        await loadNotifications();
-    } catch (error) {
-        console.error('Error deleting notification', error);
-    }
-};
+onMounted(() => {
+    // Si viene con parámetros en la URL, buscar automáticamente
+    const params = new URLSearchParams(window.location.search);
+    const offerId = params.get('offer_id');
+    const code = params.get('code');
 
 
-onMounted(async () => {
-    try {
-        await loadNotifications();
-    } catch (error) {
-        console.error('No se pudieron cargar notificaciones', error);
+    if (offerId || code) {
+        searchQuery.value = offerId || code;
+        searchTracking();
     }
 });
 </script>
+
+
 
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap');
 
 
-.notifications-shell {
+.tracking-shell {
     min-height: 100vh;
     background: #e9edf4;
     display: grid;
@@ -259,78 +282,109 @@ h1 { margin: 0; font-size: 1rem; font-weight: 800; }
 
 
 .actions { display: flex; align-items: center; gap: 0.5rem; }
-.mark-read { border: 1px solid #d2dae6; background: #fff; color: #1f3556; padding: 0.45rem 0.8rem; border-radius: 8px; font-size: 0.7rem; font-weight: 700; }
 .icon-btn { border: 1px solid #d2dae6; background: #fff; width: 30px; height: 30px; border-radius: 50%; }
 .mini-avatar { width: 30px; height: 30px; border-radius: 50%; background: #dce8fb; color: #2d65b0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; }
 
 
-.grid-main { display: grid; grid-template-columns: 2fr 1fr; gap: 0.7rem; }
+/* Search Section */
+.search-section { margin-bottom: 1rem; }
+.search-box { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+.search-input { flex: 1; border: 1px solid #d6dee8; border-radius: 8px; padding: 0.7rem; font-size: 0.82rem; background: #fff; color: #152238; }
+.search-input::placeholder { color: #a0b0c5; }
+.search-btn { border: 0; background: #ff7e26; color: #fff; padding: 0.7rem 1.5rem; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.search-btn:hover { background: #e56d0f; }
+
+
+.error-message { color: #c41e3a; background: #ffe0e0; border: 1px solid #ffb8c1; border-radius: 8px; padding: 0.6rem; font-size: 0.82rem; }
+.loading { color: #2d65b0; background: #e8f0ff; border: 1px solid #cfe0f8; border-radius: 8px; padding: 0.6rem; font-size: 0.82rem; text-align: center; }
+
+
+/* Tracking Content */
 .panel { background: #f7f9fc; border: 1px solid #d6dee8; border-radius: 9px; padding: 0.8rem; }
+.panel h3 { margin: 0 0 0.6rem; font-size: 0.88rem; }
 
 
-.inbox-head h2 { margin: 0 0 0.45rem; font-size: 0.9rem; }
-.tabs { display: flex; gap: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #dde5f0; padding-bottom: 0.45rem; }
-.tabs button { border: 0; background: transparent; color: #7a8aa2; font-size: 0.63rem; font-weight: 700; }
-.tabs button.active { color: #1f3556; }
+.tracking-header { margin-bottom: 0.8rem; }
+.header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+.header-info h2 { margin: 0; font-size: 1.1rem; }
+.header-info .status { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.73rem; font-weight: 700; }
+.status.pendiente { background: #fff1e7; color: #dd742d; }
+.status.completado { background: #e8f7ec; color: #2d8a54; }
+.status.en_curso { background: #eaf2ff; color: #2f69bd; }
 
 
-.notice-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.42rem; }
-.notice-item { display: grid; grid-template-columns: auto 1fr auto; gap: 0.55rem; border: 1px solid #e1e8f1; border-radius: 10px; padding: 0.55rem; background: #fff; }
-.notice-item.featured { background: #f0f6ff; border-color: #cfe0f7; }
-.notice-item.selected { background: #e0f7fa; border-color: #b2ebf2; }
-.bullet { width: 7px; height: 7px; border-radius: 50%; background: #2f69bd; margin-top: 0.3rem; }
-.notice-content h3 { margin: 0; font-size: 0.74rem; }
-.notice-content p { margin: 0.2rem 0 0.35rem; font-size: 0.62rem; color: #687b95; line-height: 1.35; }
-.notice-content small { color: #7f90a8; font-size: 0.59rem; }
+.progress-bar { width: 100%; height: 8px; background: #e0e8f0; border-radius: 10px; overflow: hidden; position: relative; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #ff7e26, #ffa850); border-radius: 10px; transition: width 0.3s; }
+.progress-text { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 0.7rem; font-weight: 700; color: #152238; }
 
 
-.chips { display: flex; gap: 0.35rem; margin-bottom: 0.35rem; }
-.chip { border: 1px solid #d8e0ec; border-radius: 999px; padding: 0.14rem 0.5rem; font-size: 0.55rem; font-weight: 700; color: #586c87; }
-.status.counter { background: #fff1e7; border-color: #ffd6bc; color: #dd742d; }
-.status.sent { background: #eaf2ff; border-color: #cfe0f8; color: #2f69bd; }
-.status.docs { background: #eef3f9; border-color: #d8e2ef; color: #5f738f; }
-.status.ok { background: #e8f7ec; border-color: #caecd5; color: #2d8a54; }
-.status.track { background: #eaf2ff; border-color: #cfe0f8; color: #2f69bd; }
-.status.no { background: #ffe8e4; border-color: #ffcbc2; color: #bf5046; }
+/* Grid Layout */
+.grid-tracking { display: grid; grid-template-columns: 2fr 1fr; gap: 0.8rem; }
 
 
-.notice-actions { display: flex; flex-direction: column; gap: 0.35rem; justify-content: center; }
-.action-btn { border: 0; border-radius: 8px; background: #ff7e26; color: #fff; font-size: 0.6rem; font-weight: 700; padding: 0.3rem 0.55rem; }
-.action-btn.ghost { border: 1px solid #ffd1b2; color: #df742d; background: #fff5ef; }
+/* Timeline */
+.timeline-section { }
+.timeline { display: grid; gap: 0.8rem; }
+.timeline-item { display: flex; gap: 0.8rem; }
+.timeline-item.completed .timeline-marker { color: #2d8a54; background: #e8f7ec; }
+.timeline-item.current .timeline-marker { color: #2f69bd; background: #eaf2ff; }
+.timeline-item.pending .timeline-marker { color: #a0b0c5; background: #f0f3f8; }
 
 
-.list-footer { margin-top: 0.6rem; display: flex; justify-content: space-between; align-items: center; }
-.list-footer small { font-size: 0.62rem; color: #73849d; }
-.pagination { display: flex; gap: 0.35rem; }
-.pagination button { width: 24px; height: 24px; border: 1px solid #d5deea; border-radius: 7px; background: #fff; font-size: 0.62rem; }
-.pagination button.active { background: #ff7e26; color: #fff; border-color: #ff7e26; }
+.timeline-marker { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; font-size: 1.2rem; }
+.timeline-content { flex: 1; }
+.timeline-content h4 { margin: 0; font-size: 0.82rem; font-weight: 700; }
+.timeline-content .status-text { color: #7a8aa2; font-size: 0.73rem; margin: 0.15rem 0; }
+.timeline-content small { color: #a0b0c5; font-size: 0.68rem; }
 
 
-.right-col { display: grid; gap: 0.7rem; align-content: start; }
-.priority-card .tag { display: inline-block; color: #df742d; background: #fff2e8; border: 1px solid #ffd7be; border-radius: 999px; padding: 0.14rem 0.5rem; font-size: 0.56rem; font-weight: 700; }
-.priority-card h3 { margin: 0.5rem 0 0.18rem; font-size: 0.82rem; }
-.priority-card p { margin: 0 0 0.5rem; font-size: 0.63rem; color: #6d809a; }
-.offer-grid { display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 0.5rem; margin-bottom: 0.45rem; }
-.offer-grid span { font-size: 0.61rem; color: #7689a2; }
-.offer-grid strong { font-size: 0.63rem; }
-.offer-grid .highlight { color: #e7742f; }
-.priority-card textarea { width: 100%; border: 1px solid #d8e0ec; border-radius: 8px; background: #f6f8fb; color: #59708f; font-size: 0.62rem; padding: 0.45rem; min-height: 55px; resize: none; margin-bottom: 0.45rem; }
-.accept { width: 100%; border: 0; border-radius: 8px; background: #ff7e26; color: #fff; padding: 0.5rem; font-size: 0.68rem; font-weight: 700; }
-.reject { width: 100%; border: 1px solid #ffd1b2; border-radius: 8px; background: #fff5ef; color: #df742d; padding: 0.45rem; font-size: 0.66rem; font-weight: 700; margin-top: 0.35rem; }
+/* Right Panel */
+.right-panel { display: grid; gap: 0.8rem; align-content: start; }
 
 
-.status-card h3 { margin: 0 0 0.45rem; font-size: 0.78rem; }
-.status-card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.34rem; }
-.status-card li { display: flex; justify-content: space-between; border-bottom: 1px solid #e4ebf4; padding-bottom: 0.26rem; font-size: 0.63rem; }
-.status-card li:last-child { border-bottom: 0; }
-.status-card span { color: #71839d; }
+/* Details Section */
+.details-section { }
+.detail-item { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; padding-bottom: 0.6rem; border-bottom: 1px solid #e0e8f0; }
+.detail-item:last-child { border-bottom: 0; }
+.detail-item .label { font-size: 0.73rem; color: #7a8aa2; }
+.detail-item strong { font-size: 0.82rem; text-align: right; }
+
+
+/* Agent Section */
+.agent-section { }
+.agent-info { }
+.agent-name { margin: 0; font-size: 0.85rem; font-weight: 700; }
+.agent-contact { margin: 0.4rem 0 0; font-size: 0.73rem; color: #7a8aa2; }
+
+
+/* Route Section */
+.route-section { }
+.route-info { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.route-point { text-align: center; flex: 1; }
+.route-point strong { display: block; font-size: 0.73rem; color: #7a8aa2; margin-bottom: 0.3rem; }
+.route-point p { margin: 0; font-size: 0.82rem; font-weight: 700; }
+.route-arrow { color: #ff7e26; font-size: 1.2rem; }
+
+
+/* Empty State */
+.empty-state { display: flex; align-items: center; justify-content: center; min-height: 400px; }
+.empty-box { text-align: center; }
+.empty-icon { font-size: 4rem; margin: 0 0 1rem; }
+.empty-text { font-size: 1rem; color: #7a8aa2; margin: 0; }
 
 
 @media (max-width: 1200px) {
-    .notifications-shell { grid-template-columns: 1fr; }
-    .grid-main { grid-template-columns: 1fr; }
+    .tracking-shell { grid-template-columns: 1fr; }
+    .grid-tracking { grid-template-columns: 1fr; }
+    .right-panel { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
 }
 </style>
+
+
+
+
+
+
 
 
 

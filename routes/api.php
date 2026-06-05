@@ -2,8 +2,8 @@
 
 // ── IMPORTACIONES DE CONTROLADORES ──────────────────────────────
 // Cada controlador gestiona un grupo de rutas relacionadas
-use App\Http\Controllers\Api\DatosMaestrosController; // Datos maestros del admin
-use App\Http\Controllers\Api\EmpresaController;        // CRUD de empresas
+use App\Http\Controllers\DatosMaestrosController;
+use App\Http\Controllers\EmpresaController;    // CRUD de empresas
 use App\Http\Controllers\AuthController;               // Login y logout
 use App\Http\Controllers\ClientesController;           // Lista de clientes
 use App\Http\Controllers\DashboardAdminController;     // Dashboard del administrador
