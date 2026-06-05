@@ -125,7 +125,12 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 
-const logoSrc = '/prime-logistics-logo.png';
+const logoSrc = ref(null);
+
+onMounted(() => {
+    // La imagen será servida por Laravel desde public/images
+    logoSrc.value = '/images/prime-logistics-logo.svg';
+});
 
 const dashboard = reactive({
     kpis: {
@@ -137,6 +142,16 @@ const dashboard = reactive({
 });
 
 const recentOrders = ref([]);
+const chartData = ref([
+    { pedidos: 20, incidencias: 5 },
+    { pedidos: 30, incidencias: 3 },
+    { pedidos: 25, incidencias: 8 },
+    { pedidos: 35, incidencias: 2 },
+    { pedidos: 40, incidencias: 4 },
+    { pedidos: 28, incidencias: 6 },
+    { pedidos: 32, incidencias: 3 },
+    { pedidos: 45, incidencias: 1 },
+]);
 
 const userLabel = computed(() => {
     if (recentOrders.value.length > 0) {
@@ -169,7 +184,7 @@ const statusClass = (status) => {
 };
 
 const loadDashboard = async () => {
-    const { data } = await window.axios.get('/api/client/dashboard');
+    const { data } = await window.axios.get('/client/dashboard');
     dashboard.kpis = data.kpis;
     recentOrders.value = data.recentOrders.slice(0, 3);
 };

@@ -22,17 +22,7 @@ use App\Http\Controllers\TrackingOfertaController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-
-
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
+// Client routes (public for now - testing)
 Route::prefix('client')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/orders', [OrderController::class, 'index']);
@@ -43,9 +33,10 @@ Route::prefix('client')->group(function () {
     Route::post('/reject-offer', [NotificationController::class, 'reject']);
 });
 
-    //Datos del administrador (dashboard, usuarios, datos maestros)
-
-    //Dashboard Admin
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
     Route::get('/data', [DashboardAdminController::class, 'getDashboardData']);
     Route::get('/advanced-stats', [DashboardAdminController::class, 'getAdvancedStats']);
 

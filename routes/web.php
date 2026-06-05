@@ -25,8 +25,6 @@ Route::get('/cliente/tracking', function () {
 Route::get('/cliente/notificaciones', function () {
     return view('client.notifications');
 })->name('client.notifications');
-    return redirect('/login');
-});
 
 Route::get('/admin', function(){
     return view('index');

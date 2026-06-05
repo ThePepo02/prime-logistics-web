@@ -16,10 +16,14 @@ export default defineConfig({
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },
+        hmr: {
+            host: 'localhost',
+            port: 5173,
+        },
     },
     resolve: {
         alias: {
-            '@/services/dashboardService': '/images',
+            '@': '/resources',
         },
     },
 });

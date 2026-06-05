@@ -204,21 +204,15 @@
 // import iconoNotificaciones from '@/img/notificaciones-logo.png'
 // import graficos from '@/img/graficos.png'
 
+const exportIcon = ref('/iconoExportarDatos.png');
+const notificacionesIcon = ref('/notificaciones-logo.png');
+const perfilIcon = ref('/perfilUsuarioAdmin.png');
+const primeLogisticsWebIcon = ref('/prime-logistics-logo.png');
 const logoPrimeLogistics = ''
 const imgBtnExportarDatos = ''
 const imgPerfilUsuarioAdmin = ''
 const imgBtnNotificaciones = ''
 const imgGraficos = ''
-
-const exportIcon = ref('/iconoExportarDatos.png');
-const notificacionesIcon = ref('/notificaciones-logo.png');
-const perfilIcon = ref('/perfilUsuarioAdmin.png');
-const primeLogisticsWebIcon = ref('/prime-logistics-logo.png');
-const logoPrimeLogistics = logotipo
-const imgBtnExportarDatos = ''
-const imgPerfilUsuarioAdmin = fotoPerfil
-const imgBtnNotificaciones = iconoNotificaciones
-const imgGraficos = graficos
 
 // Datos reactivos
 const sidebarOpen = ref(false)
