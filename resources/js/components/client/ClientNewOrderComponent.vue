@@ -226,7 +226,7 @@
 import { computed, reactive, ref } from 'vue';
 
 const currentStep = ref(1);
-const logoSrc = '/prime-logistics-logo.png';
+const logoSrc = '/images/prime-logistics-logo.svg';
 const isSubmitting = ref(false);
 const submitMessage = ref('');
 const submitError = ref(false);
@@ -308,7 +308,7 @@ const submitOrder = async (status) => {
             company: form.clientName,
         };
 
-        const { data } = await window.axios.post('/api/client/orders', payload);
+        const { data } = await window.axios.post('/client/orders', payload);
         submitMessage.value = `Pedido creado correctamente: ${data.offer_id}`;
 
         if (status !== 'Borrador') {

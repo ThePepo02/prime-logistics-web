@@ -66,7 +66,8 @@
                                 <small>{{ notice.time }}</small>
                             </div>
                             <div class="notice-actions">
-                                <button v-if="notice.primary" type="button" class="action-btn" @click="handlePrimaryAction(notice)">{{ notice.primary }}</button>
+                                <button v-if="notice.tracking_id" type="button" class="action-btn" @click="handlePrimaryAction(notice)">Ver Tracking</button>
+                                <button v-else-if="notice.primary" type="button" class="action-btn" @click="handlePrimaryAction(notice)">{{ notice.primary }}</button>
                                 <button v-if="notice.secondary" type="button" class="action-btn ghost">{{ notice.secondary }}</button>
                             </div>
                         </li>
@@ -95,8 +96,9 @@
                             <span>Fecha</span><strong>{{ priority.time }}</strong>
                         </div>
                         <textarea readonly>{{ priority.message }}</textarea>
-                        <button v-if="priority.typeClass === 'sent'" class="accept" type="button" @click="acceptOffer(priority.id)">Aceptar Contraoferta</button>
-                        <button v-if="priority.typeClass === 'sent'" class="reject" type="button" @click="rejectOffer(priority.id)">Rechazar</button>
+                        <button v-if="priority.tracking_id" class="accept" type="button" @click="handlePrimaryAction(priority)">Ver Tracking</button>
+                        <button v-if="!priority.llegida" class="accept" type="button" @click="acceptOffer(priority.id)">Marcar como Leído</button>
+                        <button class="reject" type="button" @click="rejectOffer(priority.id)">Eliminar</button>
                     </article>
 
                     <article class="panel status-card">
@@ -117,7 +119,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 
-const logoSrc = '/prime-logistics-logo.png';
+const logoSrc = '/images/prime-logistics-logo.svg';
 
 const notices = ref([]);
 const stats = reactive({
@@ -136,7 +138,7 @@ const priority = reactive({
 });
 
 const loadNotifications = async () => {
-    const { data } = await window.axios.get('/api/client/notifications');
+    const { data } = await window.axios.get('/client/notifications');
     notices.value = data.notices;
     Object.assign(stats, data.stats);
 
@@ -150,29 +152,26 @@ const selectNotice = (notice) => {
 };
 
 const handlePrimaryAction = (notice) => {
-    if (notice.primary === 'Ver Tracking') {
-        window.location.href = `/cliente/tracking?offer_id=${notice.id}`;
-    } else if (notice.primary === 'Ver Oferta') {
-        // Perhaps select the notice or redirect to offer details
-        selectNotice(notice);
+    if (notice.tracking_id) {
+        window.location.href = `/cliente/tracking?offer_id=${notice.tracking_id}`;
     }
 };
 
-const acceptOffer = async (offerId) => {
+const acceptOffer = async (notificationId) => {
     try {
-        await window.axios.post('/api/client/accept-offer', { offer_id: offerId });
+        await window.axios.post('/client/accept-offer', { notification_id: notificationId });
         await loadNotifications();
     } catch (error) {
-        console.error('Error accepting offer', error);
+        console.error('Error marking notification as read', error);
     }
 };
 
-const rejectOffer = async (offerId) => {
+const rejectOffer = async (notificationId) => {
     try {
-        await window.axios.post('/api/client/reject-offer', { offer_id: offerId });
+        await window.axios.post('/client/reject-offer', { notification_id: notificationId });
         await loadNotifications();
     } catch (error) {
-        console.error('Error rejecting offer', error);
+        console.error('Error deleting notification', error);
     }
 };
 

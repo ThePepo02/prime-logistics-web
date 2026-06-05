@@ -110,7 +110,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 
-const logoSrc = '/prime-logistics-logo.png';
+const logoSrc = '/images/prime-logistics-logo.svg';
 
 const orders = ref([]);
 const meta = reactive({
@@ -126,7 +126,7 @@ const filters = reactive({
 });
 
 const loadOrders = async (page = 1) => {
-    const { data } = await window.axios.get('/api/client/orders', {
+    const { data } = await window.axios.get('/client/orders', {
         params: {
             page,
             q: filters.q || undefined,

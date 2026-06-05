@@ -116,7 +116,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 
-const logoSrc = '/prime-logistics-logo.png';
+const logoSrc = '/images/prime-logistics-logo.svg';
 const trackingCode = ref('OC-2024-021');
 
 const tracking = reactive({
@@ -142,7 +142,7 @@ const tracking = reactive({
 });
 
 const loadTracking = async () => {
-    const { data } = await window.axios.get('/api/client/tracking', {
+    const { data } = await window.axios.get('/client/tracking', {
         params: {
             code: trackingCode.value || undefined,
         },
