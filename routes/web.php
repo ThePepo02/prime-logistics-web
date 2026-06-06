@@ -26,6 +26,10 @@ Route::get('/cliente/notificaciones', function () {
     return view('client.notifications');
 })->name('client.notifications');
 
+Route::get('/cliente/incoterms', function () {
+    return view('client.incoterms');
+})->name('client.incoterms');
+
 Route::get('/admin', function(){
     return view('index');
 });
@@ -35,5 +39,5 @@ Route::get('/operador', function () {
 });
 
 Route::get('/clientes', function () {
-    return view('operador');            // usa el mismo blade del operador
+    return view('operador');
 });

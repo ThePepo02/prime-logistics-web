@@ -45,7 +45,7 @@
                     <input
                         v-model="searchQuery"
                         type="text"
-                        placeholder="Buscar por código de oferta (ej: OC-2024-001) o ID"
+                        placeholder="Buscar por código de oferta (ej: OFR-2025-0041)"
                         @keyup.enter="searchTracking"
                         class="search-input"
                     />
@@ -59,21 +59,30 @@
                 <article class="panel tracking-header">
                     <div class="header-info">
                         <h2>{{ tracking.code }}</h2>
-                        <p class="status" :class="tracking.status.toLowerCase()">{{ tracking.status }}</p>
+                        <p class="status" :class="tracking.status.toLowerCase().replace(/ /g, '_')">{{ tracking.status }}</p>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" :style="{ width: tracking.progress + '%' }"></div>
                         <span class="progress-text">{{ tracking.progress }}%</span>
                     </div>
-                    <!-- BOTÓN SIGUIENTE PASO -->
-                    <button
-                        v-if="tracking.progress < 100"
-                        @click="advanceTracking"
-                        class="search-btn advance-btn"
-                    >
-                        Siguiente paso →
-                    </button>
-                    <p v-else class="completed-text">✅ Envío completado</p>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.8rem">
+                        <button
+                            v-if="tracking.progress > 11"
+                            @click="previousTracking"
+                            class="search-btn"
+                            style="background: #607089"
+                        >
+                            ← Paso anterior
+                        </button>
+                        <button
+                            v-if="tracking.progress < 100"
+                            @click="advanceTracking"
+                            class="search-btn"
+                        >
+                            Siguiente paso →
+                        </button>
+                        <p v-if="tracking.progress >= 100" class="completed-text"> Envío completado</p>
+                    </div>
                 </article>
 
                 <div class="grid-tracking">
@@ -173,7 +182,7 @@ const searchQuery = ref('');
 const tracking = ref(null);
 const loading = ref(false);
 const error = ref('');
-const currentOfferId = ref(null); // ← NUEVO
+const currentOfferId = ref(null);
 
 const searchTracking = async () => {
     if (!searchQuery.value.trim()) {
@@ -192,7 +201,7 @@ const searchTracking = async () => {
         const { data } = await window.axios.get('/client/tracking', { params });
 
         tracking.value = data;
-        currentOfferId.value = data.id; // ← NUEVO
+        currentOfferId.value = data.id;
         error.value = '';
     } catch (err) {
         tracking.value = null;
@@ -203,13 +212,21 @@ const searchTracking = async () => {
     }
 };
 
-// ── NUEVO MÉTODO ─────────────────────────────────────────────────
 const advanceTracking = async () => {
     try {
         await window.axios.post('/client/tracking/advance', { offer_id: currentOfferId.value });
-        await searchTracking(); // recarga el tracking actualizado
+        await searchTracking();
     } catch (err) {
         error.value = err.response?.data?.error || 'Error al avanzar el paso';
+    }
+};
+
+const previousTracking = async () => {
+    try {
+        await window.axios.post('/client/tracking/previous', { offer_id: currentOfferId.value });
+        await searchTracking();
+    } catch (err) {
+        error.value = err.response?.data?.error || 'Error al retroceder el paso';
     }
 };
 
@@ -290,16 +307,19 @@ h1 { margin: 0; font-size: 1rem; font-weight: 800; }
 .header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
 .header-info h2 { margin: 0; font-size: 1.1rem; }
 .header-info .status { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.73rem; font-weight: 700; }
-.status.pendiente { background: #fff1e7; color: #dd742d; }
-.status.completado { background: #e8f7ec; color: #2d8a54; }
-.status.en_curso { background: #eaf2ff; color: #2f69bd; }
+.status.en_preparación { background: #fff1e7; color: #dd742d; }
+.status.en_tránsito { background: #eaf2ff; color: #2f69bd; }
+.status.entregado_hoy { background: #e8f7ec; color: #2d8a54; }
+.status.en_aduana { background: #f5f0ff; color: #7c3aed; }
+.status.en_destino { background: #e8f7ec; color: #2d8a54; }
+.status.en_reparto { background: #fff8e1; color: #b45309; }
+.status.entregado { background: #e8f7ec; color: #2d8a54; }
 
 .progress-bar { width: 100%; height: 8px; background: #e0e8f0; border-radius: 10px; overflow: hidden; position: relative; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, #ff7e26, #ffa850); border-radius: 10px; transition: width 0.3s; }
 .progress-text { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 0.7rem; font-weight: 700; color: #152238; }
 
-.advance-btn { margin-top: 0.8rem; width: 100%; }
-.completed-text { margin-top: 0.8rem; text-align: center; color: #2d8a54; font-weight: 700; font-size: 0.85rem; }
+.completed-text { margin: 0; color: #2d8a54; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; }
 
 .grid-tracking { display: grid; grid-template-columns: 2fr 1fr; gap: 0.8rem; }
 

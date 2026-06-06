@@ -88,7 +88,7 @@
                             <td>
                                 <span class="pill" :class="statusClass(order.status)">{{ order.status }}</span>
                             </td>
-                            <td><a class="tracking" href="/cliente/tracking">Tracking</a></td>
+                                <td><a class="tracking" :href="`/cliente/tracking?code=${order.id}`">Tracking</a></td>
                         </tr>
                     </tbody>
                 </table>

@@ -3,181 +3,166 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\Oferta;
-use App\Models\TrackingStep;
-use App\Models\Notificacio;
+use App\Models\Envio;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TrackingController extends Controller
 {
     public function show(Request $request)
     {
         try {
-            $offer_id = $request->query('offer_id');
-            $code = $request->query('code');
-           
-            $oferta = null;
-           
-            if ($offer_id) {
-                $oferta = Oferta::with(['client', 'tipusTransport', 'incoterm', 'port_origen', 'port_desti', 'transportista', 'operador', 'estatOferta'])
-                    ->find($offer_id);
-            } elseif ($code) {
-                $notificacion = Notificacio::where('entitat_tipus', 'envio')
-                    ->where(function($q) use ($code) {
-                        $q->where('titol', 'like', '%' . $code . '%')
-                          ->orWhere('missatge', 'like', '%' . $code . '%');
-                    })
-                    ->first();
-               
-                if ($notificacion) {
-                    $oferta = Oferta::with(['client', 'tipusTransport', 'incoterm', 'port_origen', 'port_desti', 'transportista', 'operador', 'estatOferta'])
-                        ->find($notificacion->entitat_id);
-                }
+            $oferta_id = $request->query('offer_id') ?? $request->query('code');
+
+            if (!$oferta_id) {
+                return response()->json(['error' => 'Código de oferta requerido'], 400);
             }
-           
-            if (!$oferta) {
+
+            $envio = Envio::where('oferta_id', $oferta_id)->first();
+
+            if (!$envio) {
                 return response()->json(['error' => 'Oferta no encontrada'], 404);
             }
-           
-            $offerCode = $this->extractOfferCodeFromNotification($oferta->id);
-            $route = $this->buildRoute($oferta);
-            $trackingSteps = TrackingStep::orderBy('ordre', 'asc')->get();
-           
-            $currentStep = (int)($oferta->tracking_actual ?? 1);
+
+            // El incoterm está guardado en envios.incoterm (ej: "CIF", "FOB")
+            // Buscamos el tipus_incoterm por el código
+            $tipusIncoterm = DB::table('tipus_incoterms')
+                ->where(DB::raw('TRIM(codi)'), trim($envio->incoterm))
+                ->first();
+
+            // Cogemos los pasos del incoterm de este envio
+            if ($tipusIncoterm) {
+                $trackingSteps = DB::table('incoterms')
+                    ->join('tracking_steps', 'incoterms.tracking_steps_id', '=', 'tracking_steps.id')
+                    ->where('incoterms.tipus_inconterm_id', $tipusIncoterm->id)
+                    ->orderBy('tracking_steps.ordre')
+                    ->select('tracking_steps.id', 'tracking_steps.ordre', 'tracking_steps.nom')
+                    ->get();
+            } else {
+                // Si no tiene incoterm asignado, mostramos todos los pasos
+                $trackingSteps = DB::table('tracking_steps')->orderBy('ordre')->get();
+            }
+
+            $currentStep = (int)($envio->tracking_actual ?? 1);
             $totalSteps = $trackingSteps->count();
             $progress = $totalSteps > 0 ? round(($currentStep / $totalSteps) * 100) : 0;
-           
-            $timeline = $trackingSteps->map(function($step) use ($currentStep) {
-                $stepOrder = (int)$step->ordre;
-                $isCompleted = $currentStep > $stepOrder;
-                $isCurrent = $currentStep === $stepOrder;
-               
+
+            $timeline = $trackingSteps->values()->map(function ($step, $index) use ($currentStep) {
+                $stepNum = $index + 1;
+                $isCompleted = $currentStep > $stepNum;
+                $isCurrent   = $currentStep === $stepNum;
+
                 return [
-                    'title' => $step->nom,
+                    'title'  => $step->nom,
                     'status' => $isCompleted ? 'Completado' : ($isCurrent ? 'En curso' : 'Pendiente'),
-                    'date' => '-',
-                    'state' => $isCompleted ? 'completed' : ($isCurrent ? 'current' : 'pending'),
-                    'icon' => $isCompleted ? '✓' : ($isCurrent ? '📍' : '⭕'),
+                    'date'   => '-',
+                    'state'  => $isCompleted ? 'completed' : ($isCurrent ? 'current' : 'pending'),
+                    'icon'   => $isCompleted ? '✓' : ($isCurrent ? '📍' : '⭕'),
                 ];
             })->toArray();
-           
+
+            $pasoActual = $trackingSteps->values()->get($currentStep - 1);
+            $estadoActual = $pasoActual ? $pasoActual->nom : 'En preparación';
+
             return response()->json([
-                'id' => $oferta->id, // ← añadido para el botón de avanzar
-                'code' => $offerCode ?? 'OC-' . str_pad($oferta->id, 6, '0', STR_PAD_LEFT),
-                'route' => $this->formatRoute($oferta),
-                'status' => $oferta->estatOferta?->nom ?? 'Pendiente',
+                'id'       => $envio->oferta_id,
+                'code'     => $envio->oferta_id,
+                'route'    => [
+                    'origin'      => $envio->origen,
+                    'destination' => $envio->destino,
+                ],
+                'status'   => $estadoActual,
                 'progress' => $progress,
-                'details' => [
-                    'shipping_line' => $oferta->transportista?->nom ?? 'Pendiente',
-                    'vessel' => 'Pendiente',
-                    'container' => 'Pendiente',
-                    'incoterm' => $oferta->incoterm?->nom ?? 'Pendiente',
-                    'etd' => '-',
-                    'eta' => '-',
+                'details'  => [
+                    'shipping_line'   => $envio->compania ?? 'Pendiente',
+                    'vessel'          => 'Pendiente',
+                    'container'       => 'Pendiente',
+                    'incoterm'        => trim($envio->incoterm) ?? 'Pendiente',
+                    'etd'             => '-',
+                    'eta'             => '-',
                     'days_in_transit' => 0,
                 ],
-                'agent' => [
-                    'name' => $oferta->operador?->nom ?? 'Pendiente',
-                    'contact' => $oferta->operador?->email ?? '-',
+                'agent'    => [
+                    'name'    => $envio->cliente ?? 'Pendiente',
+                    'contact' => '-',
                 ],
                 'documents' => [],
-                'timeline' => $timeline,
-            ], 200);
+                'timeline'  => $timeline,
+            ]);
+
         } catch (\Exception $e) {
-            \Log::error('Error en tracking: ' . $e->getMessage() . ' ' . $e->getFile() . ':' . $e->getLine());
+            \Log::error('Error en tracking: ' . $e->getMessage());
             return response()->json([
-                'error' => 'Error al cargar tracking',
+                'error'   => 'Error al cargar tracking',
                 'message' => $e->getMessage()
             ], 500);
         }
     }
 
-    // ── NUEVO MÉTODO ─────────────────────────────────────────────
     public function advance(Request $request)
     {
         try {
-            $oferta = Oferta::find($request->input('offer_id'));
+            $envio = Envio::where('oferta_id', $request->input('offer_id'))->first();
 
-            if (!$oferta) {
+            if (!$envio) {
                 return response()->json(['error' => 'Oferta no encontrada'], 404);
             }
 
-            $totalSteps = TrackingStep::count();
-            $currentStep = (int)($oferta->tracking_actual ?? 1);
+            $totalSteps = $this->contarPasos($envio);
+            $currentStep = (int)($envio->tracking_actual ?? 1);
 
             if ($currentStep >= $totalSteps) {
                 return response()->json(['error' => 'Ya está en el último paso'], 400);
             }
 
-            $oferta->tracking_actual = $currentStep + 1;
-            $oferta->save();
+            $envio->tracking_actual = $currentStep + 1;
+            $envio->save();
 
-            return response()->json(['tracking_actual' => $oferta->tracking_actual]);
+            return response()->json(['tracking_actual' => $envio->tracking_actual]);
+
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
-    private function formatRoute($oferta)
+    public function previous(Request $request)
     {
-        $origen = 'Origen';
-        $destino = 'Destino';
-       
-        if ($oferta->port_origen_id) {
-            $origen = $oferta->port_origen?->nom ?? 'Origen';
+        try {
+            $envio = Envio::where('oferta_id', $request->input('offer_id'))->first();
+
+            if (!$envio) {
+                return response()->json(['error' => 'Oferta no encontrada'], 404);
+            }
+
+            $currentStep = (int)($envio->tracking_actual ?? 1);
+
+            if ($currentStep <= 1) {
+                return response()->json(['error' => 'Ya está en el primer paso'], 400);
+            }
+
+            $envio->tracking_actual = $currentStep - 1;
+            $envio->save();
+
+            return response()->json(['tracking_actual' => $envio->tracking_actual]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        if ($oferta->port_desti_id) {
-            $destino = $oferta->port_desti?->nom ?? 'Destino';
-        }
-        if ($oferta->aeroport_origen_id && !$oferta->port_origen_id) {
-            $aeroOrigen = \App\Models\Aeroport::find($oferta->aeroport_origen_id);
-            $origen = $aeroOrigen?->nom ?? 'Aeropuerto Origen';
-        }
-        if ($oferta->aeroport_desti_id && !$oferta->port_desti_id) {
-            $aeroDesti = \App\Models\Aeroport::find($oferta->aeroport_desti_id);
-            $destino = $aeroDesti?->nom ?? 'Aeropuerto Destino';
-        }
-       
-        return ['origin' => $origen, 'destination' => $destino];
     }
 
-    private function buildRoute($oferta)
+    // Cuenta los pasos según el incoterm del envio
+    private function contarPasos(Envio $envio): int
     {
-        $origen = 'Origen';
-        $destino = 'Destino';
-       
-        if ($oferta->port_origen_id) {
-            $origen = $oferta->port_origen?->nom ?? 'Origen';
-        }
-        if ($oferta->port_desti_id) {
-            $destino = $oferta->port_desti?->nom ?? 'Destino';
-        }
-        if ($oferta->aeroport_origen_id && !$oferta->port_origen_id) {
-            $aeroOrigen = \App\Models\Aeroport::find($oferta->aeroport_origen_id);
-            $origen = $aeroOrigen?->nom ?? 'Aeropuerto Origen';
-        }
-        if ($oferta->aeroport_desti_id && !$oferta->port_desti_id) {
-            $aeroDesti = \App\Models\Aeroport::find($oferta->aeroport_desti_id);
-            $destino = $aeroDesti?->nom ?? 'Aeropuerto Destino';
-        }
-        if ($origen === 'Origen' && $destino === 'Destino' && $oferta->comentaris) {
-            return $oferta->comentaris;
-        }
-       
-        return $origen . ' → ' . $destino;
-    }
-
-    private function extractOfferCodeFromNotification($oferta_id)
-    {
-        $notificacion = Notificacio::where('entitat_id', $oferta_id)
-            ->where('entitat_tipus', 'envio')
-            ->latest('data_creacio')
+        $tipusIncoterm = DB::table('tipus_incoterms')
+            ->where(DB::raw('TRIM(codi)'), trim($envio->incoterm ?? ''))
             ->first();
-       
-        if ($notificacion && preg_match('/OC-\d{4}-\d{3,}/', $notificacion->titol . ' ' . $notificacion->missatge, $matches)) {
-            return $matches[0];
+
+        if ($tipusIncoterm) {
+            return DB::table('incoterms')
+                ->where('tipus_inconterm_id', $tipusIncoterm->id)
+                ->count();
         }
-       
-        return null;
+
+        return DB::table('tracking_steps')->count();
     }
 }

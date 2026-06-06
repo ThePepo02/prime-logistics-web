@@ -4,16 +4,8 @@ import 'flowbite';
 
 import { createApp } from 'vue/dist/vue.esm-bundler.js';
 
-
-// Componentes Admin ()
+// Componentes Admin
 import DashboardAdminComponent from './components/admin/DashboardAdminComponent.vue';
-
-import DashboardClientComponent from './components/client/DashboardClientComponent.vue';
-import ClientNewOrderComponent from './components/client/ClientNewOrderComponent.vue';
-import ClientOrdersComponent from './components/client/ClientOrdersComponent.vue';
-import ClientTrackingComponent from './components/client/ClientTrackingComponent.vue';
-import ClientNotificationsComponent from './components/client/ClientNotificationsComponent.vue';
-
 import GestionUsuariosComponent from './components/admin/GestionUsuariosComponent.vue';
 import NuevoUsuarioComponent from './components/admin/NuevoUsuarioComponent.vue';
 import EditarNuevoUsuarioComponent from './components/admin/EditarNuevoUsuarioComponent.vue';
@@ -22,11 +14,18 @@ import DashboardOfertasAdminComponent from './components/admin/DashboardOfertasA
 import OfertasActivasAdminComponent from './components/admin/OfertasActivasAdminComponent.vue';
 import DatosMaestrosComponent from './components/admin/DatosMaestrosComponent.vue';
 
+// Componentes Client
+import DashboardClientComponent from './components/client/DashboardClientComponent.vue';
+import ClientNewOrderComponent from './components/client/ClientNewOrderComponent.vue';
+import ClientOrdersComponent from './components/client/ClientOrdersComponent.vue';
+import ClientTrackingComponent from './components/client/ClientTrackingComponent.vue';
+import ClientNotificationsComponent from './components/client/ClientNotificationsComponent.vue';
+import ClientIncotermsComponent from './components/client/ClientIncotermsComponent.vue';
+
 // Componentes Login
 import LoginComponents from './components/LoginComponents.vue';
 
 // Componentes Operador
-
 import SidebarOperador from './components/operador/SidebarOperador.vue';
 import DashboardOperador from './components/operador/DashboardOperador.vue';
 import ClientesComponent from './components/operador/ClientesComponent.vue';
@@ -35,14 +34,7 @@ import OfertasComerciales from './components/operador/OfertasComerciales.vue';
 const app = createApp({});
 
 // Admin
-
 app.component('dashboard-admin-component', DashboardAdminComponent);
-app.component('dashboard-client-component', DashboardClientComponent);
-app.component('client-new-order-component', ClientNewOrderComponent);
-app.component('client-orders-component', ClientOrdersComponent);
-app.component('client-tracking-component', ClientTrackingComponent);
-app.component('client-notifications-component', ClientNotificationsComponent);
-
 app.component('dashboardAdmin-component', DashboardAdminComponent);
 app.component('gestion-usuarios-component', GestionUsuariosComponent);
 app.component('nuevo-usuario-component', NuevoUsuarioComponent);
@@ -52,9 +44,16 @@ app.component('dashboard-ofertas-admin-component', DashboardOfertasAdminComponen
 app.component('ofertas-activas-admin-component', OfertasActivasAdminComponent);
 app.component('datos-maestros-component', DatosMaestrosComponent);
 
+// Client
+app.component('dashboard-client-component', DashboardClientComponent);
+app.component('client-new-order-component', ClientNewOrderComponent);
+app.component('client-orders-component', ClientOrdersComponent);
+app.component('client-tracking-component', ClientTrackingComponent);
+app.component('client-notifications-component', ClientNotificationsComponent);
+app.component('client-incoterms-component', ClientIncotermsComponent);
+
 // Login
 app.component('login-components', LoginComponents);
-
 
 // Operador
 app.component('sidebar-operador', SidebarOperador);

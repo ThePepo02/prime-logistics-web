@@ -8,7 +8,6 @@ class Envio extends Model
 {
     protected $table = 'envios';
 
-
     protected $fillable = [
         'origen',
         'destino',
@@ -25,6 +24,7 @@ class Envio extends Model
         'urgencia',
         'compania',
         'cliente_id',
+        'tracking_actual',
     ];
 
     protected $casts = [
@@ -36,5 +36,11 @@ class Envio extends Model
     {
         return $this->belongsTo(User::class, 'cliente_id');
     }
+
+    public function oferta()
+    {
+        return $this->belongsTo(Oferta::class, 'oferta_id');
+    }
+
     public $timestamps = false;
 }
