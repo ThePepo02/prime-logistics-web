@@ -66,22 +66,25 @@
                         <span class="progress-text">{{ tracking.progress }}%</span>
                     </div>
                     <div style="display: flex; gap: 0.5rem; margin-top: 0.8rem">
+                        <!-- Mostrar anterior solo si no estamos en el primer paso -->
                         <button
-                            v-if="tracking.progress > 11"
+                            v-if="pasoActual > 1"
                             @click="previousTracking"
                             class="search-btn"
                             style="background: #607089"
                         >
                             ← Paso anterior
                         </button>
+                        <!-- Mostrar siguiente solo si no estamos en el último paso -->
                         <button
-                            v-if="tracking.progress < 100"
+                            v-if="pasoActual < totalPasos"
                             @click="advanceTracking"
                             class="search-btn"
                         >
                             Siguiente paso →
                         </button>
-                        <p v-if="tracking.progress >= 100" class="completed-text"> Envío completado</p>
+                        <!-- Completado solo cuando estamos exactamente en el último paso -->
+                        <p v-if="pasoActual >= totalPasos" class="completed-text">✓ Envío completado</p>
                     </div>
                 </article>
 
@@ -175,7 +178,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 
 const logoSrc = '/images/prime-logistics-logo.svg';
 const searchQuery = ref('');
@@ -183,6 +186,23 @@ const tracking = ref(null);
 const loading = ref(false);
 const error = ref('');
 const currentOfferId = ref(null);
+
+// Calculamos el paso actual y total desde el timeline
+// para no depender del progreso en porcentaje
+const pasoActual = computed(() => {
+    if (!tracking.value) return 0;
+    // El paso actual es el índice del step con state 'current' + 1
+    // Si no hay ninguno con 'current' es que están todos completados
+    const idx = tracking.value.timeline.findIndex(s => s.state === 'current');
+    if (idx !== -1) return idx + 1;
+    // Si todos están completados estamos en el último
+    return tracking.value.timeline.length;
+});
+
+const totalPasos = computed(() => {
+    if (!tracking.value) return 0;
+    return tracking.value.timeline.length;
+});
 
 const searchTracking = async () => {
     if (!searchQuery.value.trim()) {
@@ -196,7 +216,6 @@ const searchTracking = async () => {
     try {
         const query = searchQuery.value.trim();
         const isNumeric = /^\d+$/.test(query);
-
         const params = isNumeric ? { offer_id: query } : { code: query };
         const { data } = await window.axios.get('/client/tracking', { params });
 
@@ -206,16 +225,28 @@ const searchTracking = async () => {
     } catch (err) {
         tracking.value = null;
         error.value = err.response?.data?.error || 'No se encontró el tracking. Verifica el código o ID.';
-        console.error('Error en búsqueda de tracking:', err);
     } finally {
         loading.value = false;
+    }
+};
+
+// Recarga el tracking sin tocar el searchQuery
+const recargarTracking = async () => {
+    if (!currentOfferId.value) return;
+    try {
+        const isNumeric = /^\d+$/.test(String(currentOfferId.value));
+        const params = isNumeric ? { offer_id: currentOfferId.value } : { code: currentOfferId.value };
+        const { data } = await window.axios.get('/client/tracking', { params });
+        tracking.value = data;
+    } catch (err) {
+        error.value = err.response?.data?.error || 'Error al recargar';
     }
 };
 
 const advanceTracking = async () => {
     try {
         await window.axios.post('/client/tracking/advance', { offer_id: currentOfferId.value });
-        await searchTracking();
+        await recargarTracking();
     } catch (err) {
         error.value = err.response?.data?.error || 'Error al avanzar el paso';
     }
@@ -224,7 +255,7 @@ const advanceTracking = async () => {
 const previousTracking = async () => {
     try {
         await window.axios.post('/client/tracking/previous', { offer_id: currentOfferId.value });
-        await searchTracking();
+        await recargarTracking();
     } catch (err) {
         error.value = err.response?.data?.error || 'Error al retroceder el paso';
     }
@@ -254,29 +285,17 @@ onMounted(() => {
     color: #152238;
 }
 
-.sidebar {
-    background: linear-gradient(180deg, #0a2243 0%, #071a33 100%);
-    color: #dbe7ff;
-    padding: 1.2rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.7rem;
-}
-
+.sidebar { background: linear-gradient(180deg, #0a2243 0%, #071a33 100%); color: #dbe7ff; padding: 1.2rem 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
 .brand { padding: 0.2rem 0.5rem 0.9rem; }
 .brand img { height: 30px; object-fit: contain; }
-
 .section-title { margin: 0.5rem 0 0.2rem; text-transform: uppercase; font-size: 0.67rem; letter-spacing: 0.08em; opacity: 0.8; }
 .section-title.muted { margin-top: 0.9rem; opacity: 0.58; }
-
 .menu { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.26rem; }
 .menu li { padding: 0.6rem 0.72rem; border-radius: 9px; font-size: 0.82rem; display: flex; align-items: center; justify-content: space-between; color: #c6d8fb; }
 .menu li a { color: inherit; text-decoration: none; }
 .menu li.active { background: #ff7e26; color: #fff; font-weight: 700; }
-
 .dot { width: 8px; height: 8px; border-radius: 50%; background: #ff7e26; }
-
-.user-card { margin-top: auto; padding-top: 0.9rem; border-top: 1px solid rgba(198, 216, 251, 0.17); display: flex; align-items: center; gap: 0.65rem; }
+.user-card { margin-top: auto; padding-top: 0.9rem; border-top: 1px solid rgba(198,216,251,0.17); display: flex; align-items: center; gap: 0.65rem; }
 .avatar { width: 34px; height: 34px; border-radius: 50%; background: #2d65b0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
 .user-card strong { font-size: 0.75rem; display: block; }
 .user-card small { opacity: 0.75; font-size: 0.68rem; }
@@ -285,7 +304,6 @@ onMounted(() => {
 .topbar { background: #f3f5f8; border: 1px solid #d6dee8; border-radius: 12px; padding: 0.8rem 1rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
 h1 { margin: 0; font-size: 1rem; font-weight: 800; }
 .topbar p { margin: 0.12rem 0 0; font-size: 0.72rem; color: #607089; }
-
 .actions { display: flex; align-items: center; gap: 0.5rem; }
 .icon-btn { border: 1px solid #d2dae6; background: #fff; width: 30px; height: 30px; border-radius: 50%; }
 .mini-avatar { width: 30px; height: 30px; border-radius: 50%; background: #dce8fb; color: #2d65b0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; }
@@ -302,18 +320,15 @@ h1 { margin: 0; font-size: 1rem; font-weight: 800; }
 
 .panel { background: #f7f9fc; border: 1px solid #d6dee8; border-radius: 9px; padding: 0.8rem; }
 .panel h3 { margin: 0 0 0.6rem; font-size: 0.88rem; }
-
 .tracking-header { margin-bottom: 0.8rem; }
 .header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
 .header-info h2 { margin: 0; font-size: 1.1rem; }
 .header-info .status { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.73rem; font-weight: 700; }
 .status.en_preparación { background: #fff1e7; color: #dd742d; }
-.status.en_tránsito { background: #eaf2ff; color: #2f69bd; }
-.status.entregado_hoy { background: #e8f7ec; color: #2d8a54; }
-.status.en_aduana { background: #f5f0ff; color: #7c3aed; }
-.status.en_destino { background: #e8f7ec; color: #2d8a54; }
-.status.en_reparto { background: #fff8e1; color: #b45309; }
-.status.entregado { background: #e8f7ec; color: #2d8a54; }
+.status.en_trànsit_internacional { background: #eaf2ff; color: #2f69bd; }
+.status.lliurat_al_client_final { background: #e8f7ec; color: #2d8a54; }
+.status.arribada_al_port\/aeroport_de_destí { background: #e8f7ec; color: #2d8a54; }
+.status.en_repartiment_\(last_mile\) { background: #fff8e1; color: #b45309; }
 
 .progress-bar { width: 100%; height: 8px; background: #e0e8f0; border-radius: 10px; overflow: hidden; position: relative; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, #ff7e26, #ffa850); border-radius: 10px; transition: width 0.3s; }
@@ -322,13 +337,11 @@ h1 { margin: 0; font-size: 1rem; font-weight: 800; }
 .completed-text { margin: 0; color: #2d8a54; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; }
 
 .grid-tracking { display: grid; grid-template-columns: 2fr 1fr; gap: 0.8rem; }
-
 .timeline { display: grid; gap: 0.8rem; }
 .timeline-item { display: flex; gap: 0.8rem; }
 .timeline-item.completed .timeline-marker { color: #2d8a54; background: #e8f7ec; }
 .timeline-item.current .timeline-marker { color: #2f69bd; background: #eaf2ff; }
 .timeline-item.pending .timeline-marker { color: #a0b0c5; background: #f0f3f8; }
-
 .timeline-marker { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; font-size: 1.2rem; }
 .timeline-content { flex: 1; }
 .timeline-content h4 { margin: 0; font-size: 0.82rem; font-weight: 700; }
@@ -336,15 +349,12 @@ h1 { margin: 0; font-size: 1rem; font-weight: 800; }
 .timeline-content small { color: #a0b0c5; font-size: 0.68rem; }
 
 .right-panel { display: grid; gap: 0.8rem; align-content: start; }
-
 .detail-item { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; padding-bottom: 0.6rem; border-bottom: 1px solid #e0e8f0; }
 .detail-item:last-child { border-bottom: 0; }
 .detail-item .label { font-size: 0.73rem; color: #7a8aa2; }
 .detail-item strong { font-size: 0.82rem; text-align: right; }
-
 .agent-name { margin: 0; font-size: 0.85rem; font-weight: 700; }
 .agent-contact { margin: 0.4rem 0 0; font-size: 0.73rem; color: #7a8aa2; }
-
 .route-info { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .route-point { text-align: center; flex: 1; }
 .route-point strong { display: block; font-size: 0.73rem; color: #7a8aa2; margin-bottom: 0.3rem; }
