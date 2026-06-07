@@ -1,15 +1,12 @@
 <?php
 
-
 namespace App\Http\Controllers\Client;
-
 
 use App\Http\Controllers\Controller;
 use App\Models\Notificacio;
 use App\Models\TrackingStep;
-use App\Models\Oferta;
+use App\Models\Envio;
 use Illuminate\Http\Request;
-
 
 class NotificationController extends Controller
 {
@@ -35,9 +32,7 @@ class NotificationController extends Controller
                 'tracking_id' => $this->getTrackingId($n->entitat_tipus, $n->entitat_id, $n->tipus),
             ])->toArray();
 
-
             $unreadCount = Notificacio::where('llegida', false)->count();
-
 
             return response()->json([
                 'notices' => $notices,
@@ -64,11 +59,6 @@ class NotificationController extends Controller
         }
     }
 
-
-    /**
-     * Extrae el código de la oferta del título o mensaje
-     * Busca patrones como OC-2024-018, OC-2025-023, etc.
-     */
     private function extractOfferCode($titulo, $mensaje)
     {
         $text = $titulo . ' ' . $mensaje;
@@ -78,27 +68,25 @@ class NotificationController extends Controller
         return null;
     }
 
-
     private function getTrackingId($entitat_tipus, $entitat_id, $tipus)
     {
-        // Normalizar entitat_tipus a minúsculas para comparación
         $entitat_tipus_check = strtolower(trim($entitat_tipus ?? ''));
-       
-        // Si es de tipo envio, retornar el ID de entidad como tracking_id
+
         if ($entitat_tipus_check === 'envio' && $entitat_id) {
-            return $entitat_id;
+            $envio = Envio::find($entitat_id);
+            return $envio?->oferta_id;
         }
-       
-        // Si es TrackingStep, obtener el oferta_id relacionado
+
         if ($entitat_tipus_check === 'trackingstep' && $entitat_id) {
             $step = TrackingStep::find($entitat_id);
-            return $step?->oferta_id;
+            if ($step?->oferta_id) {
+                $envio = Envio::find($step->oferta_id);
+                return $envio?->oferta_id;
+            }
         }
-       
-        // Las notificaciones de tipo oferta no tienen tracking_id
+
         return null;
     }
-
 
     public function accept(Request $request)
     {
@@ -111,7 +99,6 @@ class NotificationController extends Controller
         }
     }
 
-
     public function reject(Request $request)
     {
         try {
@@ -123,6 +110,3 @@ class NotificationController extends Controller
         }
     }
 }
-
-
-
