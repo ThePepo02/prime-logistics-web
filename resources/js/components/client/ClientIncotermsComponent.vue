@@ -41,17 +41,15 @@
             <div v-if="successMsg" class="success-message">{{ successMsg }}</div>
 
             <section v-if="!loading" class="incoterms-list">
-                <!-- HIJO 1: una tarjeta por cada incoterm -->
                 <IncotermsForm
                     v-for="incoterm in incoterms"
                     :key="incoterm.id"
                     :incoterm="incoterm"
-                    @guardar="guardar"
+                    :steps="steps"
                     @abrir-steps="abrirPopup"
                 />
             </section>
 
-            <!-- HIJO 2: popup de steps, solo visible cuando popupIncoterm no es null -->
             <IncotermsStepsPopup
                 v-if="popupIncoterm"
                 :incoterm="popupIncoterm"
@@ -73,9 +71,8 @@ const incoterms = ref([]);
 const steps = ref([]);
 const loading = ref(true);
 const successMsg = ref('');
-const popupIncoterm = ref(null); // el incoterm que tiene el popup abierto
+const popupIncoterm = ref(null);
 
-// Carga los datos de la API
 const loadData = async () => {
     const { data } = await window.axios.get('/client/incoterms');
     incoterms.value = data.incoterms;
@@ -83,17 +80,14 @@ const loadData = async () => {
     loading.value = false;
 };
 
-// Abre el popup para un incoterm concreto
 const abrirPopup = (incoterm) => {
     popupIncoterm.value = incoterm;
 };
 
-// Cierra el popup
 const cerrarPopup = () => {
     popupIncoterm.value = null;
 };
 
-// Guarda los pasos del incoterm — lo hace el PADRE
 const guardar = async (incoterm) => {
     try {
         await window.axios.put(`/client/incoterms/${incoterm.id}`, {
@@ -135,7 +129,6 @@ onMounted(loadData);
 .avatar { width: 34px; height: 34px; border-radius: 50%; background: #2d65b0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
 .user-card strong { font-size: 0.75rem; display: block; }
 .user-card small { opacity: 0.75; font-size: 0.68rem; }
-
 .content { padding: 1rem 1.1rem; }
 .topbar { background: #f3f5f8; border: 1px solid #d6dee8; border-radius: 12px; padding: 0.8rem 1rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
 h1 { margin: 0; font-size: 1rem; font-weight: 800; }
