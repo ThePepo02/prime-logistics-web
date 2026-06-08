@@ -29,7 +29,7 @@ class NotificationController extends Controller
                 'entitat_tipus' => $n->entitat_tipus,
                 'entitat_id' => $n->entitat_id,
                 'offer_code' => $this->extractOfferCode($n->titol, $n->missatge),
-                'tracking_id' => $this->getTrackingId($n->entitat_tipus, $n->entitat_id, $n->tipus),
+                'tracking_id' => $this->getTrackingId($n->entitat_tipus, $n->entitat_id),
             ])->toArray();
 
             $unreadCount = Notificacio::where('llegida', false)->count();
@@ -68,21 +68,13 @@ class NotificationController extends Controller
         return null;
     }
 
-    private function getTrackingId($entitat_tipus, $entitat_id, $tipus)
+    private function getTrackingId($entitat_tipus, $entitat_id)
     {
         $entitat_tipus_check = strtolower(trim($entitat_tipus ?? ''));
 
         if ($entitat_tipus_check === 'envio' && $entitat_id) {
             $envio = Envio::find($entitat_id);
             return $envio?->oferta_id;
-        }
-
-        if ($entitat_tipus_check === 'trackingstep' && $entitat_id) {
-            $step = TrackingStep::find($entitat_id);
-            if ($step?->oferta_id) {
-                $envio = Envio::find($step->oferta_id);
-                return $envio?->oferta_id;
-            }
         }
 
         return null;

@@ -45,20 +45,44 @@ class IncotermsController extends Controller
 
     // Actualizar los pasos de un incoterm (INSERT y UPDATE)
     public function update(Request $request, $id)
-    {
-        $pasos = $request->input('pasos', []);
+{
+    $nuevosPasos = $request->input('pasos', []);
 
-        // Borrar los pasos actuales de este incoterm
-        DB::table('incoterms')->where('tipus_inconterm_id', $id)->delete();
+    // Pasos que tiene actualmente este incoterm
+    $pasosActuales = DB::table('incoterms')
+        ->where('tipus_inconterm_id', $id)
+        ->pluck('tracking_steps_id')
+        ->toArray();
 
-        // Insertar los nuevos pasos
-        foreach ($pasos as $stepId) {
-            DB::table('incoterms')->insert([
-                'tipus_inconterm_id' => $id,
-                'tracking_steps_id' => $stepId,
-            ]);
-        }
+    // Pasos que hay que añadir (están en nuevos pero no en actuales)
+    $añadir = array_diff($nuevosPasos, $pasosActuales);
 
-        return response()->json(['message' => 'Incoterm actualizado correctamente']);
+    // Pasos que hay que borrar (están en actuales pero no en nuevos)
+    // Solo borramos los que NO estén referenciados en ofertes
+    $borrar = array_diff($pasosActuales, $nuevosPasos);
+
+    // Insertar los nuevos
+    foreach ($añadir as $stepId) {
+        DB::table('incoterms')->insert([
+            'tipus_inconterm_id' => $id,
+            'tracking_steps_id'  => $stepId,
+        ]);
     }
+
+    // Borrar solo los que no tienen ofertas vinculadas
+    foreach ($borrar as $stepId) {
+        $enUso = DB::table('ofertes')
+            ->where('incoterm_id', $stepId)
+            ->exists();
+
+        if (!$enUso) {
+            DB::table('incoterms')
+                ->where('tipus_inconterm_id', $id)
+                ->where('tracking_steps_id', $stepId)
+                ->delete();
+        }
+    }
+
+    return response()->json(['message' => 'Incoterm actualizado correctamente']);
+}
 }

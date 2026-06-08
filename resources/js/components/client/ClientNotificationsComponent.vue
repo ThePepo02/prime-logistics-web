@@ -169,8 +169,8 @@ const selectNotice = (notice) => {
 
 
 const handlePrimaryAction = (notice) => {
-    if (notice.tracking_id && notice.offer_code) {
-        window.location.href = `/cliente/tracking?code=${notice.offer_code}&offer_id=${notice.tracking_id}`;
+    if (notice.tracking_id) {
+        window.location.href = `/cliente/tracking?code=${notice.tracking_id}`;
     }
 };
 
