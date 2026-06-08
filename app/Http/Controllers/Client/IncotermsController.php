@@ -8,81 +8,78 @@ use Illuminate\Support\Facades\DB;
 
 class IncotermsController extends Controller
 {
-    // Obtener todos los incoterms con sus pasos asignados
     public function index()
     {
         $incoterms = DB::table('tipus_incoterms')
-            ->whereIn('id', range(1, 11)) // solo los originales sin duplicados
+            ->whereIn('id', range(1, 11))
             ->get();
 
         $steps = DB::table('tracking_steps')->orderBy('ordre')->get();
 
-        $result = $incoterms->map(function($incoterm) {
+        $result = $incoterms->map(function ($incoterm) {
             $pasos = DB::table('incoterms')
                 ->where('tipus_inconterm_id', $incoterm->id)
                 ->pluck('tracking_steps_id')
                 ->toArray();
 
             return [
-                'id' => $incoterm->id,
-                'codi' => trim($incoterm->codi),
-                'nom' => $incoterm->nom,
+                'id'    => $incoterm->id,
+                'codi'  => trim($incoterm->codi),
+                'nom'   => $incoterm->nom,
                 'pasos' => $pasos,
             ];
         });
 
-        $steps = DB::table('tracking_steps')->orderBy('ordre')->get()->map(fn($s) => [
-            'id' => $s->id,
+        $steps = DB::table('tracking_steps')->orderBy('ordre')->get()->map(fn ($s) => [
+            'id'    => $s->id,
             'ordre' => $s->ordre,
-            'nom' => $s->nom,
+            'nom'   => $s->nom,
         ]);
 
         return response()->json([
             'incoterms' => $result,
-            'steps' => $steps,
+            'steps'     => $steps,
         ]);
     }
 
-    // Actualizar los pasos de un incoterm (INSERT y UPDATE)
     public function update(Request $request, $id)
-{
-    $nuevosPasos = $request->input('pasos', []);
+    {
+        $nuevosPasos   = $request->input('pasos', []);
+        $pasosActuales = DB::table('incoterms')
+            ->where('tipus_inconterm_id', $id)
+            ->pluck('tracking_steps_id')
+            ->toArray();
 
-    // Pasos que tiene actualmente este incoterm
-    $pasosActuales = DB::table('incoterms')
-        ->where('tipus_inconterm_id', $id)
-        ->pluck('tracking_steps_id')
-        ->toArray();
+        $añadir = array_diff($nuevosPasos, $pasosActuales);
+        $borrar = array_diff($pasosActuales, $nuevosPasos);
 
-    // Pasos que hay que añadir (están en nuevos pero no en actuales)
-    $añadir = array_diff($nuevosPasos, $pasosActuales);
+        foreach ($añadir as $stepId) {
+            DB::table('incoterms')->insert([
+                'tipus_inconterm_id' => $id,
+                'tracking_steps_id'  => $stepId,
+            ]);
+        }
 
-    // Pasos que hay que borrar (están en actuales pero no en nuevos)
-    // Solo borramos los que NO estén referenciados en ofertes
-    $borrar = array_diff($pasosActuales, $nuevosPasos);
-
-    // Insertar los nuevos
-    foreach ($añadir as $stepId) {
-        DB::table('incoterms')->insert([
-            'tipus_inconterm_id' => $id,
-            'tracking_steps_id'  => $stepId,
-        ]);
-    }
-
-    // Borrar solo los que no tienen ofertas vinculadas
-    foreach ($borrar as $stepId) {
-        $enUso = DB::table('ofertes')
-            ->where('incoterm_id', $stepId)
-            ->exists();
-
-        if (!$enUso) {
-            DB::table('incoterms')
+        foreach ($borrar as $stepId) {
+            $incoterm = DB::table('incoterms')
                 ->where('tipus_inconterm_id', $id)
                 ->where('tracking_steps_id', $stepId)
-                ->delete();
-        }
-    }
+                ->first();
 
-    return response()->json(['message' => 'Incoterm actualizado correctamente']);
-}
+            if (!$incoterm) continue;
+
+            $enUso = DB::table('ofertes')
+                ->where('incoterm_id', $incoterm->id)
+                ->exists();
+
+            if (!$enUso) {
+                DB::table('incoterms')
+                    ->where('tipus_inconterm_id', $id)
+                    ->where('tracking_steps_id', $stepId)
+                    ->delete();
+            }
+        }
+
+        return response()->json(['message' => 'Incoterm actualizado correctamente']);
+    }
 }
