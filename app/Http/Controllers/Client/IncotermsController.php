@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class IncotermsController extends Controller
 {
-    // Obtener todos los incoterms con sus pasos asignados
     public function index()
     {
         $incoterms = TipusIncoterm::with('incoterms')
@@ -40,7 +39,6 @@ class IncotermsController extends Controller
         ]);
     }
 
-    // Actualizar los pasos de un incoterm (INSERT y UPDATE)
     public function update(Request $request, $id)
     {
         $nuevosPasos = $request->input('pasos', []);
@@ -52,7 +50,15 @@ class IncotermsController extends Controller
 
         $añadir = array_diff($nuevosPasos, $pasosActuales);
         $borrar = array_diff($pasosActuales, $nuevosPasos);
+        $añadir = array_diff($nuevosPasos, $pasosActuales);
+        $borrar = array_diff($pasosActuales, $nuevosPasos);
 
+        foreach ($añadir as $stepId) {
+            DB::table('incoterms')->insert([
+                'tipus_inconterm_id' => $id,
+                'tracking_steps_id'  => $stepId,
+            ]);
+        }
         foreach ($añadir as $stepId) {
             DB::table('incoterms')->insert([
                 'tipus_inconterm_id' => $id,
@@ -79,6 +85,8 @@ class IncotermsController extends Controller
             }
         }
 
+        return response()->json(['message' => 'Incoterm actualizado correctamente']);
+    }
         return response()->json(['message' => 'Incoterm actualizado correctamente']);
     }
 }

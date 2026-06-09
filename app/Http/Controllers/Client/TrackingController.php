@@ -14,6 +14,7 @@ class TrackingController extends Controller
     {
         try {
             $oferta_id = $request->query('code');
+            $oferta_id = $request->query('code');
 
             if (!$oferta_id) {
                 return response()->json(['error' => 'Código de oferta requerido'], 400);
@@ -41,33 +42,42 @@ class TrackingController extends Controller
             }
 
             $currentStep = (int)($envio->tracking_actual ?? 1);
-            $totalSteps = $trackingSteps->count();
-            $progress = $totalSteps > 0 ? round(($currentStep / $totalSteps) * 100) : 0;
+            $totalSteps  = $trackingSteps->count();
+            $progress    = round(($currentStep / $totalSteps) * 100);
 
-            $timeline = $trackingSteps->values()->map(function ($step, $index) use ($currentStep) {
-                $stepNum = $index + 1;
-                $isCompleted = $currentStep > $stepNum;
-                $isCurrent   = $currentStep === $stepNum;
-
-                return [
+            $timeline = [];
+            $stepNum  = 1;
+            foreach ($trackingSteps as $step) {
+                if ($currentStep > $stepNum) {
+                    $state  = 'completed';
+                    $status = 'Completado';
+                    $icon   = '✓';
+                } elseif ($currentStep === $stepNum) {
+                    $state  = 'current';
+                    $status = 'En curso';
+                    $icon   = '📍';
+                } else {
+                    $state  = 'pending';
+                    $status = 'Pendiente';
+                    $icon   = '⭕';
+                }
+                $timeline[] = [
                     'title'  => $step->nom,
-                    'status' => $isCompleted ? 'Completado' : ($isCurrent ? 'En curso' : 'Pendiente'),
+                    'status' => $status,
                     'date'   => '-',
-                    'state'  => $isCompleted ? 'completed' : ($isCurrent ? 'current' : 'pending'),
-                    'icon'   => $isCompleted ? '✓' : ($isCurrent ? '📍' : '⭕'),
+                    'state'  => $state,
+                    'icon'   => $icon,
                 ];
-            })->toArray();
+                $stepNum++;
+            }
 
-            $pasoActual = $trackingSteps->values()->get($currentStep - 1);
+            $pasoActual   = $trackingSteps->get($currentStep - 1);
             $estadoActual = $pasoActual ? $pasoActual->nom : 'En preparación';
 
             return response()->json([
                 'id'       => $envio->oferta_id,
                 'code'     => $envio->oferta_id,
-                'route'    => [
-                    'origin'      => $envio->origen,
-                    'destination' => $envio->destino,
-                ],
+                'route'    => ['origin' => $envio->origen, 'destination' => $envio->destino],
                 'status'   => $estadoActual,
                 'progress' => $progress,
                 'details'  => [
@@ -79,19 +89,13 @@ class TrackingController extends Controller
                     'eta'             => '-',
                     'days_in_transit' => 0,
                 ],
-                'agent'    => [
-                    'name'    => $envio->cliente ?? 'Pendiente',
-                    'contact' => '-',
-                ],
+                'agent'     => ['name' => $envio->cliente ?? 'Pendiente', 'contact' => '-'],
                 'documents' => [],
                 'timeline'  => $timeline,
             ]);
         } catch (\Exception $e) {
             Log::error('Error en tracking: ' . $e->getMessage());
-            return response()->json([
-                'error'   => 'Error al cargar tracking',
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Error al cargar tracking', 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -99,21 +103,17 @@ class TrackingController extends Controller
     {
         try {
             $envio = Envio::where('oferta_id', $request->input('offer_id'))->first();
+            if (!$envio) return response()->json(['error' => 'Oferta no encontrada'], 404);
 
-            if (!$envio) {
-                return response()->json(['error' => 'Oferta no encontrada'], 404);
-            }
-
-            $totalSteps = $this->contarPasos($envio);
+            $totalSteps  = $this->contarPasos($envio);
             $currentStep = (int)($envio->tracking_actual ?? 1);
 
             if ($currentStep >= $totalSteps) {
                 return response()->json(['error' => 'Ya está en el último paso'], 400);
             }
 
-            $newStep = $currentStep + 1;
-            $envio->tracking_actual = $newStep;
-            $envio->estado_envio = $this->getNombrePaso($envio, $newStep);
+            $envio->tracking_actual = $currentStep + 1;
+            $envio->estado_envio    = $this->getNombrePaso($envio, $currentStep + 1);
             $envio->save();
 
             return response()->json(['tracking_actual' => $envio->tracking_actual]);
@@ -126,10 +126,7 @@ class TrackingController extends Controller
     {
         try {
             $envio = Envio::where('oferta_id', $request->input('offer_id'))->first();
-
-            if (!$envio) {
-                return response()->json(['error' => 'Oferta no encontrada'], 404);
-            }
+            if (!$envio) return response()->json(['error' => 'Oferta no encontrada'], 404);
 
             $currentStep = (int)($envio->tracking_actual ?? 1);
 
@@ -137,9 +134,8 @@ class TrackingController extends Controller
                 return response()->json(['error' => 'Ya está en el primer paso'], 400);
             }
 
-            $newStep = $currentStep - 1;
-            $envio->tracking_actual = $newStep;
-            $envio->estado_envio = $this->getNombrePaso($envio, $newStep);
+            $envio->tracking_actual = $currentStep - 1;
+            $envio->estado_envio    = $this->getNombrePaso($envio, $currentStep - 1);
             $envio->save();
 
             return response()->json(['tracking_actual' => $envio->tracking_actual]);
@@ -151,7 +147,7 @@ class TrackingController extends Controller
     private function contarPasos(Envio $envio): int
     {
         $tipusIncoterm = DB::table('tipus_incoterms')
-            ->whereRaw("LTRIM(RTRIM(codi)) = ?", [trim($envio->incoterm)])
+            ->where('codi', trim($envio->incoterm))
             ->first();
 
         if ($tipusIncoterm) {
@@ -166,7 +162,7 @@ class TrackingController extends Controller
     private function getNombrePaso(Envio $envio, int $step): string
     {
         $tipusIncoterm = DB::table('tipus_incoterms')
-            ->whereRaw("LTRIM(RTRIM(codi)) = ?", [trim($envio->incoterm)])
+            ->where('codi', trim($envio->incoterm))
             ->first();
 
         if ($tipusIncoterm) {
@@ -180,7 +176,7 @@ class TrackingController extends Controller
             $pasos = DB::table('tracking_steps')->orderBy('ordre')->select('nom')->get();
         }
 
-        $paso = $pasos->values()->get($step - 1);
+        $paso = $pasos->get($step - 1);
         return $paso ? $paso->nom : 'En preparación';
     }
 }
