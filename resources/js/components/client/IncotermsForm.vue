@@ -11,11 +11,7 @@
         </div>
 
         <div v-if="incoterm.pasos.length > 0" class="steps-asignados">
-            <span
-                v-for="stepId in incoterm.pasos"
-                :key="stepId"
-                class="step-tag"
-            >
+            <span v-for="stepId in incoterm.pasos" :key="stepId" class="step-tag">
                 {{ nombreStep(stepId) }}
             </span>
         </div>
@@ -34,9 +30,8 @@ const props = defineProps({
 defineEmits(['abrir-steps']);
 
 const nombreStep = (stepId) => {
-    if (!props.steps || props.steps.length === 0) return `Step ${stepId}`;
-    const step = props.steps.find(s => String(s.id) === String(stepId));
-    return step ? step.nom : `Step ${stepId}`;
+    const step = props.steps.find(s => s.id == stepId);
+    return step.nom;
 };
 </script>
 

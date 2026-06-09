@@ -13,7 +13,7 @@ class TrackingController extends Controller
     public function show(Request $request)
     {
         try {
-            $oferta_id = $request->query('offer_id') ?? $request->query('code');
+            $oferta_id = $request->query('code');
 
             if (!$oferta_id) {
                 return response()->json(['error' => 'Código de oferta requerido'], 400);
@@ -26,7 +26,7 @@ class TrackingController extends Controller
             }
 
             $tipusIncoterm = DB::table('tipus_incoterms')
-                ->whereRaw("LTRIM(RTRIM(codi)) = ?", [trim($envio->incoterm)])
+                ->whereRaw("(codi) = ?", [trim($envio->incoterm)])
                 ->first();
 
             if ($tipusIncoterm) {

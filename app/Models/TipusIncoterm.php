@@ -4,8 +4,7 @@ namespace App\Models;
 
 use App\Models\Incoterm;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use Illuminate\Database\Eloquent\Relations\HasMany;  // ← cambiar el import
 class TipusIncoterm extends Model
 {
     protected $table = 'tipus_incoterms';
@@ -15,10 +14,9 @@ class TipusIncoterm extends Model
     /**
      * Get the incoterms that owns the TipusIncoterms
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function incoterms(): BelongsTo
+    public function incoterms(): HasMany
     {
-        return $this->belongsTo(Incoterm::class, 'tipus_incoterms_id', 'id');
+        return $this->hasMany(Incoterm::class, 'tipus_inconterm_id');
     }
 }

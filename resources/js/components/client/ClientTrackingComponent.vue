@@ -191,8 +191,7 @@ const currentOfferId = ref(null);
 // para no depender del progreso en porcentaje
 const pasoActual = computed(() => {
     if (!tracking.value) return 0;
-    // El paso actual es el índice del step con state 'current' + 1
-    // Si no hay ninguno con 'current' es que están todos completados
+   //Devuelve la posicion donde esta current
     const idx = tracking.value.timeline.findIndex(s => s.state === 'current');
     if (idx !== -1) return idx + 1;
     // Si todos están completados estamos en el último
@@ -215,8 +214,7 @@ const searchTracking = async () => {
 
     try {
         const query = searchQuery.value.trim();
-        const isNumeric = /^\d+$/.test(query);
-        const params = isNumeric ? { offer_id: query } : { code: query };
+        const params = { code: query };
         const { data } = await window.axios.get('/client/tracking', { params });
 
         tracking.value = data;
@@ -234,8 +232,7 @@ const searchTracking = async () => {
 const recargarTracking = async () => {
     if (!currentOfferId.value) return;
     try {
-        const isNumeric = /^\d+$/.test(String(currentOfferId.value));
-        const params = isNumeric ? { offer_id: currentOfferId.value } : { code: currentOfferId.value };
+        const params = { code: currentOfferId.value };
         const { data } = await window.axios.get('/client/tracking', { params });
         tracking.value = data;
     } catch (err) {

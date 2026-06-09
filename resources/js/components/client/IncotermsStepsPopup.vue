@@ -46,8 +46,14 @@ const props = defineProps({
 
 const emit = defineEmits(['cerrar', 'guardar']);
 
-// Copia local para no modificar el original hasta que se guarde
-const pasosLocales = ref(props.incoterm.pasos.map(p => String(p)));
+const pasosIniciales = [];
+
+for (const p of props.incoterm.pasos) {
+    pasosIniciales.push(String(p));
+}
+
+const pasosLocales = ref(pasosIniciales);
+
 
 const toggleStep = (stepId) => {
     const id = String(stepId);

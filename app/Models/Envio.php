@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Clientes;
 
 class Envio extends Model
 {
@@ -32,11 +33,11 @@ class Envio extends Model
         'peso_kg' => 'decimal:2',
     ];
 
+
     public function client()
     {
-        return $this->belongsTo(User::class, 'cliente_id');
+    return $this->belongsTo(Clientes::class, 'cliente_id');
     }
-
     public function oferta()
     {
         return $this->belongsTo(Oferta::class, 'oferta_id');
